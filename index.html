@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fun and NSFW API</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to the Fun and NSFW API</h1>
+
+  <!-- Display Random Joke -->
+  <h2>Random Joke</h2>
+  <p id="joke"></p>
+  <button onclick="getJoke()">Get Joke</button>
+
+  <!-- Display Random Fact -->
+  <h2>Random Fact</h2>
+  <p id="fact"></p>
+  <button onclick="getFact()">Get Fact</button>
+
+  <!-- Display Random Quote -->
+  <h2>Random Quote</h2>
+  <p id="quote"></p>
+  <button onclick="getQuote()">Get Quote</button>
+
+  <!-- Display Random Pickup Line -->
+  <h2>Random Pickup Line</h2>
+  <p id="pickup"></p>
+  <button onclick="getPickup()">Get Pickup Line</button>
+
+  <!-- Display Image from Jest folder -->
+  <h2>Random Jest Image</h2>
+  <img id="jest-image" src="" alt="Random Jest Image">
+  <button onclick="getJestImage()">Get Jest Image</button>
+
+  <!-- Display Image from NSFW folder -->
+  <h2>Random NSFW Image</h2>
+  <img id="nsfw-image" src="" alt="Random NSFW Image">
+  <button onclick="getNSFWImage()">Get NSFW Image</button>
+
+  <!-- Display Image from Fun folder -->
+  <h2>Random Fun Image</h2>
+  <img id="fun-image" src="" alt="Random Fun Image">
+  <button onclick="getFunImage()">Get Fun Image</button>
+
+  <script>
+    // Fetch and display random jokes
+    async function getJoke() {
+      const response = await fetch('/joke');
+      const joke = await response.text();
+      document.getElementById('joke').textContent = joke;
+    }
+
+    // Fetch and display random facts
+    async function getFact() {
+      const response = await fetch('/fact');
+      const fact = await response.text();
+      document.getElementById('fact').textContent = fact;
+    }
+
+    // Fetch and display random quotes
+    async function getQuote() {
+      const response = await fetch('/quote');
+      const quote = await response.text();
+      document.getElementById('quote').textContent = quote;
+    }
+
+    // Fetch and display random pickup lines
+    async function getPickup() {
+      const response = await fetch('/pickup');
+      const pickupLine = await response.text();
+      document.getElementById('pickup').textContent = pickupLine;
+    }
+
+    // Fetch and display random Jest image
+    async function getJestImage() {
+      const response = await fetch('/jest/random-image');
+      const imageUrl = await response.text();
+      document.getElementById('jest-image').src = imageUrl;
+    }
+
+    // Fetch and display random NSFW image
+    async function getNSFWImage() {
+      const response = await fetch('/nsfw/random-image');
+      const imageUrl = await response.text();
+      document.getElementById('nsfw-image').src = imageUrl;
+    }
+
+    // Fetch and display random Fun image
+    async function getFunImage() {
+      const response = await fetch('/fun/random-image');
+      const imageUrl = await response.text();
+      document.getElementById('fun-image').src = imageUrl;
+    }
+  </script>
+</body>
+</html>
