@@ -4,42 +4,61 @@ const path = require('path');
 const fs = require('fs');
 const port = 3000;
 
-// Serve static files from the nsfw, jest, and fun folders
-app.use('/nsfw', express.static(path.join(__dirname, 'mx', 'nsfw')));
-app.use('/jest', express.static(path.join(__dirname, 'mx', 'jest')));
-app.use('/fun', express.static(path.join(__dirname, 'mx', 'fun')));
+// Serve static files from jest, nsfw, and fun folders
+app.use('/jest', express.static(path.join(__dirname, 'jest')));
+app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
+app.use('/fun', express.static(path.join(__dirname, 'fun')));
 
-// Route to serve random image from the NSFW folder (e.g., ass)
-app.get('/nsfw/ass/random-image', (req, res) => {
-  const images = fs.readdirSync(path.join(__dirname, 'mx', 'nsfw', 'ass'));  // Ass folder inside nsfw
-  const randomImage = images[Math.floor(Math.random() * images.length)];
-  res.send(`/nsfw/ass/${randomImage}`);
-});
+// Utility function to serve random images from a given folder
+function serveRandomImage(folderPath, folderUrl) {
+  return (req, res) => {
+    const dirPath = path.join(__dirname, folderPath);
+    console.log(`Looking for images in: ${dirPath}`); // Debugging line
 
-// You can add more routes for other NSFW subfolders as needed, like anime, blowjob, etc.
+    try {
+      const images = fs.readdirSync(dirPath).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
+      
+      if (images.length === 0) {
+        return res.status(404).send(`No images found in the "${folderUrl}" folder.`);
+      }
+      
+      const randomImage = images[Math.floor(Math.random() * images.length)];
+      res.send(`${folderUrl}/${randomImage}`);
+    } catch (err) {
+      console.error(`Error accessing ${folderUrl} folder:`, err.message);
+      res.status(500).send(`Error accessing the ${folderUrl} folder.`);
+    }
+  };
+}
 
-// Route to serve random image from the Jest folder (e.g., kiss)
-app.get('/jest/kiss/random-image', (req, res) => {
-  const images = fs.readdirSync(path.join(__dirname, 'mx', 'jest', 'kiss'));  // Kiss folder inside jest
-  const randomImage = images[Math.floor(Math.random() * images.length)];
-  res.send(`/jest/kiss/${randomImage}`);
-});
+// Routes for all jest categories
+app.get('/jest/8ball/random-image', serveRandomImage('jest/8ball', '/jest/8ball'));
+app.get('/jest/avatar/random-image', serveRandomImage('jest/avatar', '/jest/avatar'));
+app.get('/jest/cuddle/random-image', serveRandomImage('jest/cuddle', '/jest/cuddle'));
+app.get('/jest/feed/random-image', serveRandomImage('jest/feed', '/jest/feed'));
+app.get('/jest/fox_girl/random-image', serveRandomImage('jest/fox_girl', '/jest/fox_girl'));
+app.get('/jest/gasm/random-image', serveRandomImage('jest/gasm', '/jest/gasm'));
+app.get('/jest/gecy/random-image', serveRandomImage('jest/gecy', '/jest/gecy'));
+app.get('/jest/goose/random-image', serveRandomImage('jest/goose', '/jest/goose'));
+app.get('/jest/hug/random-image', serveRandomImage('jest/hug', '/jest/hug'));
+app.get('/jest/kiss/random-image', serveRandomImage('jest/kiss', '/jest/kiss'));
+app.get('/jest/lewd/random-image', serveRandomImage('jest/lewd', '/jest/lewd'));
+app.get('/jest/lizard/random-image', serveRandomImage('jest/lizard', '/jest/lizard'));
+app.get('/jest/meow/random-image', serveRandomImage('jest/meow', '/jest/meow'));
+app.get('/jest/ngif/random-image', serveRandomImage('jest/ngif', '/jest/ngif'));
+app.get('/jest/pat/random-image', serveRandomImage('jest/pat', '/jest/pat'));
+app.get('/jest/slap/random-image', serveRandomImage('jest/slap', '/jest/slap'));
+app.get('/jest/smug/random-image', serveRandomImage('jest/smug', '/jest/smug'));
+app.get('/jest/spank/random-image', serveRandomImage('jest/spank', '/jest/spank'));
+app.get('/jest/tickle/random-image', serveRandomImage('jest/tickle', '/jest/tickle'));
+app.get('/jest/wallpaper/random-image', serveRandomImage('jest/wallpaper', '/jest/wallpaper'));
+app.get('/jest/woof/random-image', serveRandomImage('jest/woof', '/jest/woof'));
 
-// Similarly, for other folders inside Jest (e.g., slap, etc.)
-app.get('/jest/slap/random-image', (req, res) => {
-  const images = fs.readdirSync(path.join(__dirname, 'mx', 'jest', 'slap'));  // Slap folder inside jest
-  const randomImage = images[Math.floor(Math.random() * images.length)];
-  res.send(`/jest/slap/${randomImage}`);
-});
-
-// Route to serve random image from the Fun folder (you can specify subfolders inside Fun)
-app.get('/fun/code/random-image', (req, res) => {
-  const images = fs.readdirSync(path.join(__dirname, 'mx', 'fun', 'code'));  // Code folder inside fun
-  const randomImage = images[Math.floor(Math.random() * images.length)];
-  res.send(`/fun/code/${randomImage}`);
-});
-
-// You can add more routes for other folders inside Fun like truth, dare, etc.
+// Routes for all nsfw categories
+app.get('/nsfw/neko/random-image', serveRandomImage('nsfw/neko', '/nsfw/neko'));
+app.get('/nsfw/waifu/random-image', serveRandomImage('nsfw/waifu', '/nsfw/waifu'));
+app.get('/nsfw/shemale/random-image', serveRandomImage('nsfw/shemale', '/nsfw/shemale'));
+app.get('/nsfw/blowjob/random-image', serveRandomImage('nsfw/blowjob', '/nsfw/blowjob'));
 
 // Import the categories
 const jokes = require('./fun/joke');
@@ -91,11 +110,13 @@ app.get('/compliment', (req, res) => {
   const randomIndex = Math.floor(Math.random() * compliments.length);
   res.send(compliments[randomIndex]);
 });
-// Serve the HTML page (index.html)
+
+// Serve the index.html file on the root URL
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
