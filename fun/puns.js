@@ -1,0 +1,36 @@
+const puns = [
+    "I’m reading a book on anti-gravity. It’s impossible to put down.",
+    "I used to be a baker, but I couldn’t make enough dough.",
+    "I don’t trust stairs because they’re always up to something.",
+    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+    "I’m no good at math, but I know that two wrongs don’t make a right… but three rights make a left.",
+    "I’d tell you a chemistry joke, but I know I wouldn’t get a reaction.",
+    "Why don’t skeletons fight each other? They don’t have the guts.",
+    "I made a pun about the wind but it blows.",
+    "What do you call a fish wearing a bowtie? Sofishticated.",
+    "I can’t trust people who do acupuncture. They’re back stabbers.",
+    "I once heard a joke about a pencil, but it was pointless.",
+    "I’m reading a book about teleportation. It’s bound to take me places.",
+    "I wanted to become a professional fisher, but I couldn’t handle the scale of it.",
+    "I don’t trust atoms because they make up everything.",
+    "I’ve got a great joke about construction, but I’m still working on it.",
+    "I had a joke about a broken pencil, but it’s pointless.",
+    "I used to be a baker, but I couldn’t make enough dough.",
+    "I don’t play soccer because I enjoy punishing my goals.",
+    "I tried to catch some fog earlier. I mist.",
+    "Why don’t skeletons fight each other? They don’t have the guts.",
+    "I made a pun about the wind, but it blows.",
+    "I told my computer I needed a break, and now it won’t stop sending me Kit-Kats.",
+    "What did one ocean say to the other ocean? Nothing, they just waved.",
+    "I can’t trust people who do acupuncture. They’re back stabbers.",
+    "I’m reading a book about anti-gravity. It’s impossible to put down.",
+    "I was going to tell you a joke about an elevator, but it’s an uplifting story.",
+    "What do you call a fish that’s a detective? A cod-detective.",
+    "I’m on a whiskey diet. I’ve lost three days already.",
+    "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+    "Why did the scarecrow win an award? Because he was outstanding in his field.",
+    "I’d tell you a chemistry joke, but I know I wouldn’t get a reaction."
+  ];
+  
+  module.exports = puns;
+  
