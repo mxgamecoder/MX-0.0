@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fun and NSFW API</title>
+  <title>MX API</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -56,6 +56,38 @@
   <h2>Random Compliment</h2>
   <p id="compliment"></p>
   <button onclick="getCompliment()">Get Compliment</button>
+
+  <h2>Random whatIf</h2>
+  <p id="whatIf"></p>
+  <button onclick="getwhatIf()">Get whatIf</button>
+
+  <h2>Random wouldYourather</h2>
+  <p id="wouldYourather"></p>
+  <button onclick="getwouldYourather()">Get wouldYourather</button>
+
+  <h2>Random tongueTwister</h2>
+  <p id="tongueTwister"></p>
+  <button onclick="gettongueTwister()">Get tongueTwister</button>
+
+  <h2>Random quotesfunny</h2>
+  <p id="quotesfunny"></p>
+  <button onclick="getquotesfunny()">Get quotesfunny</button>
+
+  <h2>Random knockknock</h2>
+  <p id="knockknock"></p>
+  <button onclick="getknockknock()">Get knockknock</button>
+
+  <h2>Random limericks</h2>
+  <p id="limericks"></p>
+  <button onclick="getlimericks()">Get limericks</button>
+
+  <h2>Random pickuplines</h2> 
+  <p id="pickuplines"></p>
+  <button onclick="getpickuplines()">Get pickuplines</button>
+
+  <h2>Random puns</h2> 
+  <p id="puns"></p>
+  <button onclick="getpuns()">Get puns</button>
 
   <!-- Jest Images -->
   <h2>Random 8ball Image</h2>
@@ -132,11 +164,60 @@
       document.getElementById('riddle').textContent = riddle;
     }
 
-    async function getCompliment() {
-      const response = await fetch('/compliment');
-      const compliment = await response.text();
-      document.getElementById('compliment').textContent = compliment;
+    async function getRiddle() {
+      const response = await fetch('/riddle');
+      const riddle = await response.text();
+      document.getElementById('riddle').textContent = riddle;
     }
+
+    async function getwhatIf() {
+      const response = await fetch('/whatIf');
+      const whatIf = await response.text();
+      document.getElementById('whatIf').textContent = whatIf;
+    }
+
+    async function getwouldYourather() {
+      const response = await fetch('/wouldYourather');
+      const wouldYourather = await response.text();
+      document.getElementById('wouldYourather').textContent = wouldYourather;
+    }
+
+    async function gettongueTwister() {
+      const response = await fetch('/tongueTwister');
+      const tongueTwister = await response.text();
+      document.getElementById('tongueTwister').textContent = tongueTwister;
+    }
+
+    async function getquotesfunny() {
+      const response = await fetch('/quotesfunny');
+      const quotesfunny = await response.text();
+      document.getElementById('quotesfunny').textContent = quotesfunny;
+    }
+
+    async function getknockknock() {
+      const response = await fetch('/knockknock');
+      const knockknock = await response.text();
+      document.getElementById('knockknock').textContent = knockknock;
+    }
+
+    async function getlimericks() {
+      const response = await fetch('/limericks');
+      const limericks = await response.text();
+      document.getElementById('limericks').textContent = limericks;
+    }
+
+    async function getpickuplines() {
+      const response = await fetch('/pickuplines');
+      const pickuplines = await response.text();
+      document.getElementById('pickuplines').textContent = pickuplines;
+    }
+
+    async function getpuns() {
+      const response = await fetch('/puns');
+      const puns = await response.text();
+      document.getElementById('puns').textContent = puns;
+    }
+
 
     // Jest Image functions
     async function getJestImage(category) {
