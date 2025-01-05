@@ -1,306 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fun and NSFW API</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
+const express = require('express');
+const app = express();
+const path = require('path');
+const fs = require('fs');
+const port = 3000;
+
+// Serve static files from jest, nsfw, and fun folders
+app.use('/jest', express.static(path.join(__dirname, 'jest')));
+app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
+app.use('/fun', express.static(path.join(__dirname, 'fun')));
+
+// Utility function to serve random images from a given folder
+function serveRandomImage(folderPath, folderUrl) {
+  return (req, res) => {
+    const dirPath = path.join(__dirname, folderPath);
+    console.log(`Looking for images in: ${dirPath}`); // Debugging line
+
+    try {
+      const images = fs.readdirSync(dirPath).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
+      
+      if (images.length === 0) {
+        return res.status(404).send(`No images found in the "${folderUrl}" folder.`);
+      }
+      
+      const randomImage = images[Math.floor(Math.random() * images.length)];
+      res.send(`${folderUrl}/${randomImage}`);
+    } catch (err) {
+      console.error(`Error accessing ${folderUrl} folder:`, err.message);
+      res.status(500).send(`Error accessing the ${folderUrl} folder.`);
     }
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <h1>Welcome to the Fun and NSFW API</h1>
+  };
+}
 
-  <!-- Fun Content -->
-  <h2>Random Joke</h2>
-  <p id="joke"></p>
-  <button onclick="getJoke()">Get Joke</button>
+// Routes for all jest categories
+const jestCategories = [
+  '8ball', 'avatar', 'cuddle', 'feed', 'fox_girl', 'gasm', 'gecy', 
+  'goose', 'hug', 'kiss', 'lewd', 'lizard', 'meow', 'ngif', 'pat', 
+  'slap', 'smug', 'spank', 'tickle', 'wallpaper', 'woof'
+];
 
-  <!-- Display Random Fact -->
-  <h2>Random Fact</h2>
-  <p id="fact"></p>
-  <button onclick="getFact()">Get Fact</button>
+jestCategories.forEach(category => {
+  app.get(`/jest/${category}/random-image`, serveRandomImage(`jest/${category}`, `/jest/${category}`));
+});
 
-  <!-- Display Random Quote -->
-  <h2>Random Quote</h2>
-  <p id="quote"></p>
-  <button onclick="getQuote()">Get Quote</button>
+// Routes for all nsfw categories
+const nsfwCategories = ['neko', 'waifu', 'shemale', 'blowjob'];
 
-  <h2>Random Truth</h2>
-  <p id="truth"></p>
-  <button onclick="getTruth()">Get Truth</button>
+nsfwCategories.forEach(category => {
+  app.get(`/nsfw/${category}/random-image`, serveRandomImage(`nsfw/${category}`, `/nsfw/${category}`));
+});
 
-  <h2>Random Dare</h2>
-  <p id="dare"></p>
-  <button onclick="getDare()">Get Dare</button>
+// Import the categories from the fun folder
+const jokes = require('./fun/joke');
+const facts = require('./fun/fact');
+const quotes = require('./fun/quote');
+const truths = require('./fun/truth');
+const dares = require('./fun/dare');
+const riddles = require('./fun/riddle');
+const compliments = require('./fun/compliment');
+const funnyQuotes = require('./fun/whatIf');
+const wouldYourathers = require('./fun/wouldYourather');
+const tongueTwisters = require('./fun/tongueTwister');
+const quotesfunnys = require('./fun/quotesfunny');
+const knockKnockJokes = require('./fun/knockknock');
+const limericks = require('./fun/limericks');
+const pickuplines = require('./fun/pickuplines');
+const puns = require('./fun/puns');
 
-  <h2>Random Riddle</h2>
-  <p id="riddle"></p>
-  <button onclick="getRiddle()">Get Riddle</button>
+// Dynamic routes for fun folder categories
+const funCategories = {
+  joke: jokes,
+  fact: facts,
+  quote: quotes,
+  truth: truths,
+  dare: dares,
+  riddle: riddles,
+  compliment: compliments,
+  whatIf: funnyQuotes,
+  wouldYourather: wouldYourathers,
+  tongueTwister: tongueTwisters,
+  quotesfunny: quotesfunnys,
+  knockknock: knockKnockJokes,
+  limericks: limericks,
+  pickuplines: pickuplines,
+  puns: puns
+};
 
-  <h2>Random Compliment</h2>
-  <p id="compliment"></p>
-  <button onclick="getcompliment()">Get Compliment</button>
+Object.entries(funCategories).forEach(([key, values]) => {
+  app.get(`/${key}`, (req, res) => {
+    const randomIndex = Math.floor(Math.random() * values.length);
+    res.send(values[randomIndex]);
+  });
+});
 
-  <h2>Random whatIf</h2>
-  <p id="whatIf"></p>
-  <button onclick="getwhatIf()">Get whatIf</button>
+// Serve the index.html file on the root URL
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-  <h2>Random wouldYourather</h2>
-  <p id="wouldYourather"></p>
-  <button onclick="getwouldYourather()">Get wouldYourather</button>
-
-  <h2>Random tongueTwister</h2>
-  <p id="tongueTwister"></p>
-  <button onclick="gettongueTwister()">Get tongueTwister</button>
-
-  <h2>Random quotesfunny</h2>
-  <p id="quotesfunny"></p>
-  <button onclick="getquotesfunny()">Get quotesfunny</button>
-
-  <h2>Random knockknock</h2>
-  <p id="knockknock"></p>
-  <button onclick="getknockknock()">Get knockknock</button>
-
-  <h2>Random limericks</h2>
-  <p id="limericks"></p>
-  <button onclick="getlimericks()">Get limericks</button>
-
-  <h2>Random pickuplines</h2> 
-  <p id="pickuplines"></p>
-  <button onclick="getpickuplines()">Get pickuplines</button>
-
-  <h2>Random puns</h2> 
-  <p id="puns"></p>
-  <button onclick="getpuns()">Get puns</button>
-
-<!-- Jest Images -->
-<h2>Random 8ball Image</h2>
-<img id="8ball-image" src="" alt="Random 8ball Image">
-<button onclick="getJestImage('8ball')">Get 8ball Image</button>
-
-<h2>Random Avatar Image</h2>
-<img id="avatar-image" src="" alt="Random Avatar Image">
-<button onclick="getJestImage('avatar')">Get Avatar Image</button>
-
-<!-- Add more jest categories here -->
-<h2>Random Kiss Image</h2>
-<img id="kiss-image" src="" alt="Random Kiss Image">
-<button onclick="getJestImage('kiss')">Get Kiss Image</button>
-
-<h2>Random Slap Image</h2>
-<img id="slap-image" src="" alt="Random Slap Image">
-<button onclick="getJestImage('slap')">Get Slap Image</button>
-
-<h2>Random Cuddle Image</h2>
-<img id="cuddle-image" src="" alt="Random Cuddle Image">
-<button onclick="getJestImage('cuddle')">Get Cuddle Image</button>
-
-<h2>Random Feed Image</h2>
-<img id="feed-image" src="" alt="Random Feed Image">
-<button onclick="getJestImage('feed')">Get Feed Image</button>
-
-<h2>Random Fox Girl Image</h2>
-<img id="fox-girl-image" src="" alt="Random Fox Girl Image">
-<button onclick="getJestImage('fox_girl')">Get Fox Girl Image</button>
-
-<h2>Random Gasm Image</h2>
-<img id="gasm-image" src="" alt="Random Gasm Image">
-<button onclick="getJestImage('gasm')">Get Gasm Image</button>
-
-<h2>Random Gecy Image</h2>
-<img id="gecy-image" src="" alt="Random Gecy Image">
-<button onclick="getJestImage('gecy')">Get Gecy Image</button>
-
-<h2>Random Goose Image</h2>
-<img id="goose-image" src="" alt="Random Goose Image">
-<button onclick="getJestImage('goose')">Get Goose Image</button>
-
-<h2>Random Hug Image</h2>
-<img id="hug-image" src="" alt="Random Hug Image">
-<button onclick="getJestImage('hug')">Get Hug Image</button>
-
-<h2>Random Lewd Image</h2>
-<img id="lewd-image" src="" alt="Random Lewd Image">
-<button onclick="getJestImage('lewd')">Get Lewd Image</button>
-
-<h2>Random Lizard Image</h2>
-<img id="lizard-image" src="" alt="Random Lizard Image">
-<button onclick="getJestImage('lizard')">Get Lizard Image</button>
-
-<h2>Random Meow Image</h2>
-<img id="meow-image" src="" alt="Random Meow Image">
-<button onclick="getJestImage('meow')">Get Meow Image</button>
-
-<h2>Random NGIF Image</h2>
-<img id="ngif-image" src="" alt="Random NGIF Image">
-<button onclick="getJestImage('ngif')">Get NGIF Image</button>
-
-<h2>Random Pat Image</h2>
-<img id="pat-image" src="" alt="Random Pat Image">
-<button onclick="getJestImage('pat')">Get Pat Image</button>
-
-<h2>Random Smug Image</h2>
-<img id="smug-image" src="" alt="Random Smug Image">
-<button onclick="getJestImage('smug')">Get Smug Image</button>
-
-<h2>Random Spank Image</h2>
-<img id="spank-image" src="" alt="Random Spank Image">
-<button onclick="getJestImage('spank')">Get Spank Image</button>
-
-<h2>Random Tickle Image</h2>
-<img id="tickle-image" src="" alt="Random Tickle Image">
-<button onclick="getJestImage('tickle')">Get Tickle Image</button>
-
-<h2>Random Wallpaper Image</h2>
-<img id="wallpaper-image" src="" alt="Random Wallpaper Image">
-<button onclick="getJestImage('wallpaper')">Get Wallpaper Image</button>
-
-<h2>Random Woof Image</h2>
-<img id="woof-image" src="" alt="Random Woof Image">
-<button onclick="getJestImage('woof')">Get Woof Image</button>
-
-
-  <!-- NSFW Images -->
-  <h2>Random Neko Image</h2>
-  <img id="neko-image" src="" alt="Random Neko Image">
-  <button onclick="getNSFWImage('neko')">Get Neko Image</button>
-
-  <h2>Random Waifu Image</h2>
-  <img id="waifu-image" src="" alt="Random Waifu Image">
-  <button onclick="getNSFWImage('waifu')">Get Waifu Image</button>
-
-  <h2>Random Shemale Image</h2>
-  <img id="shemale-image" src="" alt="Random Shemale Image">
-  <button onclick="getNSFWImage('shemale')">Get Shemale Image</button>
-
-  <h2>Random Blowjob Image</h2>
-  <img id="blowjob-image" src="" alt="Random Blowjob Image">
-  <button onclick="getNSFWImage('blowjob')">Get Blowjob Image</button>
-
-  <script>
-    // Fun API functions
-    async function getJoke() {
-      const response = await fetch('/joke');
-      const joke = await response.text();
-      document.getElementById('joke').textContent = joke;
-    }
-
-    // Fetch and display random facts
-    async function getFact() {
-      const response = await fetch('/fact');
-      const fact = await response.text();
-      document.getElementById('fact').textContent = fact;
-    }
-
-    // Fetch and display random quotes
-    async function getQuote() {
-      const response = await fetch('/quote');
-      const quote = await response.text();
-      document.getElementById('quote').textContent = quote;
-    }
-
-    async function getTruth() {
-      const response = await fetch('/truth');
-      const truth = await response.text();
-      document.getElementById('truth').textContent = truth;
-    }
-
-    async function getDare() {
-      const response = await fetch('/dare');
-      const dare = await response.text();
-      document.getElementById('dare').textContent = dare;
-    }
-
-    async function getRiddle() {
-      const response = await fetch('/riddle');
-      const riddle = await response.text();
-      document.getElementById('riddle').textContent = riddle;
-    }
-
-    async function getcompliment() {
-      const response = await fetch('/compliment');
-      const compliment = await response.text();
-      document.getElementById('compliment').textContent = compliment;
-    }
-
-    async function getwhatIf() {
-      const response = await fetch('/whatIf');
-      const whatIf = await response.text();
-      document.getElementById('whatIf').textContent = whatIf;
-    }
-
-    async function getwouldYourather() {
-      const response = await fetch('/wouldYourather');
-      const wouldYourather = await response.text();
-      document.getElementById('wouldYourather').textContent = wouldYourather;
-    }
-
-    async function gettongueTwister() {
-      const response = await fetch('/tongueTwister');
-      const tongueTwister = await response.text();
-      document.getElementById('tongueTwister').textContent = tongueTwister;
-    }
-
-    async function getquotesfunny() {
-      const response = await fetch('/quotesfunny');
-      const quotesfunny = await response.text();
-      document.getElementById('quotesfunny').textContent = quotesfunny;
-    }
-
-    async function getknockknock() {
-      const response = await fetch('/knockknock');
-      const knockknock = await response.text();
-      document.getElementById('knockknock').textContent = knockknock;
-    }
-
-    async function getlimericks() {
-      const response = await fetch('/limericks');
-      const limericks = await response.text();
-      document.getElementById('limericks').textContent = limericks;
-    }
-
-    async function getpickuplines() {
-      const response = await fetch('/pickuplines');
-      const pickuplines = await response.text();
-      document.getElementById('pickuplines').textContent = pickuplines;
-    }
-
-    async function getpuns() {
-      const response = await fetch('/puns');
-      const puns = await response.text();
-      document.getElementById('puns').textContent = puns;
-    }
-
-
-    // Jest Image functions
-    async function getJestImage(category) {
-      const response = await fetch(`/jest/${category}/random-image`);
-      const imageUrl = await response.text();
-      document.getElementById(`${category}-image`).src = imageUrl;
-    }
-
-    // NSFW Image functions
-    async function getNSFWImage(category) {
-      const response = await fetch(`/nsfw/${category}/random-image`);
-      const imageUrl = await response.text();
-      document.getElementById(`${category}-image`).src = imageUrl;
-    }
-  </script>
-</body>
-</html>
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
