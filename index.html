@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MX API</title>
+  <title>Fun and NSFW API</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -55,7 +55,7 @@
 
   <h2>Random Compliment</h2>
   <p id="compliment"></p>
-  <button onclick="getCompliment()">Get Compliment</button>
+  <button onclick="getcompliment()">Get Compliment</button>
 
   <h2>Random whatIf</h2>
   <p id="whatIf"></p>
@@ -164,10 +164,10 @@
       document.getElementById('riddle').textContent = riddle;
     }
 
-    async function getRiddle() {
-      const response = await fetch('/riddle');
-      const riddle = await response.text();
-      document.getElementById('riddle').textContent = riddle;
+    async function getcompliment() {
+      const response = await fetch('/compliment');
+      const compliment = await response.text();
+      document.getElementById('compliment').textContent = compliment;
     }
 
     async function getwhatIf() {
