@@ -68,6 +68,65 @@ const truths = require('./fun/truth');
 const dares = require('./fun/dare');
 const riddles = require('./fun/riddle');
 const compliments = require('./fun/compliment');
+const riddles = require('./fun/whatIf');
+const riddles = require('./fun/wouldYourather');
+const riddles = require('./fun/tongueTwister');
+const riddles = require('./fun/quotesfunny');
+const riddles = require('./fun/knockknock');
+const riddles = require('./fun/limericks');
+const riddles = require('./fun/pickuplines');
+const riddles = require('./fun/puns');
+
+// Route to get a random puns
+app.get('/puns', (req, res) => {
+  const randomIndex = Math.floor(Math.random() * puns.length);
+  res.send(puns[randomIndex]);
+});
+
+
+// Route to get a random pickuplines
+app.get('/pickuplines', (req, res) => {
+  const randomIndex = Math.floor(Math.random() * pickuplines.length);
+  res.send(pickuplines[randomIndex]);
+});
+
+// Route to get a random limericks
+app.get('/limericks', (req, res) => {
+  const randomIndex = Math.floor(Math.random() * limericks.length);
+  res.send(limericks[randomIndex]);
+});
+
+// Route to get a random knockknock
+app.get('/knockknock', (req, res) => {
+  const randomIndex = Math.floor(Math.random() * knockKnockJokes.length);
+  res.send(knockKnockJokes[randomIndex]);
+});
+
+
+// Route to get a random tongueTwister
+app.get('/tongueTwister', (req, res) => {
+  const randomIndex = Math.floor(Math.random() * tongueTwisters.length);
+  res.send(tongueTwisters[randomIndex]);
+});
+
+// Route to get a random quotesfunny
+app.get('/quotesfunny', (req, res) => {
+  const randomIndex = Math.floor(Math.random() * quotesfunnys.length);
+  res.send(quotesfunnys[randomIndex]);
+});
+
+
+// Route to get a random whatIf
+app.get('/whatIf', (req, res) => {
+  const randomIndex = Math.floor(Math.random() * funnyQuotes.length);
+  res.send(funnyQuotes[randomIndex]);
+});
+
+// Route to get a random wouldYourather
+app.get('/wouldYourather', (req, res) => {
+  const randomIndex = Math.floor(Math.random() * wouldYourathers.length);
+  res.send(wouldYourathers[randomIndex]);
+});
 
 // Route to get a random joke
 app.get('/joke', (req, res) => {
