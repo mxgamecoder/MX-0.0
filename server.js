@@ -68,14 +68,14 @@ const truths = require('./fun/truth');
 const dares = require('./fun/dare');
 const riddles = require('./fun/riddle');
 const compliments = require('./fun/compliment');
-const riddles = require('./fun/whatIf');
-const riddles = require('./fun/wouldYourather');
-const riddles = require('./fun/tongueTwister');
-const riddles = require('./fun/quotesfunny');
-const riddles = require('./fun/knockknock');
-const riddles = require('./fun/limericks');
-const riddles = require('./fun/pickuplines');
-const riddles = require('./fun/puns');
+const funnyQuotes = require('./fun/whatIf');
+const wouldYourathers = require('./fun/wouldYourather');
+const tongueTwisters = require('./fun/tongueTwister');
+const quotesfunnys = require('./fun/quotesfunny');
+const knockKnockJokes = require('./fun/knockknock');
+const limericks = require('./fun/limericks');
+const pickuplines = require('./fun/pickuplines');
+const puns = require('./fun/puns');
 
 // Route to get a random puns
 app.get('/puns', (req, res) => {
