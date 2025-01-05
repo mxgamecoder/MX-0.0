@@ -26,7 +26,7 @@
 <body>
   <h1>Welcome to the Fun and NSFW API</h1>
 
-  <!-- Display Random Joke -->
+  <!-- Fun Content -->
   <h2>Random Joke</h2>
   <p id="joke"></p>
   <button onclick="getJoke()">Get Joke</button>
@@ -41,28 +41,59 @@
   <p id="quote"></p>
   <button onclick="getQuote()">Get Quote</button>
 
-  <!-- Display Random Pickup Line -->
-  <h2>Random Pickup Line</h2>
-  <p id="pickup"></p>
-  <button onclick="getPickup()">Get Pickup Line</button>
+  <h2>Random Truth</h2>
+  <p id="truth"></p>
+  <button onclick="getTruth()">Get Truth</button>
 
-  <!-- Display Image from Jest folder -->
-  <h2>Random Jest Image</h2>
-  <img id="jest-image" src="" alt="Random Jest Image">
-  <button onclick="getJestImage()">Get Jest Image</button>
+  <h2>Random Dare</h2>
+  <p id="dare"></p>
+  <button onclick="getDare()">Get Dare</button>
 
-  <!-- Display Image from NSFW folder -->
-  <h2>Random NSFW Image</h2>
-  <img id="nsfw-image" src="" alt="Random NSFW Image">
-  <button onclick="getNSFWImage()">Get NSFW Image</button>
+  <h2>Random Riddle</h2>
+  <p id="riddle"></p>
+  <button onclick="getRiddle()">Get Riddle</button>
 
-  <!-- Display Image from Fun folder -->
-  <h2>Random Fun Image</h2>
-  <img id="fun-image" src="" alt="Random Fun Image">
-  <button onclick="getFunImage()">Get Fun Image</button>
+  <h2>Random Compliment</h2>
+  <p id="compliment"></p>
+  <button onclick="getCompliment()">Get Compliment</button>
+
+  <!-- Jest Images -->
+  <h2>Random 8ball Image</h2>
+  <img id="8ball-image" src="" alt="Random 8ball Image">
+  <button onclick="getJestImage('8ball')">Get 8ball Image</button>
+
+  <h2>Random Avatar Image</h2>
+  <img id="avatar-image" src="" alt="Random Avatar Image">
+  <button onclick="getJestImage('avatar')">Get Avatar Image</button>
+
+  <!-- Add more jest categories here -->
+  <h2>Random Kiss Image</h2>
+  <img id="kiss-image" src="" alt="Random Kiss Image">
+  <button onclick="getJestImage('kiss')">Get Kiss Image</button>
+
+  <h2>Random Slap Image</h2>
+  <img id="slap-image" src="" alt="Random Slap Image">
+  <button onclick="getJestImage('slap')">Get Slap Image</button>
+
+  <!-- NSFW Images -->
+  <h2>Random Neko Image</h2>
+  <img id="neko-image" src="" alt="Random Neko Image">
+  <button onclick="getNSFWImage('neko')">Get Neko Image</button>
+
+  <h2>Random Waifu Image</h2>
+  <img id="waifu-image" src="" alt="Random Waifu Image">
+  <button onclick="getNSFWImage('waifu')">Get Waifu Image</button>
+
+  <h2>Random Shemale Image</h2>
+  <img id="shemale-image" src="" alt="Random Shemale Image">
+  <button onclick="getNSFWImage('shemale')">Get Shemale Image</button>
+
+  <h2>Random Blowjob Image</h2>
+  <img id="blowjob-image" src="" alt="Random Blowjob Image">
+  <button onclick="getNSFWImage('blowjob')">Get Blowjob Image</button>
 
   <script>
-    // Fetch and display random jokes
+    // Fun API functions
     async function getJoke() {
       const response = await fetch('/joke');
       const joke = await response.text();
@@ -83,32 +114,42 @@
       document.getElementById('quote').textContent = quote;
     }
 
-    // Fetch and display random pickup lines
-    async function getPickup() {
-      const response = await fetch('/pickup');
-      const pickupLine = await response.text();
-      document.getElementById('pickup').textContent = pickupLine;
+    async function getTruth() {
+      const response = await fetch('/truth');
+      const truth = await response.text();
+      document.getElementById('truth').textContent = truth;
     }
 
-    // Fetch and display random Jest image
-    async function getJestImage() {
-      const response = await fetch('/jest/random-image');
-      const imageUrl = await response.text();
-      document.getElementById('jest-image').src = imageUrl;
+    async function getDare() {
+      const response = await fetch('/dare');
+      const dare = await response.text();
+      document.getElementById('dare').textContent = dare;
     }
 
-    // Fetch and display random NSFW image
-    async function getNSFWImage() {
-      const response = await fetch('/nsfw/random-image');
-      const imageUrl = await response.text();
-      document.getElementById('nsfw-image').src = imageUrl;
+    async function getRiddle() {
+      const response = await fetch('/riddle');
+      const riddle = await response.text();
+      document.getElementById('riddle').textContent = riddle;
     }
 
-    // Fetch and display random Fun image
-    async function getFunImage() {
-      const response = await fetch('/fun/random-image');
+    async function getCompliment() {
+      const response = await fetch('/compliment');
+      const compliment = await response.text();
+      document.getElementById('compliment').textContent = compliment;
+    }
+
+    // Jest Image functions
+    async function getJestImage(category) {
+      const response = await fetch(`/jest/${category}/random-image`);
       const imageUrl = await response.text();
-      document.getElementById('fun-image').src = imageUrl;
+      document.getElementById(`${category}-image`).src = imageUrl;
+    }
+
+    // NSFW Image functions
+    async function getNSFWImage(category) {
+      const response = await fetch(`/nsfw/${category}/random-image`);
+      const imageUrl = await response.text();
+      document.getElementById(`${category}-image`).src = imageUrl;
     }
   </script>
 </body>
