@@ -3,124 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fun, Jest, and NSFW API</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    h1, h2 {
-      color: #333;
-    }
-  </style>
+  <title>MX-GΔMΞCØDΞR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./STYLE/style.css">
 </head>
 <body>
-  <h1>Welcome to the Fun, Jest, and NSFW API</h1>
+<!--background color-->
+<div id="particles"></div>
+<div id="branding">MX-GΔMΞCØDΞR</div>
 
-  <!-- Fun Categories -->
-  <h2>Fun Categories</h2>
-  <div id="fun-categories">
-    <ul>
-      <li><a href="/fun">View Fun Categories</a></li>
-    </ul>
-  </div>
 
-  <!-- Jest Categories -->
-  <h2>Jest Categories</h2>
-  <div id="jest-categories">
-    <ul>
-      <li><a href="/jest">View Jest Categories</a></li>
-    </ul>
-  </div>
-
-  <!-- NSFW Categories -->
-  <h2>NSFW Categories</h2>
-  <div id="nsfw-categories">
-    <ul>
-      <li><a href="/nsfw">View NSFW Categories</a></li>
-    </ul>
-  </div>
-
-  <!-- Fun Content -->
-  <h2>Fun Content</h2>
-  <div id="fun-content">
-    <h3>Random Joke</h3>
-    <p id="joke">Click the button to fetch a joke!</p>
-    <button onclick="fetchContent('/fun/joke', 'joke')">Get Joke</button>
-
-    <h3>Random Fact</h3>
-    <p id="fact">Click the button to fetch a fact!</p>
-    <button onclick="fetchContent('/fun/fact', 'fact')">Get Fact</button>
-
-    <!-- Add other fun content here using similar structure -->
-  </div>
-
-  <!-- Jest Content -->
-  <h2>Jest Content</h2>
-  <div id="jest-content">
-    <h3>Random Kiss Image</h3>
-    <img id="kiss-image" src="" alt="Random Kiss">
-    <button onclick="fetchImage('/jest/kiss/random-image', 'kiss-image')">Get Kiss Image</button>
-
-    <h3>Random Slap Image</h3>
-    <img id="slap-image" src="" alt="Random Slap">
-    <button onclick="fetchImage('/jest/slap/random-image', 'slap-image')">Get Slap Image</button>
-
-    <!-- Add other jest categories here using similar structure -->
-  </div>
-
-  <!-- NSFW Content -->
-  <h2>NSFW Content</h2>
-  <div id="nsfw-content">
-    <h3>Random Neko Image</h3>
-    <img id="neko-image" src="" alt="Random Neko">
-    <button onclick="fetchImage('/nsfw/neko/random-image', 'neko-image')">Get Neko Image</button>
-
-    <h3>Random Waifu Image</h3>
-    <img id="waifu-image" src="" alt="Random Waifu">
-    <button onclick="fetchImage('/nsfw/waifu/random-image', 'waifu-image')">Get Waifu Image</button>
-
-    <!-- Add other NSFW categories here using similar structure -->
-  </div>
-
-  <script>
-    // Function to fetch text content (e.g., jokes, facts)
-    async function fetchContent(url, elementId) {
-      try {
-        const response = await fetch(url);
-        const content = await response.text();
-        document.getElementById(elementId).textContent = content;
-      } catch (error) {
-        document.getElementById(elementId).textContent = "Error fetching content.";
-        console.error(error);
-      }
-    }
-
-    // Function to fetch image content
-    async function fetchImage(url, elementId) {
-      try {
-        const response = await fetch(url);
-        const imageUrl = await response.text();
-        document.getElementById(elementId).src = imageUrl;
-      } catch (error) {
-        console.error("Error fetching image:", error);
-      }
-    }
-  </script>
+<script src="./JAVASCRIPT/script.js"></script>  
 </body>
 </html>
