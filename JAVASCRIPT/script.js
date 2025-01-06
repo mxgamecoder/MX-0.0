@@ -19,3 +19,15 @@ function createParticle() {
 
 // Generate particles continuously
 setInterval(createParticle, 120);
+
+
+// Select elements
+const audio = document.getElementById('background-audio');
+const welcomePopup = document.getElementById('welcome-popup');
+const okBtn = document.getElementById('ok-btn');
+
+// Play the audio and hide the popup when user clicks OK
+okBtn.addEventListener('click', () => {
+  audio.play(); // Start the audio
+  welcomePopup.style.display = 'none'; // Hide the welcome popup
+});
