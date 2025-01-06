@@ -1,3 +1,10 @@
+/* Reset margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }  
+
 body {
     background: radial-gradient(circle at center, #1a1a1c, #0e0e10, #050505);
     margin: 0;
@@ -126,6 +133,178 @@ body {
       animation: moveAround 15s linear infinite; /* Slower for better readability */
     }
     .particle {
-      border-bottom: 4px solid rgba(255, 255, 255, 0.4); /* Smaller particles */
+      border-bottom: 4px solid #ffffff66; /* Smaller particles */
     }
-  }  
+  }
+  
+
+
+/* Navigation Bar */
+#navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 15px;
+    background-color: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+  }
+  
+  #menu-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  #logo-container {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  #nav-links {
+    display: flex;
+    justify-content: flex-end;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #nav-links li {
+    margin-left: 20px;
+  }
+  
+  #nav-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+  }
+  
+  #nav-links a:hover {
+    color: #5c67f2;
+  }
+  
+  /* Hamburger Menu: Hidden on larger screens */
+  .hamburger-menu {
+    display: none;
+    cursor: pointer;
+    width: 30px;
+    height: 25px;
+    position: relative;
+    z-index: 200;
+  }
+  
+  .hamburger-menu div {
+    background-color: white;
+    width: 100%;
+    height: 5px;
+    border-radius: 5px;
+    position: absolute;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .hamburger-menu div:nth-child(1) {
+    top: 0;
+  }
+  
+  .hamburger-menu div:nth-child(2) {
+    top: 10px;
+  }
+  
+  .hamburger-menu div:nth-child(3) {
+    top: 20px;
+  }
+  
+  /* Hamburger icon transformation when clicked */
+  .hamburger-menu.active div:nth-child(1) {
+    transform: rotate(45deg);
+    top: 10px;
+  }
+  
+  .hamburger-menu.active div:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .hamburger-menu.active div:nth-child(3) {
+    transform: rotate(-45deg);
+    top: 10px;
+  }
+  
+  /* Mobile Styles for Hamburger Menu */
+  @media (max-width: 900px) {
+    .hamburger-menu {
+      display: block; /* Show hamburger menu on smaller screens */
+    }
+  
+    #nav-links {
+      display: none; /* Hide menu items by default */
+      position: absolute;
+      top: 80px;
+      left: 0;
+      background-color: transparent;
+      width: 100%;
+      flex-direction: column;
+    }
+  
+    #nav-links li {
+      margin: 20px 0;
+      text-align: center;
+    }
+  
+    #nav-links.active {
+      display: flex; /* Show menu items when hamburger is clicked */
+    }
+  
+    #nav-links a {
+      color: white;
+      font-size: 1.5rem;
+    }
+  }
+  
+  /* For screens between 720px and 959px */
+@media (min-width: 720px) and (max-width: 959px) {
+    #logo-container {
+      font-size: 2rem; /* Smaller font size for better fit */
+    }
+  
+    #nav-links a {
+      font-size: 1rem; /* Adjust menu font size for better fit */
+    }
+  }
+  
+  /* For screens between 414px and 0px */
+@media (max-width: 414px) {
+    #logo-container {
+      font-size: 1.5rem; /* Smaller font size for smaller screens */
+    }
+  
+    #nav-links a {
+      font-size: 1rem; /* Adjust menu font size for better fit */
+    }
+  }
+  
+  /* For screens between 278px and 200px */
+@media (max-width: 278px) {
+    #logo-container {
+      font-size: 1rem; /* Very small logo name */
+    }
+  }
+  
+  /* For screens 200px and below */
+  @media (max-width: 200px) {
+    #logo-container {
+      display: none; /* Hide logo name */
+    }
+  
+    .hamburger-menu {
+      display: block; /* Show hamburger menu */
+      position: absolute;
+      right: 10px; /* Center hamburger menu */
+    }
+  }
+  
