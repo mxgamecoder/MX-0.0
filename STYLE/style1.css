@@ -1,0 +1,280 @@
+/* Reset margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }  
+
+body {
+    background: radial-gradient(circle at center, #1a1a1c, #0e0e10, #050505);
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  #particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  
+  .particle {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 6px solid rgba(255, 255, 255, 0.5);
+    animation: float 6s infinite;
+  }
+
+/* Welcome Popup Style */
+#welcome-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  #popup-content {
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%; /* Adjusted width for small screens */
+    max-width: 400px; /* Max width for larger screens */
+  }
+  
+  #ok-btn {
+    padding: 10px 20px;
+    background-color: #5c67f2;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  #ok-btn:hover {
+    background-color: #4a54d1;
+  }
+  
+  h2, p {
+    font-size: 1.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    #popup-content {
+      width: 90%; /* Adjust width for smaller screens */
+    }
+    h2 {
+      font-size: 1.2rem;
+    }
+    p {
+      font-size: 1rem;
+    }
+  }
+  
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-200px) scale(0.8);
+      opacity: 0.2;
+    }
+  }
+  
+  #branding {
+    position: absolute;
+    font-family: 'Dancing Script', cursive;
+    font-size: 5vw; /* Scales based on screen width */
+    color: rgba(200, 200, 200, 0.7);
+    text-shadow: 
+      0 0 5px rgba(100, 100, 100, 0.3),
+      0 0 10px rgba(50, 50, 50, 0.2);
+    animation: moveAround 12s linear infinite;
+    white-space: nowrap;
+  }
+  
+  @keyframes moveAround {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(10vw, 90vh); }
+    50% { transform: translate(40vw, 60vh); }
+    75% { transform: translate(10vw, 30vh); }
+    100% { transform: translate(0, 0); }
+  }
+  
+  /* Media Queries for Small Screens */
+  @media (max-width: 768px) { /* Tablets and smaller */
+    #branding {
+      font-size: 6vw; /* Slightly larger text for readability */
+    }
+  }
+  
+  @media (max-width: 480px) { /* Small phones */
+    #branding {
+      font-size: 7vw; /* Larger for tiny screens */
+      animation: moveAround 15s linear infinite; /* Slower for better readability */
+    }
+    .particle {
+      border-bottom: 4px solid #ffffff66; /* Smaller particles */
+    }
+  }
+  
+
+
+/* Navigation Bar */
+#navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 15px;
+    background-color: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+  }
+  
+  #menu-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  #logo-container {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  #nav-links {
+    display: flex;
+    justify-content: flex-end;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #nav-links li {
+    margin-left: 20px;
+  }
+  
+  #nav-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+  }
+  
+  #nav-links a:hover {
+    color: #5c67f2;
+  }
+  
+  /* Hamburger Menu: Hidden on larger screens */
+  .hamburger-menu {
+    display: none;
+    cursor: pointer;
+    font-size: 2rem;
+    color: white;
+    font-weight: bold;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  /* Hamburger icon transformation to "M" when clicked */
+  .hamburger-menu.active {
+    transform: rotate(180deg); /* Rotate the letter M */
+  }
+  
+  
+  /* Mobile Styles for Hamburger Menu */
+  @media (max-width: 900px) {
+    .hamburger-menu {
+      display: block; /* Show hamburger menu on smaller screens */
+    }
+  
+    #nav-links {
+      display: none; /* Hide menu items by default */
+      position: absolute;
+      top: 80px;
+      left: 0;
+      background-color: transparent;
+      width: 100%;
+      flex-direction: column;
+    }
+  
+    #nav-links li {
+      margin: 20px 0;
+      text-align: center;
+    }
+  
+    #nav-links.active {
+      display: flex; /* Show menu items when hamburger is clicked */
+    }
+  
+    #nav-links a {
+      color: white;
+      font-size: 1.5rem;
+    }
+  }
+  
+  /* For screens between 720px and 959px */
+@media (min-width: 720px) and (max-width: 959px) {
+    #logo-container {
+      font-size: 2rem; /* Smaller font size for better fit */
+    }
+  
+    #nav-links a {
+      font-size: 1rem; /* Adjust menu font size for better fit */
+    }
+  }
+  
+  /* For screens between 414px and 0px */
+@media (max-width: 414px) {
+    #logo-container {
+      font-size: 1.5rem; /* Smaller font size for smaller screens */
+    }
+  
+    #nav-links a {
+      font-size: 1rem; /* Adjust menu font size for better fit */
+    }
+  }
+  
+  /* For screens between 278px and 200px */
+@media (max-width: 278px) {
+    #logo-container {
+      font-size: 1rem; /* Very small logo name */
+    }
+  }
+  
+  /* For screens 200px and below */
+  @media (max-width: 200px) {
+    #logo-container {
+      display: none; /* Hide logo name */
+    }
+  
+    .hamburger-menu {
+      display: block; /* Show hamburger menu */
+      position: absolute;
+      right: 10px; /* Center hamburger menu */
+    }
+  }
+  
