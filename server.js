@@ -5,6 +5,7 @@ const fs = require('fs');
 const port = 3000;
 
 // Serve static files from jest, nsfw, and fun folders
+app.use('/db', express.static(path.join(__dirname, 'db')));
 app.use('/STYLE', express.static(path.join(__dirname, 'STYLE')));
 app.use('/JAVASCRIPT', express.static(path.join(__dirname, 'JAVASCRIPT')));
 app.use('/audio', express.static(path.join(__dirname, 'audio')));
