@@ -5,6 +5,7 @@ const fs = require('fs');
 const port = 3000;
 
 // Serve static files from jest, nsfw, and fun folders
+app.use('/web', express.static(path.join(__dirname, 'web')));
 app.use('/db', express.static(path.join(__dirname, 'db')));
 app.use('/STYLE', express.static(path.join(__dirname, 'STYLE')));
 app.use('/JAVASCRIPT', express.static(path.join(__dirname, 'JAVASCRIPT')));
@@ -129,6 +130,11 @@ app.get('/fun', (req, res) => {
     message: "Available fun categories.",
     categories: Object.keys(funCategories)
   });
+});
+
+// Serve login.html directly
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'web', 'login.html'));
 });
 
 // Serve the index.html file on the root URL
