@@ -6,6 +6,7 @@
   <title>MX-GΔMΞCØDΞR</title>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/STYLE/style.css">
+  <link rel="stylesheet" href="auth.css">
 </head>
 <body>
 <!--background color-->
@@ -48,7 +49,38 @@
     </div>
   </nav>
   
+  <div class="form-container">
+    <h1>Signup</h1>
+    <form id="signupForm">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+      <p id="usernameError" class="error-message"></p>
 
-<script src="./JAVASCRIPT/script.js"></script>  
+      <label for="fullname">Full Name:</label>
+      <input type="text" id="fullname" name="fullname" required>
+      <p id="fullnameError" class="error-message"></p>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+      <p id="emailError" class="error-message"></p>
+
+      <label for="phoneNumber">Phone Number:</label>
+      <input type="text" id="phoneNumber" name="phoneNumber" required>
+      <p id="phoneError" class="error-message"></p>
+
+      <label for="password">Password:</label>
+      <div class="password-container">
+        <input type="password" id="password" name="password" required>
+        <span id="togglePassword" class="eye-icon">&#128065;</span> <!-- Eye Icon -->
+      </div>
+      <p id="passwordError" class="error-message"></p>
+
+      <button type="submit">Signup</button>
+      <p id="formMessage" class="info-message"></p>
+    </form>
+  </div>
+  <script src="auth.js"></script>
+
+<script src="/JAVASCRIPT/script.js"></script>  
 </body>
 </html>

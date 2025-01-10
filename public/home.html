@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MX-GΔMΞCØDΞR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/STYLE/style.css">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+<!--background color-->
+<div id="particles"></div>
+<div id="branding">MX-GΔMΞCØDΞR</div>
+
+<!--background audio-->
+<audio id="background-audio" src="/audio/mx.mp3" loop></audio>
+
+<!-- Welcome Popup -->
+<div id="welcome-popup">
+    <div id="popup-content">
+      <h2>Welcome, MX-GΔMΞCØDΞR! 🎮</h2>
+      <p>Let's start the fun! 🎉</p>
+      <button id="ok-btn">OK 🚀</button>
+    </div>
+  </div>
+
+ <!-- Navigation Bar -->
+ <nav id="navbar">
+    <div id="menu-container">
+      <!-- Logo: MX-GΔMΞCØDΞR -->
+      <div id="logo-container">MX-GΔMΞCØDΞR</div>
+
+      <!-- Hamburger menu button -->
+      <div class="hamburger-menu">
+        M
+      </div>
+      
+    <!-- Navigation Links -->
+    <ul id="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#apis">APIs</a></li>
+      <li><a href="#training">Training</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#music">Music</a></li>
+    </ul>
+    </div>
+  </nav>
+  
+  <div class="welcome-container">
+    <h1 id="welcomeMessage">Welcome!</h1>
+    <p id="logoutMessage"></p>
+    <button id="logoutButton" style="display: none;">Logout</button> <!-- Hide by default -->
+  </div>
+  <script>
+    // Check if the user is logged in
+    fetch('/check-session')
+      .then(response => response.json())
+      .then(data => {
+        if (!data.loggedIn) {
+          // If not logged in, show message and redirect to login page
+          document.getElementById('welcomeMessage').textContent = 'Not allowed 🚫';
+          document.getElementById('logoutMessage').textContent = 'You are not logged in. Redirecting to login page...';
+          setTimeout(() => {
+            window.location.href = '/login.html'; // Redirect to login
+          }, 3000); // Wait 3 seconds before redirecting
+        } else {
+          // Get username from the session and display welcome message
+          const urlParams = new URLSearchParams(window.location.search);
+          const username = urlParams.get('username');
+          if (username) {
+            const hours = new Date().getHours();
+            let greeting = '';
+
+            // Determine time-based greeting
+            if (hours < 12) {
+              greeting = 'Good Morning 🌅';
+            } else if (hours < 18) {
+              greeting = 'Good Afternoon ☀️';
+            } else {
+              greeting = 'Good Evening 🌙';
+            }
+
+            document.getElementById('welcomeMessage').textContent = `${greeting}, @${username}!`;
+          }
+
+          // Show logout button when logged in
+          document.getElementById('logoutButton').style.display = 'block';
+        }
+      })
+      .catch(err => {
+        console.error('Error checking session:', err);
+        // Redirect to login if there's an error
+        window.location.href = '/login.html';
+      });
+
+    // Logout button functionality
+    document.getElementById('logoutButton').addEventListener('click', () => {
+      fetch('/logout')
+        .then(() => {
+          // After logout, redirect to login page
+          window.location.href = '/login.html';
+        })
+        .catch(err => {
+          console.error('Error logging out:', err);
+          // Handle logout error
+        });
+    });
+  </script>
+
+<script src="/JAVASCRIPT/script.js"></script>  
+</body>
+</html>
