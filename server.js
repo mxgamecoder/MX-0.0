@@ -143,7 +143,7 @@ app.use(session({
 }));
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority&ssl=true', {
+mongoose.connect('mongodb+srv://mxgamecoder:mxgamecoder@cluster0.qf0nv.mongodb.net/?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
