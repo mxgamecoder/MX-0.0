@@ -18,7 +18,7 @@ function createParticle() {
 }
 
 // Generate particles continuously
-setInterval(createParticle, 120);
+setInterval(createParticle, 190);
 
 
 // Select elements

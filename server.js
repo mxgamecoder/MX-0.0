@@ -4,12 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const port = 3000;
 
-const sqlite3 = require('sqlite3').verbose();
-const bcrypt = require('bcrypt');
-
 // Serve static files from jest, nsfw, and fun folders
-app.use('/db', express.static(path.join(__dirname, 'db')));
-app.use('/web', express.static(path.join(__dirname, 'web')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/STYLE', express.static(path.join(__dirname, 'STYLE')));
 app.use('/JAVASCRIPT', express.static(path.join(__dirname, 'JAVASCRIPT')));
 app.use('/audio', express.static(path.join(__dirname, 'audio')));
@@ -137,72 +133,12 @@ app.get('/fun', (req, res) => {
 
 // Serve login.html directly
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'web', 'login.html'));
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 // Serve the index.html file on the root URL
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.post('/signup', express.json(), (req, res) => {
-  const { full_name, username, email, password } = req.body;
-
-  if (!full_name || !username || !email || !password) {
-    return res.status(400).json({ success: false, message: "All fields are required." });
-  }
-
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const db = new sqlite3.Database('./db/users.db');
-
-  const query = `
-    INSERT INTO users (full_name, username, email, password) 
-    VALUES (?, ?, ?, ?)
-  `;
-
-  db.run(query, [full_name, username, email, hashedPassword], function (err) {
-    if (err) {
-      if (err.message.includes("UNIQUE")) {
-        return res.status(400).json({ success: false, message: "Username or email already exists." });
-      }
-      return res.status(500).json({ success: false, message: "Error creating user." });
-    }
-
-    res.status(201).json({ success: true, message: "User created successfully!" });
-  });
-
-  db.close();
-});
-
-app.post('/login', express.json(), (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: "Email and password are required." });
-  }
-
-  const db = new sqlite3.Database('./db/users.db');
-  const query = `SELECT * FROM users WHERE email = ?`;
-
-  db.get(query, [email], (err, user) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: "Error finding user." });
-    }
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found." });
-    }
-
-    const isPasswordValid = bcrypt.compareSync(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ success: false, message: "Invalid credentials." });
-    }
-
-    res.status(200).json({ success: true, message: "Login successful!" });
-  });
-
-  db.close();
 });
 
 // Start the server
