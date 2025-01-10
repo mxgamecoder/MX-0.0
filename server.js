@@ -319,17 +319,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Force HTTPS in production (when deployed)
-if (process.env.NODE_ENV === 'production') {
-  app.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] !== 'https') {
-      return res.redirect('https://' + req.headers.host + req.url);
-    }
-    return next();
-  });
-}
-
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
