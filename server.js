@@ -143,7 +143,7 @@ app.use(session({
 }));
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://mxgamecoder:mxgamecoder@cluster0.qf0nv.mongodb.net/?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority&ssl=true', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -318,6 +318,17 @@ app.get('/login', (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+// Force HTTPS in production (when deployed)
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect('https://' + req.headers.host + req.url);
+    }
+    return next();
+  });
+}
+
 
 // Start the server
 app.listen(port, () => {
