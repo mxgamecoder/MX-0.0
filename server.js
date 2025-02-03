@@ -9,7 +9,6 @@ app.use('/jest', express.static(path.join(__dirname, 'jest')));
 app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
 app.use('/fun', express.static(path.join(__dirname, 'fun')));
 
-// Utility function to serve random images from a given folder
 function serveRandomImage(folderPath, folderUrl) {
   return (req, res) => {
     const dirPath = path.join(__dirname, folderPath);
@@ -30,29 +29,12 @@ function serveRandomImage(folderPath, folderUrl) {
       }
 
       const randomImage = images[Math.floor(Math.random() * images.length)];
-      const imageUrl = `${folderUrl}/${randomImage}`;
-      const imagePath = path.join(dirPath, randomImage);
+      const imageUrl = `${req.protocol}://${req.get('host')}${folderUrl}/${randomImage}`;
 
-      // Read the image file and set the correct MIME type
-      fs.readFile(imagePath, (err, data) => {
-        if (err) {
-          console.error(`Error reading image:`, err.message);
-          return res.status(500).send(`Error accessing the ${folderUrl} folder.`);
-        }
-
-        let contentType;
-        if (randomImage.endsWith('.gif')) {
-          contentType = 'image/gif';
-        } else if (randomImage.endsWith('.jpg') || randomImage.endsWith('.jpeg')) {
-          contentType = 'image/jpeg';
-        } else if (randomImage.endsWith('.png')) {
-          contentType = 'image/png';
-        } else {
-          return res.status(400).send('Unsupported image format.');
-        }
-
-        res.set('Content-Type', contentType);
-        res.send(data);
+      res.json({
+        success: true,
+        message: "Image fetched successfully.",
+        imageUrl: imageUrl
       });
     } catch (err) {
       console.error(`Error accessing ${folderUrl} folder:`, err.message);
