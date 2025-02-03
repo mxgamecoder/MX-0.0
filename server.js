@@ -16,7 +16,14 @@ function serveRandomImage(folderPath, folderUrl) {
     console.log(`Looking for images in: ${dirPath}`); // Debugging line
 
     try {
-      const images = fs.readdirSync(dirPath).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
+      const images = fs.readdirSync(dirPath)
+        .filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file)) // Make sure to include gif files
+        .sort((a, b) => {
+          // Prioritize gifs over jpgs
+          if (a.endsWith('.gif') && !b.endsWith('.gif')) return -1;
+          if (!a.endsWith('.gif') && b.endsWith('.gif')) return 1;
+          return 0;
+        });
 
       if (images.length === 0) {
         return res.status(404).send(`No images found in the "${folderUrl}" folder.`);
