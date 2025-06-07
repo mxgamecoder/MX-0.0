@@ -2,10 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MX-GΔMΞCØDΞR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fun & Image API Explorer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  welcome
+  <div class="container">
+    <h1>🎭 Fun & Image API Explorer</h1>
+
+    <section>
+      <h2>Jest Categories</h2>
+      <ul id="jestList"></ul>
+    </section>
+
+    <section>
+      <h2>NSFW Categories</h2>
+      <ul id="nsfwList"></ul>
+    </section>
+
+    <section>
+      <h2>Fun Categories</h2>
+      <ul id="funList"></ul>
+    </section>
+
+    <section id="resultSection" class="result hidden">
+      <h3>🔹 API Result</h3>
+      <div id="resultContent"></div>
+    </section>
+  </div>
+
+  <script>
+    async function fetchCategories(route, listId, type) {
+      const res = await fetch(`/${route}`);
+      const data = await res.json();
+      const list = document.getElementById(listId);
+      data.categories.forEach(category => {
+        const li = document.createElement("li");
+        li.innerHTML = `<button onclick="fetchResult('${route}/${category}', '${type}')">${category}</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    async function fetchResult(endpoint, type) {
+      const res = await fetch(`/${endpoint}`);
+      const data = await res.json();
+      const result = document.getElementById("resultContent");
+      const section = document.getElementById("resultSection");
+      section.classList.remove("hidden");
+
+      if (type === 'image') {
+        result.innerHTML = `<img src="${data.imageUrl}" alt="Fetched Image">`;
+      } else {
+        result.innerHTML = `<p>${data.content}</p>`;
+      }
+    }
+
+    // Load all categories on page load
+    window.onload = () => {
+      fetchCategories("jest", "jestList", "image");
+      fetchCategories("nsfw", "nsfwList", "image");
+      fetchCategories("fun", "funList", "text");
+    };
+  </script>
 </body>
 </html>
