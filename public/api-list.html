@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🧠 MX API List</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1rem; background: #f0f0f0; }
+    h1 { color: #333; }
+    .category { background: #fff; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .endpoint { font-weight: bold; color: #222; }
+    .desc { color: #555; margin-bottom: 0.5rem; }
+    .image-preview { max-width: 100px; cursor: pointer; border-radius: 8px; }
+
+    /* Full screen viewer */
+    #fullscreenViewer {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      flex-direction: column;
+    }
+
+    #fullscreenViewer img {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 12px;
+    }
+
+    .fullscreen-buttons {
+      margin-top: 1rem;
+    }
+
+    .fullscreen-buttons button {
+      padding: 0.5rem 1rem;
+      margin: 0 0.5rem;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .cancel-btn { background: crimson; color: white; }
+    .retry-btn { background: dodgerblue; color: white; }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 MX API Endpoint List</h1>
+  <div id="apiList">Loading API endpoints...</div>
+
+  <!-- Fullscreen Image Viewer -->
+  <div id="fullscreenViewer">
+    <img id="fullImage" src="">
+    <div class="fullscreen-buttons">
+      <button class="cancel-btn" onclick="closeViewer()">❌ Cancel</button>
+      <button class="retry-btn" onclick="retryImage()">🔁 Retry</button>
+    </div>
+  </div>
+
+<script>
+  const apiListDiv = document.getElementById('apiList');
+  const fullViewer = document.getElementById('fullscreenViewer');
+  const fullImage = document.getElementById('fullImage');
+
+  // Fetch all categories
+  async function fetchCategories() {
+    try {
+      const jest = await fetch('/jest').then(res => res.json());
+      const nsfw = await fetch('/nsfw').then(res => res.json());
+      const fun = await fetch('/fun').then(res => res.json());
+
+      displayCategories(jest.categories, 'jest', '🧪');
+      displayCategories(nsfw.categories, 'nsfw', '🔞');
+      displayCategories(fun.categories, 'fun', '🎉');
+    } catch (err) {
+      apiListDiv.innerHTML = `<p>⚠️ Failed to load API categories. Try refreshing the page.</p>`;
+    }
+  }
+
+  function displayCategories(list, type, emoji) {
+    list.forEach(name => {
+      const container = document.createElement('div');
+      container.className = 'category';
+
+      const endpoint = `/${type}/${name}`;
+      const desc = getDescription(name, type);
+
+      container.innerHTML = `
+        <div class="endpoint">${emoji} ${endpoint}</div>
+        <div class="desc">${desc}</div>
+        <button onclick="previewImage('${endpoint}')">🔍 Preview</button>
+      `;
+
+      apiListDiv.appendChild(container);
+    });
+  }
+
+  function getDescription(name, type) {
+    const descriptions = {
+      hug: "Sends a random hug image.",
+      kiss: "Random kissing animation.",
+      meow: "Cute cat images!",
+      neko: "Anime-style NSFW neko image.",
+      joke: "Returns a random joke.",
+      fact: "Interesting random fact.",
+      dare: "Dare generator for games.",
+      riddle: "Mind-bending riddles.",
+      quote: "Random quote to inspire.",
+      truth: "Truth questions for fun.",
+      pickuplines: "Cringey or funny pick-up lines!",
+    };
+    return descriptions[name] || "Random content from this category.";
+  }
+
+  async function previewImage(endpoint) {
+    try {
+      const res = await fetch(endpoint);
+      const data = await res.json();
+      if (data.success && data.imageUrl) {
+        fullImage.src = data.imageUrl;
+        fullViewer.style.display = 'flex';
+      } else {
+        alert('Failed to fetch image.');
+      }
+    } catch {
+      alert('Could not fetch preview.');
+    }
+  }
+
+  function closeViewer() {
+    fullViewer.style.display = 'none';
+    fullImage.src = '';
+  }
+
+  function retryImage() {
+    const currentSrc = fullImage.src;
+    fullImage.src = '';
+    setTimeout(() => {
+      fullImage.src = currentSrc;
+    }, 300);
+  }
+
+  fetchCategories();
+</script>
+
+</body>
+</html>
