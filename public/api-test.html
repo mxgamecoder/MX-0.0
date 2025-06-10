@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>⚙️ MX API Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .section {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+      margin: 1rem auto;
+      max-width: 600px;
+    }
+
+    label, select, button {
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    select, button {
+      padding: 0.6rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+
+    .response-box {
+      background: #f4f4f4;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    img {
+      max-width: 100%;
+      margin-top: 1rem;
+      border-radius: 8px;
+    }
+
+    .curl-box {
+      background: #e9e9e9;
+      padding: 0.5rem;
+      border-radius: 5px;
+      font-family: monospace;
+      margin-top: 1rem;
+      white-space: pre-wrap;
+    }
+
+    .error {
+      color: crimson;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>⚙️ MX API Test Tool</h1>
+
+<div class="section">
+  <label for="categorySelect">🔎 Choose an API Endpoint</label>
+  <select id="categorySelect">
+    <option>Loading endpoints...</option>
+  </select>
+  <button onclick="testApi()">🚀 Run Test</button>
+
+  <div id="output" class="response-box"></div>
+  <div id="imagePreview"></div>
+  <div id="curlCommand" class="curl-box"></div>
+</div>
+
+<script>
+  const categorySelect = document.getElementById("categorySelect");
+  const outputDiv = document.getElementById("output");
+  const imagePreview = document.getElementById("imagePreview");
+  const curlDiv = document.getElementById("curlCommand");
+
+  const sources = {
+    "/jest": "🎭 Jest",
+    "/nsfw": "🔞 NSFW",
+    "/fun": "🎉 Fun"
+  };
+
+  async function loadEndpoints() {
+    categorySelect.innerHTML = '';
+    for (const [url, label] of Object.entries(sources)) {
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.categories) {
+          data.categories.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = `${url}/${cat}`;
+            option.textContent = `${label} - ${cat}`;
+            categorySelect.appendChild(option);
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to load:", url);
+      }
+    }
+  }
+
+  async function testApi() {
+    const endpoint = categorySelect.value;
+    outputDiv.innerHTML = '⏳ Testing...';
+    imagePreview.innerHTML = '';
+    curlDiv.innerHTML = '';
+
+    try {
+      const res = await fetch(endpoint);
+      const data = await res.json();
+
+      outputDiv.textContent = JSON.stringify(data, null, 2);
+
+      // Show image if present
+      if (data.imageUrl) {
+        const img = document.createElement("img");
+        img.src = data.imageUrl;
+        imagePreview.appendChild(img);
+      }
+
+      // Show curl
+      const curl = `curl ${window.location.origin}${endpoint}`;
+      curlDiv.textContent = `💡 CURL:\n${curl}`;
+    } catch (err) {
+      outputDiv.innerHTML = `<div class="error">❌ Failed to fetch or parse JSON. Maybe this endpoint doesn’t return valid JSON?</div>`;
+      curlDiv.textContent = `curl ${window.location.origin}${endpoint}`;
+    }
+  }
+
+  loadEndpoints();
+</script>
+
+</body>
+</html>
