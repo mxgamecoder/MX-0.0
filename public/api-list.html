@@ -193,6 +193,11 @@
     <h2>🎈 Fun</h2>
     <div class="category-list" id="funList"></div>
   </div>
+  
+  <div class="section">
+    <h2>👾 Theend</h2>
+    <div class="category-list" id="funList"></div>
+  </div>
 
   <div id="resultOverlay" class="overlay hidden">
     <div class="overlay-content">
@@ -203,7 +208,7 @@
   </div>
 
   <script>
-    const allCategories = { nsfw: [], jest: [], fun: [] };
+    const allCategories = { nsfw: [], jest: [], fun: [], theend: [] };
     let currentCategory = '', currentType = '', currentIndex = 0;
 
     async function fetchCategories(route, listId, type) {
