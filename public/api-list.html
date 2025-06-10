@@ -1,200 +1,262 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>🧠 MX API List</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      padding: 2rem;
-      background: #f7f7f7;
-      color: #222;
       margin: 0;
+      background: #f4f4f4;
+      color: #222;
+      padding: 2rem;
     }
+
     h1 {
       text-align: center;
+      font-size: 2.5rem;
       margin-bottom: 2rem;
     }
+
+    .letter-group {
+      margin-bottom: 2rem;
+    }
+
+    .letter-title {
+      font-size: 1.6rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      border-bottom: 2px solid #ccc;
+    }
+
     .category {
       background: white;
-      border-radius: 10px;
+      border-radius: 16px;
       padding: 1rem;
       margin-bottom: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 3px 15px rgba(0,0,0,0.1);
     }
+
     .endpoint {
+      font-size: 1.2rem;
       font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 0.3rem;
     }
+
     .desc {
-      color: #555;
-      margin-bottom: 0.75rem;
+      color: #444;
+      margin: 0.5rem 0 1rem 0;
     }
+
     button {
-      padding: 0.5rem 1rem;
-      background: #007bff;
-      color: white;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      margin: 0.5rem 0.5rem 0 0;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.2s ease;
-    }
-    button:hover {
-      background: #0056b3;
+      font-weight: bold;
     }
 
-    /* Fullscreen Viewer */
+    .preview-btn { background: #2196f3; color: white; }
+    .download-btn { background: #4caf50; color: white; }
+
     #fullscreenViewer {
       display: none;
       position: fixed;
       top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.95);
+      width: 100vw; height: 100vh;
+      background: black;
       justify-content: center;
       align-items: center;
+      z-index: 9999;
       flex-direction: column;
-      z-index: 1000;
     }
-    #fullscreenViewer img {
-      max-width: 90%;
-      max-height: 70vh;
+
+    #fullImage {
+      max-width: 95vw;
+      max-height: 85vh;
       border-radius: 12px;
       margin-bottom: 1rem;
     }
-    .fullscreen-buttons {
-      display: flex;
-      gap: 1rem;
-    }
-    .fullscreen-buttons button {
-      font-size: 1rem;
-    }
-    .cancel-btn { background: crimson; }
-    .retry-btn { background: orange; display: none; }
-    .download-btn { background: green; }
 
+    .fullscreen-buttons button {
+      font-size: 1.1rem;
+      padding: 0.8rem 1.4rem;
+    }
+
+    .cancel-btn { background: crimson; color: white; }
+    .retry-btn { background: #ff9800; color: white; display: none; }
+    .download-btn-viewer { background: #4caf50; color: white; }
+    .next-btn { background: dodgerblue; color: white; }
   </style>
 </head>
 <body>
-  <h1>🧠 MX API Endpoint List</h1>
-  <div id="apiList">Loading API endpoints...</div>
 
-  <!-- Fullscreen Image Viewer -->
-  <div id="fullscreenViewer">
-    <img id="fullImage" src="">
-    <div class="fullscreen-buttons">
-      <button class="cancel-btn" onclick="closeViewer()">❌ Cancel</button>
-      <button class="retry-btn" id="retryBtn" onclick="retryImage()">🔁 Retry</button>
-      <button class="download-btn" onclick="downloadImage()">⬇️ Download</button>
-    </div>
+<h1>🧠 MX API Endpoint List</h1>
+<div id="apiList">Loading API endpoints...</div>
+
+<!-- Fullscreen Image Viewer -->
+<div id="fullscreenViewer">
+  <img id="fullImage" src="">
+  <div class="fullscreen-buttons">
+    <button class="cancel-btn" onclick="closeViewer()">❌ Cancel</button>
+    <button class="retry-btn" id="retryBtn" onclick="retryImage()">🔁 Retry</button>
+    <button class="next-btn" onclick="fetchNextImage()">➡️ Next</button>
+    <button class="download-btn-viewer" onclick="downloadImage()">⬇️ Download</button>
   </div>
+</div>
 
-  <script>
-    const apiListDiv = document.getElementById('apiList');
-    const fullViewer = document.getElementById('fullscreenViewer');
-    const fullImage = document.getElementById('fullImage');
-    const retryBtn = document.getElementById('retryBtn');
+<script>
+const apiListDiv = document.getElementById('apiList');
+const fullViewer = document.getElementById('fullscreenViewer');
+const fullImage = document.getElementById('fullImage');
+const retryBtn = document.getElementById('retryBtn');
 
-    function closeViewer() {
-      fullViewer.style.display = 'none';
-      fullImage.src = '';
-      retryBtn.style.display = 'none';
+let currentEndpoint = '';
+
+function closeViewer() {
+  fullViewer.style.display = 'none';
+  fullImage.src = '';
+  retryBtn.style.display = 'none';
+  currentEndpoint = '';
+}
+
+function retryImage() {
+  const src = fullImage.src;
+  fullImage.src = '';
+  setTimeout(() => { fullImage.src = src; }, 300);
+}
+
+function downloadImage() {
+  const link = document.createElement('a');
+  link.href = fullImage.src;
+  link.download = 'image.jpg';
+  link.click();
+}
+
+function fetchNextImage() {
+  if (!currentEndpoint) return;
+  fetchResult(currentEndpoint, 'image', true);
+}
+
+function downloadText(content) {
+  const blob = new Blob([content], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'content.txt';
+  link.click();
+}
+
+async function fetchCategories(route, emoji, type) {
+  try {
+    const res = await fetch(`/${route}`);
+    const data = await res.json();
+    displayCategory(route, data.categories, emoji, type);
+  } catch {
+    const div = document.createElement('div');
+    div.className = 'category';
+    div.innerHTML = `<div class="endpoint">${emoji} /${route}</div><div class="desc">⚠️ Failed to load this category</div>`;
+    apiListDiv.appendChild(div);
+  }
+}
+
+function displayCategory(route, list, emoji, type) {
+  const grouped = {};
+  list.forEach(name => {
+    const letter = name[0].toUpperCase();
+    if (!grouped[letter]) grouped[letter] = [];
+    grouped[letter].push(name);
+  });
+
+  Object.keys(grouped).sort().forEach(letter => {
+    const group = document.createElement('div');
+    group.className = 'letter-group';
+    group.innerHTML = `<div class="letter-title">🔤 ${letter}</div>`;
+
+    grouped[letter].forEach(name => {
+      const container = document.createElement('div');
+      container.className = 'category';
+      const endpoint = `/${route}/${name}`;
+      const desc = getDescription(name, route);
+
+      container.innerHTML = `
+        <div class="endpoint">${emoji} ${endpoint}</div>
+        <div class="desc">${desc}</div>
+        <button class="preview-btn" onclick="fetchResult('${endpoint}', '${type}')">🔍 Preview</button>
+        <button class="download-btn" onclick="downloadDirect('${endpoint}', '${type}')">⬇️ Download</button>
+      `;
+      group.appendChild(container);
+    });
+
+    apiListDiv.appendChild(group);
+  });
+}
+
+async function fetchResult(endpoint, type, isNext = false) {
+  try {
+    const res = await fetch(endpoint);
+    const data = await res.json();
+    retryBtn.style.display = 'none';
+    currentEndpoint = endpoint;
+
+    if (type === 'image' && data.imageUrl) {
+      fullImage.src = data.imageUrl;
+      fullViewer.style.display = 'flex';
+    } else if (type === 'text' && data.content) {
+      if (!isNext) alert(`🧠 ${data.content}`);
+      else downloadText(data.content);
+    } else {
+      alert("⚠️ Invalid data format.");
     }
+  } catch {
+    retryBtn.style.display = 'inline-block';
+    alert("⚠️ Failed to preview content.");
+  }
+}
 
-    function retryImage() {
-      const currentSrc = fullImage.src;
-      fullImage.src = '';
-      setTimeout(() => {
-        fullImage.src = currentSrc;
-      }, 300);
-    }
+async function downloadDirect(endpoint, type) {
+  try {
+    const res = await fetch(endpoint);
+    const data = await res.json();
 
-    function downloadImage() {
+    if (type === 'image' && data.imageUrl) {
       const link = document.createElement('a');
-      link.href = fullImage.src;
-      link.download = 'mx_api_image.jpg';
-      document.body.appendChild(link);
+      link.href = data.imageUrl;
+      link.download = 'api-image.jpg';
       link.click();
-      document.body.removeChild(link);
+    } else if (type === 'text' && data.content) {
+      downloadText(data.content);
+    } else {
+      alert("⚠️ Could not get data.");
     }
+  } catch {
+    alert("⚠️ Download failed.");
+  }
+}
 
-    async function fetchCategories(route, emoji, type) {
-      try {
-        const res = await fetch(`/${route}`);
-        const data = await res.json();
-        displayCategory(route, data.categories, emoji, type);
-      } catch {
-        const div = document.createElement('div');
-        div.className = 'category';
-        div.innerHTML = `<div class="endpoint">${emoji} /${route}</div><div class="desc">⚠️ Failed to load this category</div>`;
-        apiListDiv.appendChild(div);
-      }
-    }
+function getDescription(name, type) {
+  const descriptions = {
+    hug: "Sends a random hug image.",
+    kiss: "Random kissing animation.",
+    meow: "Cute cat images!",
+    neko: "Anime-style NSFW neko image.",
+    joke: "Returns a random joke.",
+    fact: "Interesting random fact.",
+    dare: "Dare generator for games.",
+    riddle: "Mind-bending riddles.",
+    quote: "Random quote to inspire.",
+    truth: "Truth questions for fun.",
+    pickuplines: "Cringey or funny pick-up lines!",
+  };
+  return descriptions[name] || "Random content from this category.";
+}
 
-    function displayCategory(route, list, emoji, type) {
-      const sortedList = list.sort((a, b) => a.localeCompare(b));
-      sortedList.forEach(name => {
-        const container = document.createElement('div');
-        container.className = 'category';
-
-        const endpoint = `/${route}/${name}`;
-        const desc = getDescription(name, route);
-
-        container.innerHTML = `
-          <div class="endpoint">${emoji} ${endpoint}</div>
-          <div class="desc">${desc}</div>
-          <button onclick="fetchResult('${endpoint}', '${type}')">🔍 Preview</button>
-        `;
-
-        apiListDiv.appendChild(container);
-      });
-    }
-
-    async function fetchResult(endpoint, type) {
-      try {
-        const res = await fetch(endpoint);
-        const data = await res.json();
-
-        if (type === 'image' && data.imageUrl) {
-          fullImage.onerror = () => {
-            retryBtn.style.display = 'inline-block';
-          };
-          retryBtn.style.display = 'none';
-          fullImage.src = data.imageUrl;
-          fullViewer.style.display = 'flex';
-        } else if (type === 'text' && data.content) {
-          alert(`🧠 ${data.content}`);
-        } else {
-          alert("⚠️ Invalid response format.");
-        }
-      } catch {
-        alert("⚠️ Could not fetch preview.");
-      }
-    }
-
-    function getDescription(name, route) {
-      const descriptions = {
-        hug: "Sends a random hug image.",
-        kiss: "Random kissing animation.",
-        meow: "Cute cat images!",
-        neko: "Anime-style NSFW neko image.",
-        joke: "Returns a random joke.",
-        fact: "Interesting random fact.",
-        dare: "Dare generator for games.",
-        riddle: "Mind-bending riddles.",
-        quote: "Random quote to inspire.",
-        truth: "Truth questions for fun.",
-        pickuplines: "Cringey or funny pick-up lines!",
-      };
-      return descriptions[name] || "Random content from this category.";
-    }
-
-    window.onload = () => {
-      fetchCategories("jest", "🧪", "image");
-      fetchCategories("nsfw", "🔞", "image");
-      fetchCategories("fun", "🎉", "text");
-    };
-  </script>
+// Load categories on page load
+window.onload = () => {
+  fetchCategories("jest", "🧪", "image");
+  fetchCategories("nsfw", "🔞", "image");
+  fetchCategories("fun", "🎉", "text");
+};
+</script>
 </body>
 </html>
