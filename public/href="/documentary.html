@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📘 MX API Documentation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Base Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0f0f;
+      color: #f2f2f2;
+      line-height: 1.7;
+      padding: 30px;
+    }
+
+    a {
+      color: #09f;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: #00ffff;
+    }
+
+    h1, h2, h3 {
+      margin-top: 30px;
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .highlight {
+      background: #1f1f1f;
+      border-left: 4px solid #00ffcc;
+      padding: 20px;
+      margin: 25px 0;
+      border-radius: 6px;
+    }
+
+    pre {
+      background: #181818;
+      color: #00ff88;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      font-size: 0.95rem;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: monospace;
+      color: #00eaff;
+    }
+
+    ul {
+      padding-left: 25px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      background: #222;
+      padding: 3px 7px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-left: 5px;
+      color: #999;
+    }
+
+    .glow {
+      color: #00ffff;
+      text-shadow: 0 0 5px #00ffffaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="glow">📘 MX Public API — Final Documentation</h1>
+    <p>Welcome to the final and official documentation of the <strong>MX Public API</strong> built by <strong>mxgamecoder</strong>.</p>
+
+    <div class="highlight">
+      <strong>🌐 API Base URL:</strong> <code>https://mxgamecoder-klfx.onrender.com</code><br>
+      <strong>📦 GitHub Repo:</strong> <a href="https://github.com/msgamecoder/MX-0.0" target="_blank">View Source</a><br>
+      <strong>💬 Dev Group:</strong> <a href="https://chat.whatsapp.com/DZdp64lIxKMJhh6Dj0znaj" target="_blank">Join on WhatsApp</a>
+    </div>
+
+    <h2>🚀 How to Use This API</h2>
+    <p>The API returns JSON with keys like <code>content</code> for text or <code>imageUrl</code> for images. It works with fetch, axios, curl, Python requests, bots, and more.</p>
+
+    <h3>📌 10 Code Examples</h3>
+
+    <h3>1. JS Fetch (Browser)</h3>
+    <pre><code>fetch("https://mxgamecoder-klfx.onrender.com/fun/joke")
+  .then(res => res.json())
+  .then(data => alert(data.content));</code></pre>
+
+    <h3>2. Node.js</h3>
+    <pre><code>const https = require("https");
+https.get("https://mxgamecoder-klfx.onrender.com/fun/fact", res => {
+  let d = "";
+  res.on("data", chunk => d += chunk);
+  res.on("end", () => console.log(JSON.parse(d).content));
+});</code></pre>
+
+    <h3>3. Curl</h3>
+    <pre><code>curl https://mxgamecoder-klfx.onrender.com/fun/quote</code></pre>
+
+    <h3>4. Python</h3>
+    <pre><code>import requests
+res = requests.get("https://mxgamecoder-klfx.onrender.com/fun/riddle")
+print(res.json()["content"])</code></pre>
+
+    <h3>5. HTML Button</h3>
+    <pre><code>&lt;button onclick="getJoke()">Get Joke&lt;/button>
+&lt;script>
+function getJoke() {
+  fetch("https://mxgamecoder-klfx.onrender.com/fun/joke")
+    .then(res => res.json())
+    .then(data => alert(data.content));
+}
+&lt;/script></code></pre>
+
+    <h3>6. React (useEffect)</h3>
+    <pre><code>useEffect(() => {
+  fetch("https://mxgamecoder-klfx.onrender.com/fun/quote")
+    .then(res => res.json())
+    .then(data => console.log(data.content));
+}, []);</code></pre>
+
+    <h3>7. Discord Bot (Python)</h3>
+    <pre><code>@bot.command()
+async def truth(ctx):
+  res = requests.get("https://mxgamecoder-klfx.onrender.com/fun/truth").json()
+  await ctx.send(res["content"])</code></pre>
+
+    <h3>8. PHP</h3>
+    <pre><code>&lt;?php
+$res = file_get_contents("https://mxgamecoder-klfx.onrender.com/fun/quote");
+$data = json_decode($res);
+echo $data-&gt;content;
+?></code></pre>
+
+    <h3>9. jQuery</h3>
+    <pre><code>$.getJSON("https://mxgamecoder-klfx.onrender.com/fun/whatIf", function(data) {
+  alert(data.content);
+});</code></pre>
+
+    <h3>10. Telegram Bot</h3>
+    <pre><code>def get_funny():
+  r = requests.get("https://mxgamecoder-klfx.onrender.com/fun/quotesfunny")
+  return r.json()["content"]</code></pre>
+
+    <h2>👨‍💻 My Experience</h2>
+    <p>Building this API taught me:</p>
+    <ul>
+      <li>✅ Express.js routing and middleware</li>
+      <li>✅ JSON formatting and clean responses</li>
+      <li>✅ Image file sorting and gif prioritization</li>
+      <li>✅ Building for real developers</li>
+      <li>✅ How to build & test API from scratch with no library help</li>
+    </ul>
+
+    <h2>📦 Future Note</h2>
+    <p>This project is <strong>fully open source</strong>. I’m currently focusing on my next big dream platform: <a href="https://mxgamecoder.lovestoblog.com" target="_blank">MSWORLD</a>. But this API is still up and running, free for all. No keys, no limits, just use it.</p>
+
+    <div class="highlight">
+      📅 Last Updated: <strong>June 10, 2025</strong><br>
+      ⚙️ Status: <span class="badge">Active</span> | Open Source | Developer Friendly
+    </div>
+
+    <h2>✅ Summary</h2>
+    <p>
+      Use this API anywhere: websites, bots, Discord, Telegram, React apps, even terminal scripts. It’s made to be simple and powerful.
+    </p>
+  </div>
+
+  <div class="footer">
+    &copy; 2025 mxgamecoder — Powered by passion, built with 💙
+  </div>
+</body>
+</html>
