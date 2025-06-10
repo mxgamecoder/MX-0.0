@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>📊 MX API Status</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      padding: 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .group {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+    }
+
+    .group-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.8rem;
+      color: #555;
+    }
+
+    .endpoint {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.8rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .endpoint:last-child {
+      border-bottom: none;
+    }
+
+    .name {
+      font-weight: 500;
+    }
+
+    .status {
+      font-size: 0.9rem;
+      font-weight: bold;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .ok {
+      background-color: #d4f8d4;
+      color: #067a0a;
+    }
+
+    .warn {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .fail {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .loader {
+      border: 3px solid #ccc;
+      border-top: 3px solid #000;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .note {
+      text-align: center;
+      margin-top: 2rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📊 MX API Status Dashboard</h1>
+
+<div id="statusContainer">Loading...</div>
+<div class="note">🔁 This page checks all live endpoints automatically.</div>
+
+<script>
+const statusContainer = document.getElementById('statusContainer');
+
+const apiSources = {
+  "🎭 Jest": "/jest",
+  "🔞 NSFW": "/nsfw",
+  "🎉 Fun": "/fun"
+};
+
+async function fetchAllStatuses() {
+  statusContainer.innerHTML = '';
+
+  for (const [groupName, baseUrl] of Object.entries(apiSources)) {
+    try {
+      const res = await fetch(baseUrl);
+      const data = await res.json();
+      const categories = data.categories;
+
+      if (Array.isArray(categories)) {
+        buildGroup(groupName, baseUrl.replace('/', ''), categories);
+      } else {
+        showError(groupName, "Category list invalid.");
+      }
+    } catch (err) {
+      showError(groupName, "Failed to fetch categories.");
+    }
+  }
+}
+
+function buildGroup(groupName, type, endpoints) {
+  const group = document.createElement('div');
+  group.className = 'group';
+
+  const title = document.createElement('div');
+  title.className = 'group-title';
+  title.textContent = groupName;
+  group.appendChild(title);
+
+  endpoints.forEach(name => {
+    const endpointDiv = document.createElement('div');
+    endpointDiv.className = 'endpoint';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'name';
+    nameSpan.textContent = `/${type}/${name}`;
+
+    const statusSpan = document.createElement('span');
+    statusSpan.className = 'status';
+    statusSpan.innerHTML = `<div class="loader"></div>`;
+
+    endpointDiv.appendChild(nameSpan);
+    endpointDiv.appendChild(statusSpan);
+    group.appendChild(endpointDiv);
+
+    checkStatus(`/${type}/${name}`, statusSpan);
+  });
+
+  statusContainer.appendChild(group);
+}
+
+function checkStatus(url, statusElement) {
+  const start = performance.now();
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const duration = performance.now() - start;
+      if (data.success) {
+        statusElement.className = 'status ok';
+        statusElement.textContent = `✅ ${Math.round(duration)}ms`;
+      } else {
+        statusElement.className = 'status warn';
+        statusElement.textContent = `⚠️ Error`;
+      }
+    })
+    .catch(() => {
+      statusElement.className = 'status fail';
+      statusElement.textContent = `❌ Offline`;
+    });
+}
+
+function showError(groupName, message) {
+  const group = document.createElement('div');
+  group.className = 'group';
+  group.innerHTML = `<div class="group-title">${groupName}</div><div style="color:crimson;">${message}</div>`;
+  statusContainer.appendChild(group);
+}
+
+fetchAllStatuses();
+</script>
+
+</body>
+</html>
