@@ -2,82 +2,105 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>API Category Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧠 MSWORLD API Explorer 2025</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f1f1f1;
-      padding: 1rem;
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #f0f0f0;
+      --accent: #00bcd4;
+      --accent-hover: #0097a7;
+      --danger: #ff5252;
+    }
+
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: "Segoe UI", sans-serif;
+      padding: 1rem;
     }
 
     h1, h2 {
       text-align: center;
-      color: #333;
-    }
-
-    .group-buttons {
-      text-align: center;
       margin-bottom: 1rem;
     }
 
-    .group-buttons button {
-      margin: 0.3rem;
-      padding: 0.5rem 1.2rem;
-      background: #444;
+    .filter-bar {
+      display: flex;
+      overflow-x: auto;
+      gap: 0.5rem;
+      padding: 1rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-bar button {
+      background: var(--accent);
       color: #fff;
       border: none;
-      border-radius: 5px;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
       cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
     }
 
-    .group-buttons button:hover {
-      background: #222;
+    .filter-bar button:hover {
+      background: var(--accent-hover);
     }
 
-    .category-section {
-      margin-bottom: 2rem;
+    .section {
+      background: var(--card-bg);
+      border-radius: 12px;
       padding: 1rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      box-shadow: 0 0 10px rgba(0, 188, 212, 0.1);
     }
 
-    .category-section h2 {
-      margin-bottom: 0.5rem;
+    .section h2 {
+      margin-bottom: 1rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 0.5rem;
       text-align: left;
-      color: #222;
     }
 
     .category-list button {
       display: block;
       width: 100%;
       text-align: left;
-      padding: 0.6rem 1rem;
+      padding: 0.7rem 1rem;
       margin: 0.3rem 0;
-      background: #e0e0e0;
+      background: #2a2a2a;
       border: none;
-      border-radius: 5px;
-      color: #111;
+      color: #fff;
+      border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
     .category-list button:hover {
-      background: #d2d2d2;
+      background: #383838;
     }
 
     .overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow-y: auto;
-      z-index: 1000;
       padding: 1rem;
+      z-index: 9999;
     }
 
     .hidden {
@@ -85,18 +108,37 @@
     }
 
     .overlay-content {
-      background: #fff;
-      padding: 1rem;
-      border-radius: 1rem;
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
       max-width: 600px;
       width: 100%;
+      color: var(--text-color);
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(0, 188, 212, 0.2);
       text-align: center;
     }
 
-    img {
+    .overlay-content img {
       max-width: 100%;
-      height: auto;
+      border-radius: 10px;
       margin-bottom: 1rem;
+    }
+
+    .overlay-content > button {
+      background: var(--danger);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+
+    .overlay-content > button:hover {
+      background: #d32f2f;
     }
 
     #resultActions {
@@ -107,36 +149,48 @@
       flex-wrap: wrap;
     }
 
-    button {
-      font-family: inherit;
+    #resultActions button,
+    #resultActions a button {
+      background: var(--accent);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #resultActions button:hover,
+    #resultActions a button:hover {
+      background: var(--accent-hover);
     }
   </style>
 </head>
 <body>
 
-  <h1>📂 Explore Categories</h1>
+  <h1>⚡ MSWORLD API Explorer</h1>
 
-  <div class="group-buttons">
+  <div class="filter-bar">
     <button onclick="filterRange('A', 'E')">A–E</button>
     <button onclick="filterRange('F', 'K')">F–K</button>
     <button onclick="filterRange('L', 'P')">L–P</button>
     <button onclick="filterRange('Q', 'T')">Q–T</button>
     <button onclick="filterRange('U', 'Z')">U–Z</button>
-    <button onclick="resetFilters()">🔄 Reset</button>
+    <button onclick="resetFilters()">🔁 Reset</button>
   </div>
 
-  <div class="category-section">
-    <h2>NSFW</h2>
+  <div class="section">
+    <h2>🔞 NSFW</h2>
     <div class="category-list" id="nsfwList"></div>
   </div>
 
-  <div class="category-section">
-    <h2>Jest</h2>
+  <div class="section">
+    <h2>🎭 Jest</h2>
     <div class="category-list" id="jestList"></div>
   </div>
 
-  <div class="category-section">
-    <h2>Fun</h2>
+  <div class="section">
+    <h2>🎈 Fun</h2>
     <div class="category-list" id="funList"></div>
   </div>
 
@@ -178,7 +232,7 @@
 
       let content = '';
       if (type === 'image') {
-        content = `<img src="${data.imageUrl}" alt="Image">`;
+        content = `<img src="${data.imageUrl}" alt="Image Result">`;
         document.getElementById("resultActions").innerHTML = `
           <a href="${data.imageUrl}" download><button>💾 Download</button></a>
           <button id="nextBtn" onclick="showNext()">➡️ Next</button>
