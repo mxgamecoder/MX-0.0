@@ -1,76 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>🎉 Fun & Image API Explorer</title>
-  <link rel="stylesheet" href="/style.css">
+  <title>MX Server Menu</title>
 </head>
 <body>
-  <div class="container">
-    <h1>🎭 Welcome to the Fun & Image API Explorer 🚀</h1>
 
-    <section>
-      <h2>😂 Jest Categories</h2>
-      <ul id="jestList"></ul>
-    </section>
+<!-- Hamburger button -->
+<div onclick="openSidebar()">☰</div>
 
-    <section>
-      <h2>🔞 NSFW Categories</h2>
-      <ul id="nsfwList"></ul>
-    </section>
+<!-- Sidebar menu -->
+<div id="sidebar" hidden>
+  <div onclick="closeSidebar()">×</div>
+  <a href="/">🏠 Home</a><br>
+  <a href="/fun/joke">⚙️ API Test</a><br>
+  <a href="/jest">📊 Status</a><br>
+  <a href="/fun">📘 Documentary</a><br>
+  <a href="/api-list.html">🧠 API List</a><br>
+</div>
 
-    <section>
-      <h2>🎈 Fun Categories</h2>
-      <ul id="funList"></ul>
-    </section>
-  </div>
+<!-- Main content -->
+<div>
+  <h1>📡 About MX API — Final Chapter</h1>
+  <p style="line-height: 1.7rem; max-width: 800px;">
+    Hello and welcome to the official hub of <strong>MX API 0.0</strong> — a project that started with pure curiosity and grew into something meaningful. 🌱💻<br><br>
 
-  <div id="resultOverlay" class="overlay hidden">
-    <div class="overlay-content">
-      <button class="close-btn" onclick="closeResult()">❌ Cancel</button>
-      <h3>📦 API Result</h3>
-      <div id="resultContent"></div>
-    </div>
-  </div>
+    🧠 This API was handcrafted by <strong>MX-GΔMΞCØDΞR</strong> (a.k.a the mind behind MSWORLD) to serve as a free and open source toolkit for developers and learners around the world. It includes features like random jokes, status tests, documentation links, and more — all served via a clean RESTful interface. <br><br>
 
-  <script>
-    async function fetchCategories(route, listId, type) {
-      const res = await fetch(`/${route}`);
-      const data = await res.json();
-      const list = document.getElementById(listId);
-      data.categories.forEach(category => {
-        const li = document.createElement("li");
-        li.innerHTML = `<button onclick="fetchResult('${route}/${category}', '${type}')">📥 ${category}</button>`;
-        list.appendChild(li);
-      });
-    }
+    🎁 <strong>Open Source & Free Forever</strong><br>
+    Everything here is open to the public — no paywalls, no tricks. You can contribute, fork, remix, and use the code however you like.<br>
+    📂 GitHub Repo: <a href="https://github.com/msgamecoder/MX-0.0" target="_blank">https://github.com/msgamecoder/MX-0.0</a><br><br>
 
-    async function fetchResult(endpoint, type) {
-      const res = await fetch(`/${endpoint}`);
-      const data = await res.json();
-      const result = document.getElementById("resultContent");
-      const overlay = document.getElementById("resultOverlay");
-      overlay.classList.remove("hidden");
+    🛠️ <strong>Created:</strong> From late-night coding and lots of debugging... MX API was born.<br>
+    📅 <strong>Last Updated:</strong> June 10, 2025 — the final stable version.<br><br>
 
-      if (type === 'image') {
-        result.innerHTML = `<img src="${data.imageUrl}" alt="Image from API">`;
-      } else {
-        result.innerHTML = `<p>🧠 ${data.content}</p>`;
-      }
-    }
+    ⚠️ <strong>Status: Legacy</strong><br>
+    The MX API project is no longer under active development. But don’t be sad — the reason is beautiful. The creator has moved on to build something even greater: <strong>MSWORLD 🌍</strong>, a powerful new social platform built from scratch to connect the world in a fresh way.<br><br>
 
-    function closeResult() {
-      document.getElementById("resultOverlay").classList.add("hidden");
-      document.getElementById("resultContent").innerHTML = "";
-    }
+    🌐 Check out the new future at:<br>
+    👉 <a href="https://mxgamecoder.lovestoblog.com" target="_blank">https://mxgamecoder.lovestoblog.com</a><br><br>
 
-    // Load categories
-    window.onload = () => {
-      fetchCategories("jest", "jestList", "image");
-      fetchCategories("nsfw", "nsfwList", "image");
-      fetchCategories("fun", "funList", "text");
-    };
-  </script>
+    🤖 MSWORLD isn't just another platform — it’s packed with innovation, real-time features, chat systems, AI, and more. It's the next big vision. The MX API was just the beginning of this journey.<br><br>
+
+    📱 Wanna connect directly with the creator and community? Join our WhatsApp group and become part of the family:<br>
+    👉 <a href="https://chat.whatsapp.com/DZdp64lIxKMJhh6Dj0znaj" target="_blank">Join WhatsApp Group 💬</a><br><br>
+
+    💡 <strong>The Future?</strong><br>
+    While MX API is in legacy mode, don’t be surprised if you see small updates or secret tweaks pop up from time to time. The repo is alive, and the spirit is eternal.<br><br>
+
+    ❤️ <strong>From MX-GΔMΞCØDΞR:</strong><br>
+    Thank you to everyone who ever used this API, tested an endpoint, or gave feedback. You made this journey worth it. I’m not quitting — I’m evolving. See you on MSWORLD! 💫<br><br>
+
+    — With love, tech, and crazy dreams,  
+    <em>MX-GΔMΞCØDΞR</em>  
+  </p>
+</div>
+
+<script>
+  function openSidebar() {
+    document.getElementById("sidebar").hidden = false;
+  }
+
+  function closeSidebar() {
+    document.getElementById("sidebar").hidden = true;
+  }
+</script>
+
 </body>
 </html>
