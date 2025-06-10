@@ -3,37 +3,58 @@
 <head>
   <title>⚙️ MX API Test</title>
   <style>
-    body {
+    html, body {
+      height: 100%;
+      margin: 0;
       font-family: Arial, sans-serif;
       background: #f2f2f2;
-      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .section {
+      margin-top: 15vh;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
     }
 
     h1 {
       text-align: center;
       color: #333;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
     }
 
-    .section {
-      background: #fff;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.1);
-      margin: 1rem auto;
-      max-width: 600px;
-    }
-
-    label, select, button {
+    label {
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
       display: block;
-      margin-bottom: 1rem;
     }
 
     select, button {
-      padding: 0.6rem;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
       width: 100%;
+      font-size: 1.1rem;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
     }
 
     .response-box {
@@ -43,7 +64,7 @@
       font-family: monospace;
       white-space: pre-wrap;
       overflow-x: auto;
-      margin-top: 1rem;
+      text-align: left;
     }
 
     img {
@@ -54,10 +75,11 @@
 
     .curl-box {
       background: #e9e9e9;
-      padding: 0.5rem;
-      border-radius: 5px;
+      padding: 0.6rem;
+      border-radius: 6px;
       font-family: monospace;
       margin-top: 1rem;
+      text-align: left;
       white-space: pre-wrap;
     }
 
@@ -69,13 +91,14 @@
 </head>
 <body>
 
-<h1>⚙️ MX API Test Tool</h1>
-
 <div class="section">
+  <h1>⚙️ MX API Test Tool</h1>
+
   <label for="categorySelect">🔎 Choose an API Endpoint</label>
   <select id="categorySelect">
     <option>Loading endpoints...</option>
   </select>
+
   <button onclick="testApi()">🚀 Run Test</button>
 
   <div id="output" class="response-box"></div>
