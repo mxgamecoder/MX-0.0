@@ -1,48 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>API Category Explorer</title>
-  <link rel="stylesheet" href="/style.css">
   <style>
     body {
       font-family: sans-serif;
+      background: #f1f1f1;
       padding: 1rem;
-      background-color: #f4f4f4;
+      margin: 0;
     }
 
     h1, h2 {
       text-align: center;
+      color: #333;
     }
 
-    .category-buttons, .category-section {
-      margin-bottom: 2rem;
+    .group-buttons {
+      text-align: center;
+      margin-bottom: 1rem;
     }
 
-    .category-buttons button {
-      margin: 0.2rem;
-      padding: 0.5rem 1rem;
-    }
-
-    .category-section div {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      justify-content: center;
-    }
-
-    .category-section button {
-      padding: 0.6rem 1rem;
-      border-radius: 0.5rem;
-      border: 1px solid #ccc;
-      background: #fff;
+    .group-buttons button {
+      margin: 0.3rem;
+      padding: 0.5rem 1.2rem;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
-      transition: background 0.2s;
     }
 
-    .category-section button:hover {
-      background-color: #e0e0e0;
+    .group-buttons button:hover {
+      background: #222;
+    }
+
+    .category-section {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .category-section h2 {
+      margin-bottom: 0.5rem;
+      text-align: left;
+      color: #222;
+    }
+
+    .category-list button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.6rem 1rem;
+      margin: 0.3rem 0;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 5px;
+      color: #111;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .category-list button:hover {
+      background: #d2d2d2;
     }
 
     .overlay {
@@ -52,8 +75,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
       overflow-y: auto;
+      z-index: 1000;
+      padding: 1rem;
     }
 
     .hidden {
@@ -61,12 +85,11 @@
     }
 
     .overlay-content {
-      background: white;
-      padding: 1.5rem;
+      background: #fff;
+      padding: 1rem;
       border-radius: 1rem;
-      max-width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
+      max-width: 600px;
+      width: 100%;
       text-align: center;
     }
 
@@ -85,30 +108,36 @@
     }
 
     button {
-      cursor: pointer;
+      font-family: inherit;
     }
   </style>
 </head>
 <body>
 
-  <h1>📂 Explore API Categories</h1>
+  <h1>📂 Explore Categories</h1>
 
-  <div class="category-buttons" id="alphaFilter"></div>
-  <div style="text-align: center; margin-bottom: 2rem;">
+  <div class="group-buttons">
+    <button onclick="filterRange('A', 'E')">A–E</button>
+    <button onclick="filterRange('F', 'K')">F–K</button>
+    <button onclick="filterRange('L', 'P')">L–P</button>
+    <button onclick="filterRange('Q', 'T')">Q–T</button>
+    <button onclick="filterRange('U', 'Z')">U–Z</button>
     <button onclick="resetFilters()">🔄 Reset</button>
   </div>
 
-  <div class="category-section" id="jestListContainer">
-    <h2>Jest</h2>
-    <div id="jestList"></div>
-  </div>
-  <div class="category-section" id="nsfwListContainer">
+  <div class="category-section">
     <h2>NSFW</h2>
-    <div id="nsfwList"></div>
+    <div class="category-list" id="nsfwList"></div>
   </div>
-  <div class="category-section" id="funListContainer">
+
+  <div class="category-section">
+    <h2>Jest</h2>
+    <div class="category-list" id="jestList"></div>
+  </div>
+
+  <div class="category-section">
     <h2>Fun</h2>
-    <div id="funList"></div>
+    <div class="category-list" id="funList"></div>
   </div>
 
   <div id="resultOverlay" class="overlay hidden">
@@ -120,64 +149,36 @@
   </div>
 
   <script>
-    const allCategories = {
-      jest: [],
-      nsfw: [],
-      fun: []
-    };
-    let currentIndex = 0;
-    let currentCategory = '';
-    let currentType = '';
-
-    function generateAlphaButtons() {
-      const container = document.getElementById('alphaFilter');
-      for (let i = 65; i <= 90; i++) {
-        const letter = String.fromCharCode(i);
-        const btn = document.createElement('button');
-        btn.textContent = letter;
-        btn.onclick = () => filterCategoriesBy(letter);
-        container.appendChild(btn);
-      }
-    }
-
-    function resetFilters() {
-      document.getElementById('jestList').innerHTML = '';
-      document.getElementById('nsfwList').innerHTML = '';
-      document.getElementById('funList').innerHTML = '';
-      fetchAllCategories();
-    }
-
-    async function fetchAllCategories() {
-      await fetchCategories("jest", "jestList", "image");
-      await fetchCategories("nsfw", "nsfwList", "image");
-      await fetchCategories("fun", "funList", "text");
-    }
+    const allCategories = { nsfw: [], jest: [], fun: [] };
+    let currentCategory = '', currentType = '', currentIndex = 0;
 
     async function fetchCategories(route, listId, type) {
       const res = await fetch(`/${route}`);
       const data = await res.json();
       allCategories[route] = data.categories;
 
-      const list = document.getElementById(listId);
-      list.innerHTML = '';
+      const container = document.getElementById(listId);
+      container.innerHTML = '';
       data.categories.forEach(cat => {
         const btn = document.createElement("button");
         btn.textContent = cat;
         btn.onclick = () => { currentIndex = 0; fetchResult(`${route}/${cat}`, type, cat); };
-        list.appendChild(btn);
+        container.appendChild(btn);
       });
     }
 
     async function fetchResult(endpoint, type, catName) {
       currentCategory = catName;
       currentType = type;
+
       const res = await fetch(`/${endpoint}`);
       const data = await res.json();
+
       document.getElementById("resultOverlay").classList.remove("hidden");
 
       let content = '';
       if (type === 'image') {
-        content = `<img src="${data.imageUrl}" alt="Image Result">`;
+        content = `<img src="${data.imageUrl}" alt="Image">`;
         document.getElementById("resultActions").innerHTML = `
           <a href="${data.imageUrl}" download><button>💾 Download</button></a>
           <button id="nextBtn" onclick="showNext()">➡️ Next</button>
@@ -193,16 +194,12 @@
     }
 
     async function showNext() {
-      const btn = document.getElementById('nextBtn');
+      const btn = document.getElementById("nextBtn");
       btn.disabled = true;
       btn.textContent = "Nextting...";
 
-      currentIndex++;
       const endpoint = findEndpoint(currentCategory);
-      if (!endpoint) {
-        btn.textContent = "No more!";
-        return;
-      }
+      if (!endpoint) return;
 
       await fetchResult(endpoint, currentType, currentCategory);
       btn.disabled = false;
@@ -210,10 +207,9 @@
     }
 
     function findEndpoint(category) {
-      const routes = ['jest', 'nsfw', 'fun'];
-      for (let r of routes) {
-        if (allCategories[r].includes(category)) {
-          return `${r}/${category}`;
+      for (let type in allCategories) {
+        if (allCategories[type].includes(category)) {
+          return `${type}/${category}`;
         }
       }
       return null;
@@ -225,24 +221,33 @@
       document.getElementById("resultActions").innerHTML = "";
     }
 
-    function filterCategoriesBy(letter) {
-      for (const route in allCategories) {
-        const list = document.getElementById(route + "List");
+    function filterRange(startChar, endChar) {
+      for (let type in allCategories) {
+        const list = document.getElementById(type + 'List');
         list.innerHTML = '';
-        allCategories[route]
-          .filter(c => c[0].toUpperCase() === letter)
-          .forEach(cat => {
+        allCategories[type].forEach(cat => {
+          const first = cat[0].toUpperCase();
+          if (first >= startChar && first <= endChar) {
             const btn = document.createElement("button");
             btn.textContent = cat;
-            btn.onclick = () => { currentIndex = 0; fetchResult(`${route}/${cat}`, 'image', cat); };
+            btn.onclick = () => fetchResult(`${type}/${cat}`, 'image', cat);
             list.appendChild(btn);
-          });
+          }
+        });
       }
     }
 
-    // Init
-    generateAlphaButtons();
-    fetchAllCategories();
+    function resetFilters() {
+      fetchAll();
+    }
+
+    async function fetchAll() {
+      await fetchCategories("nsfw", "nsfwList", "image");
+      await fetchCategories("jest", "jestList", "image");
+      await fetchCategories("fun", "funList", "text");
+    }
+
+    fetchAll();
   </script>
 </body>
 </html>
