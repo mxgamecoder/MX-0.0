@@ -1,40 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>📊 MX API Status</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧠 MX API Status</title>
   <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #f5f5f5;
+      --ok-color: #00e676;
+      --warn-color: #ffeb3b;
+      --fail-color: #ff5252;
+      --glow: 0 0 10px rgba(0, 188, 212, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f4f4f4;
-      padding: 1rem;
+      background: var(--bg-color);
+      color: var(--text-color);
+      padding: 2rem 1rem;
     }
 
     h1 {
       text-align: center;
-      color: #333;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      color: var(--text-color);
     }
 
     .group {
-      background: #fff;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.08);
-      margin-bottom: 1.5rem;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--glow);
     }
 
     .group-title {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: bold;
-      margin-bottom: 0.8rem;
-      color: #555;
+      margin-bottom: 1rem;
+      color: #00bcd4;
+      border-bottom: 1px solid #00bcd4;
+      padding-bottom: 0.3rem;
     }
 
     .endpoint {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem 0.8rem;
-      border-bottom: 1px solid #ddd;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #333;
     }
 
     .endpoint:last-child {
@@ -43,50 +66,68 @@
 
     .name {
       font-weight: 500;
+      font-size: 1rem;
     }
 
     .status {
-      font-size: 0.9rem;
-      font-weight: bold;
-      padding: 0.3rem 0.6rem;
-      border-radius: 6px;
-      min-width: 80px;
+      min-width: 90px;
       text-align: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
     }
 
     .ok {
-      background-color: #d4f8d4;
-      color: #067a0a;
+      background: var(--ok-color);
+      color: #000;
+      box-shadow: 0 0 5px var(--ok-color);
     }
 
     .warn {
-      background-color: #fff3cd;
-      color: #856404;
+      background: var(--warn-color);
+      color: #222;
+      box-shadow: 0 0 5px var(--warn-color);
     }
 
     .fail {
-      background-color: #f8d7da;
-      color: #721c24;
+      background: var(--fail-color);
+      color: #fff;
+      box-shadow: 0 0 5px var(--fail-color);
     }
 
     .loader {
-      border: 3px solid #ccc;
-      border-top: 3px solid #000;
-      border-radius: 50%;
       width: 18px;
       height: 18px;
-      animation: spin 0.8s linear infinite;
+      border: 3px solid #444;
+      border-top: 3px solid #00bcd4;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: auto;
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
 
     .note {
       text-align: center;
       margin-top: 2rem;
       color: #888;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .endpoint {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+      }
+
+      .status {
+        align-self: flex-end;
+      }
     }
   </style>
 </head>
@@ -95,7 +136,7 @@
 <h1>📊 MX API Status Dashboard</h1>
 
 <div id="statusContainer">Loading...</div>
-<div class="note">🔁 This page checks all live endpoints automatically.</div>
+<div class="note">🔁 This page auto-checks all endpoints live.</div>
 
 <script>
 const statusContainer = document.getElementById('statusContainer');
@@ -118,10 +159,10 @@ async function fetchAllStatuses() {
       if (Array.isArray(categories)) {
         buildGroup(groupName, baseUrl.replace('/', ''), categories);
       } else {
-        showError(groupName, "Category list invalid.");
+        showError(groupName, "⚠️ Invalid response format");
       }
     } catch (err) {
-      showError(groupName, "Failed to fetch categories.");
+      showError(groupName, "❌ Failed to fetch data");
     }
   }
 }
@@ -180,7 +221,7 @@ function checkStatus(url, statusElement) {
 function showError(groupName, message) {
   const group = document.createElement('div');
   group.className = 'group';
-  group.innerHTML = `<div class="group-title">${groupName}</div><div style="color:crimson;">${message}</div>`;
+  group.innerHTML = `<div class="group-title">${groupName}</div><div style="color:#ff5252;">${message}</div>`;
   statusContainer.appendChild(group);
 }
 
