@@ -2,317 +2,177 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🧠 MX API List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API Category Explorer</title>
+  <link rel="stylesheet" href="/style.css">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: #f0f0f0;
-      padding: 2rem;
-      color: #222;
+    body { font-family: sans-serif; padding: 1rem; }
+    h1, h2 { text-align: center; }
+    .category-buttons, .category-section { margin-bottom: 2rem; }
+    .category-buttons button { margin: 0.2rem; padding: 0.5rem 1rem; }
+    .category-section button { margin: 0.4rem; padding: 0.6rem 1rem; border-radius: 0.5rem; border: 1px solid #ccc; cursor: pointer; background: #f9f9f9; }
+    .overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center;
     }
-
-    h1 {
-      text-align: center;
-      font-size: 2.8rem;
-      margin-bottom: 2rem;
+    .hidden { display: none; }
+    .overlay-content {
+      background: white; padding: 1.5rem; border-radius: 1rem; max-width: 90%; text-align: center;
     }
-
-    .filters {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .filters button {
-      font-size: 1.1rem;
-      padding: 0.8rem 1.5rem;
-      margin: 0.4rem;
-      background: #2196f3;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .letter-group {
-      margin-bottom: 2rem;
-    }
-
-    .letter-title {
-      font-size: 1.6rem;
-      font-weight: bold;
-      margin: 1rem 0;
-      border-bottom: 2px solid #ccc;
-    }
-
-    .category {
-      background: white;
-      border-radius: 16px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    .endpoint {
-      font-size: 1.3rem;
-      font-weight: bold;
-    }
-
-    .desc {
-      color: #444;
-      margin: 0.6rem 0 1rem 0;
-    }
-
-    button {
-      padding: 0.9rem 1.6rem;
-      font-size: 1.1rem;
-      margin: 0.4rem 0.6rem 0 0;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .preview-btn { background: #1e88e5; color: white; }
-    .download-btn { background: #43a047; color: white; }
-
-    #fullscreenViewer {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: black;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      flex-direction: column;
-    }
-
-    #fullImage {
-      max-width: 95vw;
-      max-height: 85vh;
-      border-radius: 12px;
-      margin-bottom: 2rem;
-    }
-
-    .fullscreen-buttons button {
-      padding: 1rem 2rem;
-      font-size: 1.3rem;
-    }
-
-    .cancel-btn { background: crimson; color: white; }
-    .retry-btn { background: orange; color: white; display: none; }
-    .download-btn-viewer { background: #4caf50; color: white; }
-    .next-btn { background: dodgerblue; color: white; }
+    img { max-width: 100%; height: auto; }
+    #resultContent button { margin-top: 1rem; margin-right: 0.5rem; }
   </style>
 </head>
 <body>
 
-<h1>🧠 MX API Endpoint List</h1>
-<div class="filters">
-  <button onclick="filterLetters('A', 'E')">A–E</button>
-  <button onclick="filterLetters('F', 'K')">F–K</button>
-  <button onclick="filterLetters('L', 'Q')">L–Q</button>
-  <button onclick="filterLetters('R', 'Z')">R–Z</button>
-  <button onclick="resetFilters()">🔁 Reset</button>
-</div>
+  <h1>📂 Explore API Categories</h1>
 
-<div id="apiList">Loading API endpoints...</div>
+  <div class="category-buttons" id="alphaFilter"></div>
+  <button onclick="resetFilters()">🔄 Reset</button>
 
-<!-- Fullscreen Viewer -->
-<div id="fullscreenViewer">
-  <img id="fullImage" src="">
-  <div class="fullscreen-buttons">
-    <button class="cancel-btn" onclick="closeViewer()">❌ Cancel</button>
-    <button class="retry-btn" id="retryBtn" onclick="retryImage()">🔁 Retry</button>
-    <button class="next-btn" id="nextBtn" onclick="fetchNextImage()">➡️ Next</button>
-    <button class="download-btn-viewer" onclick="downloadImage()">⬇️ Download</button>
+  <div class="category-section" id="jestListContainer">
+    <h2>Jest</h2>
+    <div id="jestList"></div>
   </div>
-</div>
+  <div class="category-section" id="nsfwListContainer">
+    <h2>NSFW</h2>
+    <div id="nsfwList"></div>
+  </div>
+  <div class="category-section" id="funListContainer">
+    <h2>Fun</h2>
+    <div id="funList"></div>
+  </div>
 
-<script>
-const apiListDiv = document.getElementById('apiList');
-const fullViewer = document.getElementById('fullscreenViewer');
-const fullImage = document.getElementById('fullImage');
-const retryBtn = document.getElementById('retryBtn');
-const nextBtn = document.getElementById('nextBtn');
+  <div id="resultOverlay" class="overlay hidden">
+    <div class="overlay-content">
+      <button onclick="closeResult()">❌ Close</button>
+      <div id="resultContent"></div>
+      <div id="resultActions"></div>
+    </div>
+  </div>
 
-let allCategories = {};
-let currentEndpoint = '';
+  <script>
+    const allCategories = {
+      jest: [],
+      nsfw: [],
+      fun: []
+    };
+    let currentIndex = 0;
+    let currentCategory = '';
+    let currentType = '';
 
-function closeViewer() {
-  fullViewer.style.display = 'none';
-  fullImage.src = '';
-  retryBtn.style.display = 'none';
-  currentEndpoint = '';
-}
+    function generateAlphaButtons() {
+      const container = document.getElementById('alphaFilter');
+      for (let i = 65; i <= 90; i++) {
+        const letter = String.fromCharCode(i);
+        const btn = document.createElement('button');
+        btn.textContent = letter;
+        btn.onclick = () => filterCategoriesBy(letter);
+        container.appendChild(btn);
+      }
+    }
 
-function retryImage() {
-  const src = fullImage.src;
-  fullImage.src = '';
-  setTimeout(() => { fullImage.src = src; }, 300);
-}
+    function resetFilters() {
+      document.getElementById('jestList').innerHTML = '';
+      document.getElementById('nsfwList').innerHTML = '';
+      document.getElementById('funList').innerHTML = '';
+      fetchAllCategories();
+    }
 
-function downloadImage() {
-  const link = document.createElement('a');
-  link.href = fullImage.src;
-  link.download = 'image.jpg';
-  link.click();
-}
+    async function fetchAllCategories() {
+      await fetchCategories("jest", "jestList", "image");
+      await fetchCategories("nsfw", "nsfwList", "image");
+      await fetchCategories("fun", "funList", "text");
+    }
 
-function fetchNextImage() {
-  if (!currentEndpoint) return;
-  nextBtn.disabled = true;
-  nextBtn.innerText = 'Loading...';
-  fetchResult(currentEndpoint, 'image', true);
-}
+    async function fetchCategories(route, listId, type) {
+      const res = await fetch(`/${route}`);
+      const data = await res.json();
+      allCategories[route] = data.categories;
 
-function downloadText(content) {
-  const blob = new Blob([content], { type: 'text/plain' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'content.txt';
-  link.click();
-}
+      const list = document.getElementById(listId);
+      list.innerHTML = '';
+      data.categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.textContent = cat;
+        btn.onclick = () => { currentIndex = 0; fetchResult(`${route}/${cat}`, type, cat); };
+        list.appendChild(btn);
+      });
+    }
 
-async function fetchCategories(route, emoji, type) {
-  try {
-    const res = await fetch(`/${route}`);
-    const data = await res.json();
-    displayCategory(route, data.categories, emoji, type);
-  } catch {
-    const div = document.createElement('div');
-    div.className = 'category';
-    div.innerHTML = `<div class="endpoint">${emoji} /${route}</div><div class="desc">⚠️ Failed to load this category</div>`;
-    apiListDiv.appendChild(div);
-  }
-}
+    async function fetchResult(endpoint, type, catName) {
+      currentCategory = catName;
+      currentType = type;
+      const res = await fetch(`/${endpoint}`);
+      const data = await res.json();
+      document.getElementById("resultOverlay").classList.remove("hidden");
 
-function displayCategory(route, list, emoji, type) {
-  const grouped = {};
+      let content = '';
+      if (type === 'image') {
+        content = `<img src="${data.imageUrl}" alt="Image Result"><br>`;
+        content += `<a href="${data.imageUrl}" download><button>💾 Download</button></a>`;
+      } else {
+        content = `<p>${data.content}</p>`;
+      }
 
-  list.forEach(name => {
-    const letter = name[0].toUpperCase();
-    if (!grouped[letter]) grouped[letter] = [];
-    grouped[letter].push({ name, route, emoji, type });
-  });
-
-  allCategories = grouped;
-  renderGroups(Object.keys(grouped));
-}
-
-function renderGroups(lettersToShow) {
-  apiListDiv.innerHTML = '';
-
-  const sorted = [...lettersToShow].sort();
-
-  sorted.forEach(letter => {
-    const group = document.createElement('div');
-    group.className = 'letter-group';
-    group.innerHTML = `<div class="letter-title">🔤 ${letter}</div>`;
-
-    allCategories[letter].forEach(({ name, route, emoji, type }) => {
-      const container = document.createElement('div');
-      container.className = 'category';
-      const endpoint = `/${route}/${name}`;
-      const desc = getDescription(name, route);
-
-      container.innerHTML = `
-        <div class="endpoint">${emoji} ${endpoint}</div>
-        <div class="desc">${desc}</div>
-        <button class="preview-btn" onclick="fetchResult('${endpoint}', '${type}')">🔍 Preview</button>
-        <button class="download-btn" onclick="downloadDirect('${endpoint}', '${type}')">⬇️ Download</button>
+      document.getElementById("resultContent").innerHTML = content;
+      document.getElementById("resultActions").innerHTML = `
+        <button id="nextBtn" onclick="showNext()">➡️ Next</button>
       `;
-      group.appendChild(container);
-    });
-
-    apiListDiv.appendChild(group);
-  });
-}
-
-function filterLetters(start, end) {
-  const letters = Object.keys(allCategories).filter(
-    l => l >= start && l <= end
-  );
-  renderGroups(letters);
-}
-
-function resetFilters() {
-  renderGroups(Object.keys(allCategories));
-}
-
-async function fetchResult(endpoint, type, isNext = false) {
-  try {
-    const res = await fetch(endpoint);
-    const data = await res.json();
-    retryBtn.style.display = 'none';
-    currentEndpoint = endpoint;
-
-    if (type === 'image' && data.imageUrl) {
-      fullImage.src = data.imageUrl;
-      fullViewer.style.display = 'flex';
-    } else if (type === 'text' && data.content) {
-      if (!isNext) alert(`🧠 ${data.content}`);
-      else downloadText(data.content);
-    } else {
-      alert("⚠️ Invalid data format.");
     }
 
-    nextBtn.disabled = false;
-    nextBtn.innerText = '➡️ Next';
+    async function showNext() {
+      const btn = document.getElementById('nextBtn');
+      btn.disabled = true;
+      btn.textContent = "Nextting...";
 
-  } catch {
-    retryBtn.style.display = 'inline-block';
-    alert("⚠️ Failed to preview content.");
-    nextBtn.disabled = false;
-    nextBtn.innerText = '➡️ Next';
-  }
-}
+      currentIndex++;
+      const endpoint = findEndpoint(currentCategory);
+      if (!endpoint) {
+        btn.textContent = "No more!";
+        return;
+      }
 
-async function downloadDirect(endpoint, type) {
-  try {
-    const res = await fetch(endpoint);
-    const data = await res.json();
+      await fetchResult(endpoint, currentType, currentCategory);
 
-    if (type === 'image' && data.imageUrl) {
-      const link = document.createElement('a');
-      link.href = data.imageUrl;
-      link.download = 'api-image.jpg';
-      link.click();
-    } else if (type === 'text' && data.content) {
-      downloadText(data.content);
-    } else {
-      alert("⚠️ Could not get data.");
+      btn.disabled = false;
+      btn.textContent = "➡️ Next";
     }
-  } catch {
-    alert("⚠️ Download failed.");
-  }
-}
 
-function getDescription(name, type) {
-  const descriptions = {
-    hug: "Sends a random hug image.",
-    kiss: "Random kissing animation.",
-    meow: "Cute cat images!",
-    neko: "Anime-style NSFW neko image.",
-    joke: "Returns a random joke.",
-    fact: "Interesting random fact.",
-    dare: "Dare generator for games.",
-    riddle: "Mind-bending riddles.",
-    quote: "Random quote to inspire.",
-    truth: "Truth questions for fun.",
-    pickuplines: "Cringey or funny pick-up lines!",
-  };
-  return descriptions[name] || "Random content from this category.";
-}
+    function findEndpoint(category) {
+      const routes = ['jest', 'nsfw', 'fun'];
+      for (let r of routes) {
+        if (allCategories[r].includes(category)) {
+          return `${r}/${category}`;
+        }
+      }
+      return null;
+    }
 
-// Load all categories on page load
-window.onload = () => {
-  fetchCategories("jest", "🧪", "image");
-  fetchCategories("nsfw", "🔞", "image");
-  fetchCategories("fun", "🎉", "text");
-};
-</script>
+    function closeResult() {
+      document.getElementById("resultOverlay").classList.add("hidden");
+      document.getElementById("resultContent").innerHTML = "";
+      document.getElementById("resultActions").innerHTML = "";
+    }
+
+    function filterCategoriesBy(letter) {
+      for (const route in allCategories) {
+        const list = document.getElementById(route + "List");
+        list.innerHTML = '';
+        allCategories[route]
+          .filter(c => c[0].toUpperCase() === letter)
+          .forEach(cat => {
+            const btn = document.createElement("button");
+            btn.textContent = cat;
+            btn.onclick = () => { currentIndex = 0; fetchResult(`${route}/${cat}`, 'image', cat); };
+            list.appendChild(btn);
+          });
+      }
+    }
+
+    // Init
+    generateAlphaButtons();
+    fetchAllCategories();
+  </script>
 </body>
 </html>
