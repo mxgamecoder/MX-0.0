@@ -6,21 +6,87 @@
   <title>API Category Explorer</title>
   <link rel="stylesheet" href="/style.css">
   <style>
-    body { font-family: sans-serif; padding: 1rem; }
-    h1, h2 { text-align: center; }
-    .category-buttons, .category-section { margin-bottom: 2rem; }
-    .category-buttons button { margin: 0.2rem; padding: 0.5rem 1rem; }
-    .category-section button { margin: 0.4rem; padding: 0.6rem 1rem; border-radius: 0.5rem; border: 1px solid #ccc; cursor: pointer; background: #f9f9f9; }
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      background-color: #f4f4f4;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .category-buttons, .category-section {
+      margin-bottom: 2rem;
+    }
+
+    .category-buttons button {
+      margin: 0.2rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .category-section div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+    }
+
+    .category-section button {
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .category-section button:hover {
+      background-color: #e0e0e0;
+    }
+
     .overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      overflow-y: auto;
     }
-    .hidden { display: none; }
+
+    .hidden {
+      display: none;
+    }
+
     .overlay-content {
-      background: white; padding: 1.5rem; border-radius: 1rem; max-width: 90%; text-align: center;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      max-width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      text-align: center;
     }
-    img { max-width: 100%; height: auto; }
-    #resultContent button { margin-top: 1rem; margin-right: 0.5rem; }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 1rem;
+    }
+
+    #resultActions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -28,7 +94,9 @@
   <h1>📂 Explore API Categories</h1>
 
   <div class="category-buttons" id="alphaFilter"></div>
-  <button onclick="resetFilters()">🔄 Reset</button>
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <button onclick="resetFilters()">🔄 Reset</button>
+  </div>
 
   <div class="category-section" id="jestListContainer">
     <h2>Jest</h2>
@@ -109,16 +177,19 @@
 
       let content = '';
       if (type === 'image') {
-        content = `<img src="${data.imageUrl}" alt="Image Result"><br>`;
-        content += `<a href="${data.imageUrl}" download><button>💾 Download</button></a>`;
+        content = `<img src="${data.imageUrl}" alt="Image Result">`;
+        document.getElementById("resultActions").innerHTML = `
+          <a href="${data.imageUrl}" download><button>💾 Download</button></a>
+          <button id="nextBtn" onclick="showNext()">➡️ Next</button>
+        `;
       } else {
         content = `<p>${data.content}</p>`;
+        document.getElementById("resultActions").innerHTML = `
+          <button id="nextBtn" onclick="showNext()">➡️ Next</button>
+        `;
       }
 
       document.getElementById("resultContent").innerHTML = content;
-      document.getElementById("resultActions").innerHTML = `
-        <button id="nextBtn" onclick="showNext()">➡️ Next</button>
-      `;
     }
 
     async function showNext() {
@@ -134,7 +205,6 @@
       }
 
       await fetchResult(endpoint, currentType, currentCategory);
-
       btn.disabled = false;
       btn.textContent = "➡️ Next";
     }
