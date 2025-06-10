@@ -45,7 +45,7 @@ function serveRandomImage(folderPath, folderUrl) {
 
 // Routes for all jest categories without `/random-image`
 const jestCategories = [
-  '8ball', 'avatar', 'cuddle', 'feed', 'fox_girl', 'gasm', 'gecy', 
+  '8ball', 'avatar', 'cuddle', 'feed', 'fox_girl', 'gasm', 'gecg', 
   'goose', 'hug', 'kiss', 'lewd', 'lizard', 'meow', 'ngif', 'pat', 
   'slap', 'smug', 'spank', 'tickle', 'wallpaper', 'woof'
 ];
