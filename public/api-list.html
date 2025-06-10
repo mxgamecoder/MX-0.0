@@ -7,15 +7,32 @@
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      background: #f4f4f4;
-      color: #222;
+      background: #f0f0f0;
       padding: 2rem;
+      color: #222;
     }
 
     h1 {
       text-align: center;
-      font-size: 2.5rem;
+      font-size: 2.8rem;
       margin-bottom: 2rem;
+    }
+
+    .filters {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .filters button {
+      font-size: 1.1rem;
+      padding: 0.8rem 1.5rem;
+      margin: 0.4rem;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .letter-group {
@@ -34,31 +51,31 @@
       border-radius: 16px;
       padding: 1rem;
       margin-bottom: 1rem;
-      box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
     .endpoint {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: bold;
     }
 
     .desc {
       color: #444;
-      margin: 0.5rem 0 1rem 0;
+      margin: 0.6rem 0 1rem 0;
     }
 
     button {
-      padding: 0.7rem 1.2rem;
-      font-size: 1rem;
-      margin: 0.5rem 0.5rem 0 0;
+      padding: 0.9rem 1.6rem;
+      font-size: 1.1rem;
+      margin: 0.4rem 0.6rem 0 0;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
     }
 
-    .preview-btn { background: #2196f3; color: white; }
-    .download-btn { background: #4caf50; color: white; }
+    .preview-btn { background: #1e88e5; color: white; }
+    .download-btn { background: #43a047; color: white; }
 
     #fullscreenViewer {
       display: none;
@@ -76,16 +93,16 @@
       max-width: 95vw;
       max-height: 85vh;
       border-radius: 12px;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
     }
 
     .fullscreen-buttons button {
-      font-size: 1.1rem;
-      padding: 0.8rem 1.4rem;
+      padding: 1rem 2rem;
+      font-size: 1.3rem;
     }
 
     .cancel-btn { background: crimson; color: white; }
-    .retry-btn { background: #ff9800; color: white; display: none; }
+    .retry-btn { background: orange; color: white; display: none; }
     .download-btn-viewer { background: #4caf50; color: white; }
     .next-btn { background: dodgerblue; color: white; }
   </style>
@@ -93,15 +110,23 @@
 <body>
 
 <h1>🧠 MX API Endpoint List</h1>
+<div class="filters">
+  <button onclick="filterLetters('A', 'E')">A–E</button>
+  <button onclick="filterLetters('F', 'K')">F–K</button>
+  <button onclick="filterLetters('L', 'Q')">L–Q</button>
+  <button onclick="filterLetters('R', 'Z')">R–Z</button>
+  <button onclick="resetFilters()">🔁 Reset</button>
+</div>
+
 <div id="apiList">Loading API endpoints...</div>
 
-<!-- Fullscreen Image Viewer -->
+<!-- Fullscreen Viewer -->
 <div id="fullscreenViewer">
   <img id="fullImage" src="">
   <div class="fullscreen-buttons">
     <button class="cancel-btn" onclick="closeViewer()">❌ Cancel</button>
     <button class="retry-btn" id="retryBtn" onclick="retryImage()">🔁 Retry</button>
-    <button class="next-btn" onclick="fetchNextImage()">➡️ Next</button>
+    <button class="next-btn" id="nextBtn" onclick="fetchNextImage()">➡️ Next</button>
     <button class="download-btn-viewer" onclick="downloadImage()">⬇️ Download</button>
   </div>
 </div>
@@ -111,7 +136,9 @@ const apiListDiv = document.getElementById('apiList');
 const fullViewer = document.getElementById('fullscreenViewer');
 const fullImage = document.getElementById('fullImage');
 const retryBtn = document.getElementById('retryBtn');
+const nextBtn = document.getElementById('nextBtn');
 
+let allCategories = {};
 let currentEndpoint = '';
 
 function closeViewer() {
@@ -136,6 +163,8 @@ function downloadImage() {
 
 function fetchNextImage() {
   if (!currentEndpoint) return;
+  nextBtn.disabled = true;
+  nextBtn.innerText = 'Loading...';
   fetchResult(currentEndpoint, 'image', true);
 }
 
@@ -162,18 +191,28 @@ async function fetchCategories(route, emoji, type) {
 
 function displayCategory(route, list, emoji, type) {
   const grouped = {};
+
   list.forEach(name => {
     const letter = name[0].toUpperCase();
     if (!grouped[letter]) grouped[letter] = [];
-    grouped[letter].push(name);
+    grouped[letter].push({ name, route, emoji, type });
   });
 
-  Object.keys(grouped).sort().forEach(letter => {
+  allCategories = grouped;
+  renderGroups(Object.keys(grouped));
+}
+
+function renderGroups(lettersToShow) {
+  apiListDiv.innerHTML = '';
+
+  const sorted = [...lettersToShow].sort();
+
+  sorted.forEach(letter => {
     const group = document.createElement('div');
     group.className = 'letter-group';
     group.innerHTML = `<div class="letter-title">🔤 ${letter}</div>`;
 
-    grouped[letter].forEach(name => {
+    allCategories[letter].forEach(({ name, route, emoji, type }) => {
       const container = document.createElement('div');
       container.className = 'category';
       const endpoint = `/${route}/${name}`;
@@ -192,6 +231,17 @@ function displayCategory(route, list, emoji, type) {
   });
 }
 
+function filterLetters(start, end) {
+  const letters = Object.keys(allCategories).filter(
+    l => l >= start && l <= end
+  );
+  renderGroups(letters);
+}
+
+function resetFilters() {
+  renderGroups(Object.keys(allCategories));
+}
+
 async function fetchResult(endpoint, type, isNext = false) {
   try {
     const res = await fetch(endpoint);
@@ -208,9 +258,15 @@ async function fetchResult(endpoint, type, isNext = false) {
     } else {
       alert("⚠️ Invalid data format.");
     }
+
+    nextBtn.disabled = false;
+    nextBtn.innerText = '➡️ Next';
+
   } catch {
     retryBtn.style.display = 'inline-block';
     alert("⚠️ Failed to preview content.");
+    nextBtn.disabled = false;
+    nextBtn.innerText = '➡️ Next';
   }
 }
 
@@ -251,7 +307,7 @@ function getDescription(name, type) {
   return descriptions[name] || "Random content from this category.";
 }
 
-// Load categories on page load
+// Load all categories on page load
 window.onload = () => {
   fetchCategories("jest", "🧪", "image");
   fetchCategories("nsfw", "🔞", "image");
