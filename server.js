@@ -126,12 +126,48 @@ Object.entries(funCategories).forEach(([key, values]) => {
   });
 });
 
+// AI route
+app.post('/theend/ai', async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({
+      success: false,
+      error: "Prompt is required.",
+    });
+  }
+
+  try {
+    const reply = await getAIResponse(prompt);
+    res.json({
+      success: true,
+      message: "AI response generated successfully.",
+      prompt,
+      reply
+    });
+  } catch (err) {
+    console.error("AI error:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Failed to generate AI response."
+    });
+  }
+});
+
 // Show available categories for /fun
 app.get('/fun', (req, res) => {
   res.json({
     success: true,
     message: "Available fun categories.",
     categories: Object.keys(funCategories)
+  });
+});
+
+app.get('/theend', (req, res) => {
+  res.json({
+    success: true,
+    message: "Available theend categories.",
+    categories: ['ai']
   });
 });
 
