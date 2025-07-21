@@ -8,6 +8,7 @@ const port = 3000;
 app.use('/jest', express.static(path.join(__dirname, 'jest')));
 app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
 app.use('/fun', express.static(path.join(__dirname, 'fun')));
+app.use('/theend', express.static(path.join(__dirname, 'theend')));
 
 function serveRandomImage(folderPath, folderUrl) {
   return (req, res) => {
