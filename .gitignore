@@ -1,0 +1,5 @@
+echo "node_modules/" >> .gitignore
+echo ".replit" >> .gitignore
+echo "package-lock.json" >> .gitignore
+echo "replit.nix" >> .gitignore
+echo "*.log" >> .gitignore
