@@ -41,7 +41,7 @@ await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
     res.status(201).json({ msg: 'Registered successfully. Check email for code.', token });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server error');
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
@@ -67,7 +67,7 @@ router.post('/login', [
     res.json({ msg: 'Login successful', token, user: { name: user.name, username: user.username, email: user.email } });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server error');
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
