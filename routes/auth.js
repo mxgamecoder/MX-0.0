@@ -9,10 +9,50 @@ const generateCode = require('../utils/generateCode');
 const sendEmail = require('../utils/sendEmail');
 
 router.post('/register', [
-  body('email').isEmail(),
-  body('password').isLength({ min: 6 }),
-  body('username').notEmpty(),
-  body('name').notEmpty(),
+  body('name')
+    .matches(/^[A-Za-z\s]+$/)
+    .withMessage('Name must contain only letters'),
+
+  body('username')
+    .isLength({ max: 33 })
+    .withMessage('Username must not be more than 33 characters'),
+
+  body('email')
+    .isEmail()
+    .custom((value) => {
+      const allowedDomains = ['@gmail.com', '@yahoo.com', '@outlook.com'];
+      if (!allowedDomains.some(domain => value.endsWith(domain))) {
+        throw new Error('Email must be Gmail, Yahoo, or Outlook');
+      }
+      return true;
+    }),
+
+  body('password')
+    .isLength({ min: 10 })
+    .withMessage('Password must be at least 10 characters long'),
+
+  body('dob')
+    .notEmpty()
+    .withMessage('Date of birth is required')
+    .custom((value) => {
+      const dob = new Date(value);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+      if (age < 12) {
+        throw new Error('You must be at least 12 years old');
+      }
+      return true;
+    }),
+
+  body('phone')
+    .optional({ checkFalsy: true })
+    .matches(/^\d{1,15}$/)
+    .withMessage('Phone number must contain only numbers and max 15 digits'),
+
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -33,7 +73,11 @@ router.post('/register', [
     const code = generateCode();
     await VerifyToken.deleteMany({ userId: user._id }); // Remove any old code
     await new VerifyToken({ userId: user._id, code }).save();
-await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
+    await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);await sendEmail(
+  email,
+  'MXAPI Account Created 🎉',
+  `Welcome to MXAPI! Your verification code is: ${code}\n\nIf you didn’t request this code, just ignore this message.\n\n🚀 MXAPI – The best & most affordable API in the world, 10x faster than Flash.`
+);
     console.log(`📨 Email verification code for ${email}: ${code}`);
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -63,11 +107,15 @@ router.post('/login', [
     if (!match) return res.status(400).json({ msg: 'Invalid password' });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
+await sendEmail(
+  user.email,
+  'MXAPI Login Alert 🔐',
+  `You just logged in to your MXAPI account.\n\nIf this wasn't you, reset your password immediately.\n\nStay secure — MXAPI Team`
+);
     res.json({ msg: 'Login successful', token, user: { name: user.name, username: user.username, email: user.email } });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+    res.status(500).send('Server error');
   }
 });
 
@@ -101,7 +149,11 @@ router.post('/request-reset', async (req, res) => {
   await token.save();
 
   // TODO: Send via email in future
-  await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
+  await sendEmail(
+    email,
+    'MXAPI Verification Code 🔁',
+    `Here’s your new MXAPI verification code: ${code}\n\nNeed for speed? Welcome to the fastest API service on the planet.`
+  );
   console.log(`🔐 Reset code for ${identifier}: ${code}`);
 
   res.json({ msg: 'Password reset code sent to your email or phone (demo)' });
@@ -125,26 +177,45 @@ router.post('/reset-password', async (req, res) => {
   await VerifyToken.deleteMany({ userId: user._id });
 
   res.json({ msg: 'Password reset successful. You can now log in.' });
+  await sendEmail(
+  user.email,
+  'MXAPI Password Reset ✔️',
+  `Your MXAPI password has been reset successfully.\n\nIf you didn’t do this, reset it again or contact support immediately.`
+);
 });
 
 router.post('/send-code', async (req, res) => {
   const { email } = req.body;
+
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ msg: 'User not found' });
 
   if (user.isVerified) return res.status(400).json({ msg: 'User already verified' });
 
+  let existing = await VerifyToken.findOne({ userId: user._id });
+
+  if (existing && existing.resendAttempts >= 2) {
+    return res.status(429).json({ msg: 'You have reached the resend limit. Please wait or contact support.' });
+  }
+
   const code = generateCode();
 
-  // Remove old tokens
+  // Remove old token if it's outdated
   await VerifyToken.deleteMany({ userId: user._id });
 
-  const token = new VerifyToken({ userId: user._id, code });
-  await token.save();
+  const token = new VerifyToken({
+    userId: user._id,
+    code,
+    resendAttempts: existing ? existing.resendAttempts + 1 : 1
+  });
 
-  // TODO: Send `code` via email (can use nodemailer later)
-  await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
-  console.log(`📨 Verification code for ${email}: ${code}`);
+  await token.save();
+  await sendEmail(
+    email,
+    'MXAPI Verification Code 🔁',
+    `Here’s your new MXAPI verification code: ${code}\n\nNeed for speed? Welcome to the fastest API service on the planet.`
+  );
+  console.log(`📨 New verification code for ${email}: ${code}`);
 
   res.json({ msg: 'Verification code sent to email' });
 });
