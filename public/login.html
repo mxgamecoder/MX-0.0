@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MXAPI - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-gray-100 to-gray-200 min-h-screen flex items-center justify-center px-4">
+
+  <div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md sm:max-w-lg md:max-w-md lg:max-w-lg">
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Welcome Back</h2>
+
+    <form id="loginForm" class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email or Username</label>
+        <input type="text" name="identifier" required placeholder="you@example.com or username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <input type="password" name="password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="remember" name="remember" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+          <label for="remember" class="text-sm text-gray-600">Remember me</label>
+        </div>
+        <a href="#" class="text-sm text-blue-600 hover:underline">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+        Login
+      </button>
+    </form>
+
+    <p class="mt-4 text-center text-sm text-gray-600">
+      Don't have an account? <a href="signup.html" class="text-blue-600 hover:underline">Sign up here</a>
+    </p>
+
+    <div id="loginMessage" class="text-center mt-4 text-sm font-medium"></div>
+  </div>
+<!-- Footer -->
+<footer class="absolute bottom-4 w-full text-center text-xs text-gray-500">
+  Powered by <span class="font-semibold text-blue-600">Lumora</span> × <span class="text-black">MΞKΛ core v4</span>
+</footer>
+</body>
+  <script>
+    const form = document.getElementById('loginForm');
+    const messageDiv = document.getElementById('loginMessage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const identifier = form.identifier.value.trim();
+      const password = form.password.value.trim();
+      const button = form.querySelector('button');
+      const originalText = button.textContent;
+
+      // Basic front-end validation
+      if (!identifier || !password || password.length < 6) {
+        messageDiv.textContent = '⚠️ Please enter valid credentials.';
+        messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
+        return;
+      }
+
+      // Disable button + show loading
+      button.disabled = true;
+      button.textContent = 'Logging in...';
+
+      try {
+        const res = await fetch('https://mxgamecoder-klfx.onrender.com/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          messageDiv.textContent = '✅ Login successful! Redirecting...';
+          messageDiv.className = 'text-green-600 text-center mt-4 text-sm font-medium';
+          localStorage.setItem('mxapi_token', data.token);
+
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+        } else {
+          messageDiv.textContent = data.msg || '❌ Login failed.';
+          messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
+        }
+      } catch (err) {
+        console.error(err);
+        messageDiv.textContent = '❌ Network/server error.';
+        messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    });
+  </script>
+
+</body>
+</html>
