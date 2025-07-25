@@ -83,9 +83,14 @@
           messageDiv.className = 'text-green-600 text-center mt-4 text-sm font-medium';
           localStorage.setItem('mxapi_token', data.token);
 
-          setTimeout(() => {
-            window.location.href = 'dashboard.html';
-          }, 1500);
+setTimeout(() => {
+  if (!localStorage.getItem('seenWelcome')) {
+    localStorage.setItem('seenWelcome', 'true');
+    window.location.href = 'welcome.html';
+  } else {
+    window.location.href = 'dashboard.html';
+  }
+}, 1500);
         } else {
           messageDiv.textContent = data.msg || '❌ Login failed.';
           messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
