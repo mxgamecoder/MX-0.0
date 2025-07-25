@@ -73,66 +73,113 @@
     const submitBtn = document.getElementById('submitBtn');
     const BASE_URL = "https://mxgamecoder-klfx.onrender.com";
 
+    function isValidEmail(email) {
+      return /@(gmail|yahoo|outlook)\.com$/.test(email);
+    }
+
+    function isOnlyLetters(name) {
+      return /^[a-zA-Z\s]+$/.test(name);
+    }
+
+    function isOnlyNumbers(phone) {
+      return /^\d{1,15}$/.test(phone);
+    }
+
+    function isAtLeast12YearsOld(dob) {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        return age - 1 >= 12;
+      }
+      return age >= 12;
+    }
+
     form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    message.textContent = '';
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Registering...";
-    
-    const formData = new FormData(form);
-    
-    if (formData.get("password") !== formData.get("confirm_password")) {
-    message.textContent = "❌ Passwords do not match.";
-    message.className = "text-red-500 text-sm text-center";
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Register";
-    return;
-    }
-    
-    if (!formData.get("terms")) {
-    message.textContent = "❌ You must agree to the terms and conditions.";
-    message.className = "text-red-500 text-sm text-center";
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Register";
-    return;
-    }
-    
-    const data = {
-    name: formData.get("name"),
-    username: formData.get("username"),
-    email: formData.get("email"),
-    phone: formData.get("phone"),
-    dob: formData.get("dob"),
-    password: formData.get("password"),
-    };
-    
-    try {
-    const res = await fetch(`${BASE_URL}/api/auth/register`, {
-    method: 'POST',
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+      e.preventDefault();
+      message.textContent = '';
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Registering...";
+
+      const formData = new FormData(form);
+      const name = formData.get("name").trim();
+      const username = formData.get("username").trim();
+      const email = formData.get("email").trim();
+      const phone = formData.get("phone").trim();
+      const dob = formData.get("dob");
+      const password = formData.get("password");
+      const confirmPassword = formData.get("confirm_password");
+      const agreed = formData.get("terms");
+
+      // Validation checks
+      if (!isOnlyLetters(name)) {
+        return showError("❌ Full Name must contain only letters.");
+      }
+
+      if (username.length > 33) {
+        return showError("❌ Username must not be more than 33 characters.");
+      }
+
+      if (!isValidEmail(email)) {
+        return showError("❌ Email must be @gmail.com, @yahoo.com, or @outlook.com.");
+      }
+
+      if (!isAtLeast12YearsOld(dob)) {
+        return showError("❌ You must be at least 12 years old.");
+      }
+
+      if (!isOnlyNumbers(phone)) {
+        return showError("❌ Phone number must contain only numbers (max 15 digits).");
+      }
+
+      if (password.length < 10) {
+        return showError("❌ Password must be at least 10 characters.");
+      }
+
+      if (password !== confirmPassword) {
+        return showError("❌ Passwords do not match.");
+      }
+
+      if (!agreed) {
+        return showError("❌ You must agree to the terms and conditions.");
+      }
+
+      const data = { name, username, email, phone, dob, password };
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          showError(`❌ ${result.msg || result.errors?.[0]?.msg || "Registration failed"}`);
+        } else {
+          message.textContent = "✅ Registration successful!";
+          message.className = "text-green-600 text-sm text-center";
+          form.reset();
+          setTimeout(() => window.location.href = `verify.html?email=${encodeURIComponent(email)}`, 1500);
+        }
+      } catch (err) {
+        console.error(err);
+        showError("❌ Network error. Please try again.");
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Register";
     });
-    
-    const result = await res.json();
-    
-    if (!res.ok) {
-    message.textContent = `❌ ${result.msg || result.errors?.[0]?.msg || "Registration failed"}`;
-    message.className = "text-red-500 text-sm text-center";
-    } else {
-    message.textContent = "✅ Registration successful!";
-    message.className = "text-green-600 text-sm text-center";
-    form.reset();
-    setTimeout(() => window.location.href = "verify.html", 1500);
+
+    function showError(msg) {
+      message.textContent = msg;
+      message.className = "text-red-500 text-sm text-center";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Register";
+      return false;
     }
-    } catch (err) {
-    console.error(err);
-    message.textContent = "❌ Network error. Please try again.";
-    message.className = "text-red-500 text-sm text-center";
-    }
-    
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Register";
-    });
   </script>
 </body>
 </html>
