@@ -95,7 +95,7 @@
 
         localStorage.removeItem("email");
         showPopup("✅ Email verified successfully!");
-        setTimeout(() => window.location.href = "login.html", 2000);
+        setTimeout(() => window.location.href = "success.html", 2000);
       } catch (err) {
         showPopup("❌ " + err.message);
       } finally {
