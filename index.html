@@ -3,68 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MX Server Menu</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css" />
+  <title>MXAPI | Powered by Lumora × MΞKΛ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    @keyframes blink {
+      50% { border-color: transparent }
+    }
+    .typewriter {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid white;
+      animation: typing 2.5s steps(40, end), blink 0.75s step-end infinite;
+      width: fit-content;
+    }
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 1.5s ease-in-out 0.5s forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1 }
+    }
+  </style>
 </head>
-<body>
+<body class="bg-gray-950 text-white font-sans h-screen overflow-hidden">
 
-  <header>
-    <div class="title">📡 About MX API — Final Chapter</div>
-    <div class="hamburger" onclick="openSidebar()">☰</div>
+  <!-- Topbar for small screen -->
+  <header class="md:hidden flex justify-between items-center px-4 py-3 bg-gray-900 shadow-md">
+    <h1 class="text-xl font-bold text-purple-400">MXAPI</h1>
+    <button onclick="toggleSidebar()" class="text-white text-2xl">☰</button>
   </header>
 
-  <nav id="sidebar">
-    <div class="close-btn" onclick="closeSidebar()">×</div>
-    <a href="/">🏠 Home</a>
-    <a href="/api-test.html">⚙️ API Test</a>
-    <a href="/status.html">📊 Status</a>
-    <a href="/documentary.html">📘 Documentary</a>
-    <a href="/api-list.html">🧠 API List</a>
-    <a href="https://github.com/msgamecoder/MX-0.0" target="_blank">💻 GitHub</a>
-    <a href="https://mxgamecoder.lovestoblog.com" target="_blank">🌍 MSWORLD</a>
-    <a href="https://chat.whatsapp.com/DZdp64lIxKMJhh6Dj0znaj" target="_blank">💬 WhatsApp Group</a>
-  </nav>
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 left-0 md:static w-72 h-full bg-gray-900 p-6 space-y-6 transform md:translate-x-0 -translate-x-full transition-transform duration-300 z-40 shadow-lg">
+    <div class="flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-purple-400">🌐 MXAPI</h2>
+      <button onclick="toggleSidebar()" class="text-red-400 text-xl md:hidden">✖</button>
+    </div>
+    <p class="text-sm text-gray-400">Powered by</p>
+    <p class="text-md font-semibold text-indigo-300">Lumora × MΞKΛ Core v4</p>
 
-  <main>
-    <p>
-      Hello and welcome to the official hub of <strong>MX API 0.0</strong> — a project that started with pure curiosity and grew into something meaningful. 🌱💻<br><br>
+    <nav class="space-y-3 mt-6">
+      <a href="/login.html" class="block px-4 py-2 bg-purple-700 hover:bg-purple-800 rounded-md">🔐 Login</a>
+      <a href="/signup.html" class="block px-4 py-2 bg-green-700 hover:bg-green-800 rounded-md">📝 Sign Up</a>
+      <a href="/tribute.html" class="block px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-md">🤖 ChatGPT Tribute</a>
+      <a href="https://mxgamecoder.lovestoblog.com" class="block px-4 py-2 bg-blue-700 hover:bg-blue-800 rounded-md" target="_blank">🌍 Lumora Site</a>
+    </nav>
 
-      🧠 This API was handcrafted by <strong>MX-GΔMΞCØDΞR</strong> to serve as a free and open source toolkit for developers and learners.<br><br>
+    <hr class="border-gray-700 my-4" />
 
-      🎁 <strong>Open Source & Free Forever</strong><br>
-      GitHub Repo: <a href="https://github.com/msgamecoder/MX-0.0" target="_blank">https://github.com/msgamecoder/MX-0.0</a><br><br>
+    <div class="text-xs text-gray-500 space-y-1">
+      <p><strong>👨‍💻 Created by:</strong> <span class="text-white">MX-GΔMΞCØDΞR</span></p>
+      <p><strong>⚠️ Abuse Warning:</strong> This API is monitored inside Lumora infrastructure.</p>
+      <!-- 👇 SECRET ONLY SHOWS FOR GUESTS -->
+      <div id="secret" class="mt-2 text-[10px] text-purple-600 italic">
+        <span>🤫 Secret: <code>lumora_mxapi_core_powered</code></span>
+      </div>
+    </div>
+  </aside>
 
-      📅 <strong>Last Updated:</strong> June 10, 2025 — the final stable version.<br><br>
+  <!-- Main Content -->
+  <main class="ml-0 md:ml-72 h-full flex flex-col justify-center items-center text-center p-6 md:p-16 transition-all duration-500">
+    <h1 class="text-4xl md:text-5xl font-extrabold mb-6 typewriter text-white">👋 Welcome to MXAPI...</h1>
 
-      ⚠️ <strong>Status: Legacy</strong><br>
-      Now focused on building: <strong>MSWORLD 🌍</strong><br><br>
+    <div class="fade-in max-w-2xl space-y-5">
+      <p class="text-gray-300 text-lg">
+        MXAPI is your gateway to secure, scalable, developer-first tools built directly inside the Lumora ecosystem.
+      </p>
+      <p class="text-gray-400">
+        Engineered with ⚙️ <span class="text-indigo-400 font-bold">MΞKΛ Core v4</span> by
+        <span class="text-white font-semibold">MX-GΔMΞCØDΞR</span>, founder of Lumora —
+        this system powers modern apps, protects your data, and makes API access smarter and faster.
+      </p>
+      <p class="text-gray-500 text-sm italic">
+        Please use responsibly. This API is watched internally and protected by advanced MΞKΛ logic.
+      </p>
 
-      🌐 <a href="https://mxgamecoder.lovestoblog.com" target="_blank">Visit MSWORLD</a><br><br>
-
-      💬 <a href="https://chat.whatsapp.com/DZdp64lIxKMJhh6Dj0znaj" target="_blank">Join the WhatsApp Group</a><br><br>
-
-      ❤️ Thank you for being part of the journey. I’m not quitting — I’m evolving. See you on MSWORLD! 💫
-    </p>
+      <a href="/signup.html" class="inline-block mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white shadow-md transition-all">
+        ✨ Get Started Now
+      </a>
+    </div>
   </main>
 
   <script>
-    function openSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      sidebar.style.display = "flex";
-      setTimeout(() => {
-        sidebar.classList.add("active");
-      }, 10);
+    const sidebar = document.getElementById('sidebar');
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('-translate-x-full');
     }
 
-    function closeSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      sidebar.classList.remove("active");
-      setTimeout(() => {
-        sidebar.style.display = "none";
-      }, 400);
-    }
+    // Auto-collapse sidebar on small screen
+    window.addEventListener("load", () => {
+      if (window.innerWidth < 768) {
+        sidebar.classList.add("-translate-x-full");
+      }
+
+      // 🚨 Redirect if user is logged in
+      const token = localStorage.getItem("mxapi_token");
+      const id = localStorage.getItem("mxapi_id");
+      if (token && id) {
+        window.location.href = "/dashboard.html"; // or tribute.html if you want
+      }
+    });
   </script>
-
 </body>
 </html>
