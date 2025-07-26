@@ -38,7 +38,7 @@
     async function createApiKey() {
       const token = localStorage.getItem("mxapi_token");
 
-      const res = await fetch('/api/user/create-api-key', {
+      const res = await fetch('https://mxgamecoder-klfx.onrender.com/api/user/create-api-key', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
