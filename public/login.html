@@ -82,6 +82,7 @@
           messageDiv.textContent = '✅ Login successful! Redirecting...';
           messageDiv.className = 'text-green-600 text-center mt-4 text-sm font-medium';
           localStorage.setItem('mxapi_token', data.token);
+localStorage.setItem('mxapi_id', data.user.publicUserId);
 
 setTimeout(() => {
   if (!localStorage.getItem('seenWelcome')) {
