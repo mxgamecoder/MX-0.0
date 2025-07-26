@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Create API Key | MXAPI</title>
   <script>
-    // 🔒 Redirect if not logged in
     const token = localStorage.getItem('mxapi_token');
     const userId = localStorage.getItem('mxapi_id');
     if (!token || !userId) window.location.href = 'index.html';
@@ -18,14 +17,18 @@
     <h2 class="text-2xl font-bold mb-4">🔐 Create API Key</h2>
     <p class="text-sm text-gray-400">You can only create one API key. Keep it safe!</p>
 
-    <div id="result" class="mt-4 space-y-3">
+    <div id="result" class="mt-4 space-y-4">
+      <!-- Button to create key -->
       <button onclick="createApiKey()" id="createBtn"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full font-semibold">
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full font-semibold w-full">
         Generate API Key 🔑
       </button>
 
-      <div id="keyBox" class="hidden flex items-center justify-between bg-gray-800 px-4 py-2 rounded">
-        <span id="apiKey" class="tracking-widest font-mono"></span>
+      <!-- API Key display -->
+      <div id="keyBox" class="hidden bg-gray-800 px-4 py-3 rounded flex items-center justify-between">
+        <div class="flex-1 overflow-auto">
+          <span id="apiKey" class="tracking-widest font-mono text-sm break-all block text-left pr-2">••••••••••••••••••</span>
+        </div>
         <button onclick="toggleKey()" class="ml-3 text-white text-xl" id="eyeBtn">👁️</button>
       </div>
     </div>
@@ -34,6 +37,25 @@
   <script>
     let showing = false;
     let savedKey = '';
+
+    window.onload = async function () {
+      const token = localStorage.getItem("mxapi_token");
+      try {
+        const res = await fetch('https://mxgamecoder-klfx.onrender.com/api/user/get-api-key', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.apiKey) {
+          savedKey = data.apiKey;
+          document.getElementById('createBtn').classList.add('hidden');
+          document.getElementById('keyBox').classList.remove('hidden');
+          document.getElementById('apiKey').textContent = '••••••••••••••••••';
+        }
+      } catch (e) {
+        console.warn("No API key found or failed to fetch");
+      }
+    };
 
     async function createApiKey() {
       const token = localStorage.getItem("mxapi_token");
@@ -48,8 +70,10 @@
       if (data.apiKey) {
         savedKey = data.apiKey;
         document.getElementById('apiKey').textContent = savedKey;
-        document.getElementById('createBtn').style.display = 'none';
+        document.getElementById('createBtn').classList.add('hidden');
         document.getElementById('keyBox').classList.remove('hidden');
+        showing = true;
+        document.getElementById('eyeBtn').textContent = '🙈';
       } else {
         alert(data.msg || "Something went wrong");
       }
@@ -67,5 +91,6 @@
       }
     }
   </script>
+
 </body>
 </html>
