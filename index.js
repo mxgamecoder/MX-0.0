@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-
+const requireApiKey = require('./middleware/apiKey');
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,6 +41,16 @@ app.use('/jest', express.static(path.join(__dirname, 'jest')));
 app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
 app.use('/fun', express.static(path.join(__dirname, 'fun')));
 app.use('/theend', express.static(path.join(__dirname, 'theend')));
+
+// ======== apikey ===============
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return next(); // Allow open access to auth/user routes
+  }
+
+  // Apply API key middleware to all others
+  return requireApiKey(req, res, next);
+});
 
 // ========== Random Image Logic ==========
 function serveRandomImage(folderPath, folderUrl) {
