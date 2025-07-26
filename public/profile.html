@@ -85,11 +85,32 @@
       saveSection.classList.remove("hidden");
     });
 
-    // ✅ Handle Save (POST or PATCH can be added later)
-    document.getElementById("saveBtn").addEventListener("click", () => {
-      alert("This demo does not save changes yet. Backend update endpoint not connected.");
-      // Example POST could be made here if needed.
-    });
+document.getElementById("saveBtn").addEventListener("click", () => {
+  const updatedData = {
+    name: document.getElementById("name").value,
+    username: document.getElementById("username").value,
+    dob: document.getElementById("dob").value,
+    phone: document.getElementById("phone").value
+  };
+
+  fetch("/auth/update-profile", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(updatedData)
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    location.reload();
+  })
+  .catch(err => {
+    alert("Update failed");
+    console.error(err);
+  });
+});
   </script>
 </body>
 </html>
