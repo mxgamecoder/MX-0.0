@@ -116,7 +116,7 @@ if (!publicId || !token) {
 }
 async function fetchUser() {
   try {
-    const res = await fetch(`https://mxgamecoder-klfx.onrender.com/api/user/${publicId}`, {
+    const res = await fetch(`https://mxgamecoder-klfx.onrender.com/api/auth/user/${publicId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
