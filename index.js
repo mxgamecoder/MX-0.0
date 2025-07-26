@@ -52,14 +52,8 @@ app.use('/fun', express.static(path.join(__dirname, 'fun')));
 app.use('/theend', express.static(path.join(__dirname, 'theend')));
 
 // ======== apikey ===============
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    return next(); // Allow open access to auth/user routes
-  }
-
-  // Apply API key middleware to all others
-  return requireApiKey(req, res, next);
-});
+// Protect only /jest, /nsfw, /fun, and /theend
+app.use(['/jest', '/nsfw', '/fun', '/theend'], requireApiKey);
 
 // ========== Random Image Logic ==========
 function serveRandomImage(folderPath, folderUrl) {
