@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <title>⚙️ MX API Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+  const token = localStorage.getItem('mxapi_token');
+  const id = localStorage.getItem('mxapi_id');
+
+  // If token or ID is missing, block access
+  if (!token || !id) {
+    window.location.href = "index.html"; // redirect to login
+  }
+</script>
   <style>
     :root {
       --bg: #121212;
