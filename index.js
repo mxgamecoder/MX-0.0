@@ -34,6 +34,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ========== Auth Routes ==========
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/user'));
 
 // ========== Static Files ==========
 app.use('/jest', express.static(path.join(__dirname, 'jest')));
