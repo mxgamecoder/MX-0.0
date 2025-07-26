@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MXAPI Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex overflow-hidden relative">
+
+  <!-- Overlay -->
+  <div id="bodyOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed z-40 inset-y-0 left-0 w-64 transform -translate-x-full lg:translate-x-0 bg-gray-800 transition-transform duration-300 overflow-y-auto">
+    <div class="h-full flex flex-col p-4 space-y-4 relative">
+      <!-- Close button -->
+      <button id="closeSidebarBtn" class="absolute top-3 right-3 text-white lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <h2 class="text-xl font-bold mb-4">🚀 MXAPI Panel</h2>
+
+      <!-- Nav Links -->
+      <nav class="flex-1 space-y-3 overflow-y-auto">
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">🏠 Home</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📚 Documentary</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📃 API List</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📡 API Status</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">💠 Lumora</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">🆘 Support</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">💰 Balance & Withdraw</a>
+        <hr class="border-gray-700 my-2" />
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">🔑 API Key</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">💳 Billing</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">👤 Profile</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">🛒 Own API</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📤 Upload</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">⚡ Rent API</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📊 Usage</a>
+        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📩 Requests</a>
+      </nav>
+
+      <div class="text-xs text-gray-400 mt-auto pt-4 border-t border-gray-700">
+        Powered by <span class="font-semibold text-blue-400">Lumora</span> × <span class="text-white">MΞKΛ core v4</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col lg:ml-64 z-10">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900 lg:sticky top-0 z-30">
+      <button id="sidebarToggle" class="text-white lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <h1 class="text-lg font-bold" id="greeting">Welcome 👋</h1>
+    </header>
+
+    <!-- Page Content -->
+    <main class="p-6 space-y-4">
+      <p class="text-lg">✨ This is your personalized API control center.</p>
+      <p>You're managing powerful APIs built into the Lumora platform and proudly maintained by <span class="font-semibold text-blue-300">MX-GΔMΞCØDΞR</span>.</p>
+      <p>💡 Even Lumora services use this very same API. You're in good hands!</p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-gray-400 mt-auto py-4 border-t border-gray-700">
+      Powered by <span class="font-semibold text-blue-400">Lumora</span> × <span class="text-white">MΞKΛ core v4</span>
+    </footer>
+  </div>
+
+  <!-- Script -->
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const toggleButton = document.getElementById('sidebarToggle');
+    const closeButton = document.getElementById('closeSidebarBtn');
+    const bodyOverlay = document.getElementById('bodyOverlay');
+
+    const closeSidebar = () => {
+      sidebar.classList.add('-translate-x-full');
+      bodyOverlay.classList.add('hidden');
+    };
+
+    toggleButton.addEventListener('click', () => {
+      sidebar.classList.remove('-translate-x-full');
+      bodyOverlay.classList.remove('hidden');
+    });
+
+    closeButton.addEventListener('click', closeSidebar);
+    bodyOverlay.addEventListener('click', closeSidebar);
+
+    // Dynamic greeting
+const greetingEl = document.getElementById('greeting');
+const hour = new Date().getHours();
+let greeting = "Welcome";
+if (hour < 12) greeting = "🌅 Good morning";
+else if (hour < 17) greeting = "🌞 Good afternoon";
+else greeting = "🌙 Good evening";
+
+// Check auth
+const publicId = localStorage.getItem('mxapi_id');
+const token = localStorage.getItem('mxapi_token');
+
+if (!publicId || !token) {
+  // Redirect to login
+  window.location.href = "index.html";
+}
+async function fetchUser() {
+  try {
+    const res = await fetch(`https://mxgamecoder-klfx.onrender.com/api/user/${publicId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+    if (res.ok && data.user) {
+      greetingEl.textContent = `${greeting} @${data.user.username}!`;
+      localStorage.setItem('mxapi_username', data.user.username);
+    } else {
+      greetingEl.textContent = `${greeting} 👤 User`;
+    }
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    greetingEl.textContent = `${greeting} 👤 Error`;
+  }
+}
+
+fetchUser();
+  </script>
+
+</body>
+</html>
