@@ -11,6 +11,11 @@ const UserSchema = new mongoose.Schema({
   publicUserId: { type: String, unique: true, required: true }, // Safe public-facing ID
   isVerified: { type: Boolean, default: false },
   balance: { type: Number, default: 0 },
+  apiKey: {
+  type: String,
+  unique: true,
+  sparse: true // allows it to be null until they create one
+  },
   plan: { type: String, default: 'Free' }
 }, { timestamps: true });
 
