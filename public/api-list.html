@@ -239,7 +239,7 @@
       currentCategory = catName;
       currentType = type;
 
-      const res = await fetch(`/proxy/${endpoint}`);
+      const res = await fetch(`/${endpoint}`);
       const data = await res.json();
 
       document.getElementById("resultOverlay").classList.remove("hidden");
