@@ -66,7 +66,15 @@
       Already have an account? <a href="login.html" class="text-blue-600 hover:underline">Login here</a>
     </p>
   </div>
+<script>
+  // Block already logged-in users from visiting guest pages
+  const token = localStorage.getItem('mxapi_token');
+  const id = localStorage.getItem('mxapi_id');
 
+  if (token && id) {
+    window.location.href = "dashboard.html"; // redirect to dashboard
+  }
+</script>
   <script>
     const form = document.getElementById('registerForm');
     const message = document.getElementById('message');
