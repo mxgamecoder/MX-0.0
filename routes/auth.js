@@ -1,58 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+const crypto = require('crypto');
+
+const User = require('../models/User');
 const VerifyToken = require('../models/VerifyToken');
 const generateCode = require('../utils/generateCode');
 const sendEmail = require('../utils/sendEmail');
 
+// REGISTER
 router.post('/register', [
-  body('name')
-    .matches(/^[A-Za-z\s]+$/)
-    .withMessage('Name must contain only letters'),
-
-  body('username')
-    .isLength({ max: 33 })
-    .withMessage('Username must not be more than 33 characters'),
-
-  body('email')
-    .isEmail()
-    .custom((value) => {
-      const allowedDomains = ['@gmail.com', '@yahoo.com', '@outlook.com'];
-      if (!allowedDomains.some(domain => value.endsWith(domain))) {
-        throw new Error('Email must be Gmail, Yahoo, or Outlook');
-      }
-      return true;
-    }),
-
-  body('password')
-    .isLength({ min: 10 })
-    .withMessage('Password must be at least 10 characters long'),
-
-  body('dob')
-    .notEmpty()
-    .withMessage('Date of birth is required')
-    .custom((value) => {
-      const dob = new Date(value);
-      const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      const m = today.getMonth() - dob.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-        age--;
-      }
-      if (age < 12) {
-        throw new Error('You must be at least 12 years old');
-      }
-      return true;
-    }),
-
-  body('phone')
-    .optional({ checkFalsy: true })
-    .matches(/^\d{1,15}$/)
-    .withMessage('Phone number must contain only numbers and max 15 digits'),
-
+  body('name').matches(/^[A-Za-z\s]+$/).withMessage('Name must contain only letters'),
+  body('username').isLength({ max: 33 }).withMessage('Username must not be more than 33 characters'),
+  body('email').isEmail().custom((value) => {
+    const allowedDomains = ['@gmail.com', '@yahoo.com', '@outlook.com'];
+    if (!allowedDomains.some(domain => value.endsWith(domain))) {
+      throw new Error('Email must be Gmail, Yahoo, or Outlook');
+    }
+    return true;
+  }),
+  body('password').isLength({ min: 10 }).withMessage('Password must be at least 10 characters long'),
+  body('dob').notEmpty().withMessage('Date of birth is required').custom((value) => {
+    const dob = new Date(value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    if (age < 12) throw new Error('You must be at least 12 years old');
+    return true;
+  }),
+  body('phone').optional({ checkFalsy: true }).matches(/^\d{1,15}$/).withMessage('Phone must be numeric (max 15 digits)')
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -67,28 +46,49 @@ router.post('/register', [
     if (usernameInUse) return res.status(400).json({ msg: 'Username is already in use' });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ name, username, email, password: hashed, phone, dob });
+
+    const id2 = crypto.randomBytes(16).toString('hex'); // hidden internal ID
+    const publicUserId = `mxapi_${Math.random().toString(36).substring(2, 10)}`; // public ID
+
+    const user = new User({
+      name,
+      username,
+      email,
+      password: hashed,
+      phone,
+      dob,
+      id2,
+      publicUserId
+    });
+
     await user.save();
 
     const code = generateCode();
-    await VerifyToken.deleteMany({ userId: user._id }); // Remove any old code
+    await VerifyToken.deleteMany({ userId: user._id });
     await new VerifyToken({ userId: user._id, code }).save();
-    await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);await sendEmail(
-  email,
-  'MXAPI Account Created 🎉',
-  `Welcome to MXAPI! Your verification code is: ${code}\n\nIf you didn’t request this code, just ignore this message.\n\n🚀 MXAPI – The best & most affordable API in the world, 10x faster than Flash.`
-);
-    console.log(`📨 Email verification code for ${email}: ${code}`);
+
+    await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
+    await sendEmail(email, 'MXAPI Account Created 🎉',
+      `Welcome to MXAPI! Your verification code is: ${code}\n\nIf you didn’t request this code, just ignore this message.\n\n🚀 MXAPI – The best & most affordable API in the world, 10x faster than Flash.`);
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.status(201).json({ msg: 'Registered successfully. Check email for code.', token });
+    res.status(201).json({
+      msg: 'Registered successfully. Check email for code.',
+      token,
+      user: {
+        username: user.username,
+        email: user.email,
+        publicUserId: user.publicUserId
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
 
+// LOGIN
 router.post('/login', [
   body('identifier').notEmpty(),
   body('password').notEmpty()
@@ -99,7 +99,6 @@ router.post('/login', [
   const { identifier, password } = req.body;
 
   try {
-    // Match by email or username
     const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] });
     if (!user) return res.status(400).json({ msg: 'User not found' });
 
@@ -107,15 +106,44 @@ router.post('/login', [
     if (!match) return res.status(400).json({ msg: 'Invalid password' });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-await sendEmail(
-  user.email,
-  'MXAPI Login Alert 🔐',
-  `You just logged in to your MXAPI account.\n\nIf this wasn't you, reset your password immediately.\n\nStay secure — MXAPI Team`
-);
-    res.json({ msg: 'Login successful', token, user: { name: user.name, username: user.username, email: user.email } });
+
+    await sendEmail(user.email, 'MXAPI Login Alert 🔐',
+      `You just logged in to your MXAPI account.\n\nIf this wasn't you, reset your password immediately.`);
+
+    res.json({
+      msg: 'Login successful',
+      token,
+      user: {
+        username: user.username,
+        email: user.email,
+        publicUserId: user.publicUserId
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send('Server error');
+  }
+});
+
+// GET USER BY PUBLIC USER ID
+router.get('/user/:publicId', async (req, res) => {
+  try {
+    const user = await User.findOne({ publicUserId: req.params.publicId }).select('-password');
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    res.json({
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      balance: user.balance || 0,
+      dob: user.dob,
+      phone: user.phone,
+      verified: user.isVerified,
+      plan: user.plan || 'Free'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
