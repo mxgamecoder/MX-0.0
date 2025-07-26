@@ -40,7 +40,15 @@
       <button onclick="closePopup()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">OK</button>
     </div>
   </div>
+<script>
+  // Block already logged-in users from visiting guest pages
+  const token = localStorage.getItem('mxapi_token');
+  const id = localStorage.getItem('mxapi_id');
 
+  if (token && id) {
+    window.location.href = "dashboard.html"; // redirect to dashboard
+  }
+</script>
   <script>
     const resendBtn = document.getElementById('resendBtn');
     const resendStatus = document.getElementById('resendStatus');
