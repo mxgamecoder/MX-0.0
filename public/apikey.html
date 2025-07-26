@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black text-white">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create API Key | MXAPI</title>
+  <script>
+    // 🔒 Redirect if not logged in
+    const token = localStorage.getItem('mxapi_token');
+    const userId = localStorage.getItem('mxapi_id');
+    if (!token || !userId) window.location.href = 'index.html';
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 flex flex-col items-center justify-center min-h-screen">
+
+  <div class="bg-gray-900 p-6 rounded-2xl shadow-xl w-full max-w-md text-center space-y-4">
+    <h2 class="text-2xl font-bold mb-4">🔐 Create API Key</h2>
+    <p class="text-sm text-gray-400">You can only create one API key. Keep it safe!</p>
+
+    <div id="result" class="mt-4 space-y-3">
+      <button onclick="createApiKey()" id="createBtn"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full font-semibold">
+        Generate API Key 🔑
+      </button>
+
+      <div id="keyBox" class="hidden flex items-center justify-between bg-gray-800 px-4 py-2 rounded">
+        <span id="apiKey" class="tracking-widest font-mono"></span>
+        <button onclick="toggleKey()" class="ml-3 text-white text-xl" id="eyeBtn">👁️</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let showing = false;
+    let savedKey = '';
+
+    async function createApiKey() {
+      const token = localStorage.getItem("mxapi_token");
+
+      const res = await fetch('/api/user/create-api-key', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+
+      if (data.apiKey) {
+        savedKey = data.apiKey;
+        document.getElementById('apiKey').textContent = savedKey;
+        document.getElementById('createBtn').style.display = 'none';
+        document.getElementById('keyBox').classList.remove('hidden');
+      } else {
+        alert(data.msg || "Something went wrong");
+      }
+    }
+
+    function toggleKey() {
+      const keySpan = document.getElementById('apiKey');
+      showing = !showing;
+      if (showing) {
+        keySpan.textContent = savedKey;
+        document.getElementById('eyeBtn').textContent = '🙈';
+      } else {
+        keySpan.textContent = '••••••••••••••••••';
+        document.getElementById('eyeBtn').textContent = '👁️';
+      }
+    }
+  </script>
+</body>
+</html>
