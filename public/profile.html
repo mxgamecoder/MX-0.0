@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile - MXAPI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-white min-h-screen font-sans">
+
+  <!-- Header -->
+  <header class="bg-gray-900 px-6 py-4 flex justify-between items-center shadow-md">
+    <h1 class="text-xl font-bold text-purple-400">👤 My Profile</h1>
+    <a href="dashboard.html" class="text-sm text-blue-400 hover:underline">← Back to Dashboard</a>
+  </header>
+
+  <!-- Profile Content -->
+  <main class="max-w-2xl mx-auto mt-10 p-6 bg-gray-900 rounded-lg shadow-lg space-y-6">
+
+    <!-- Profile Image -->
+    <div class="flex flex-col items-center">
+      <img id="profileImage" src="https://i.ibb.co/JjMphBCP/avatar.jpg" alt="Profile Avatar" class="w-28 h-28 rounded-full border-4 border-purple-500 shadow-md mb-2">
+      <p class="text-sm italic text-gray-400">Your public avatar</p>
+    </div>
+
+    <!-- Profile Info -->
+    <div class="space-y-2 text-gray-300 text-sm md:text-base">
+      <p><strong>Username:</strong> <span id="username">loading...</span></p>
+      <p><strong>Email:</strong> <span id="email">loading...</span></p>
+      <p><strong>Public ID:</strong> <span id="publicId">loading...</span></p>
+      <p><strong>Created:</strong> <span id="createdAt">loading...</span></p>
+    </div>
+
+    <div class="text-[10px] text-purple-600 italic mt-6">
+      Secret: <code>lumora_mxapi_core_powered</code>
+    </div>
+  </main>
+
+  <script>
+    // Redirect if not logged in
+    const token = localStorage.getItem('mxapi_token');
+    const userId = localStorage.getItem('mxapi_id');
+    if (!token || !userId) {
+      window.location.href = "index.html";
+    }
+
+    // Simulated fetch function — replace with your backend fetch
+    async function loadProfile() {
+      try {
+        // Example GET: /api/user?id=...
+        const res = await fetch(`/api/user?id=${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+
+        document.getElementById("username").textContent = data.username || "N/A";
+        document.getElementById("email").textContent = data.email || "N/A";
+        document.getElementById("publicId").textContent = data.publicId || "N/A";
+        document.getElementById("createdAt").textContent = new Date(data.createdAt).toLocaleString();
+
+        const avatar = data.image || "https://i.ibb.co/JjMphBCP/avatar.jpg";
+        document.getElementById("profileImage").src = avatar;
+
+      } catch (err) {
+        alert("Failed to load profile.");
+        console.error(err);
+      }
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>
