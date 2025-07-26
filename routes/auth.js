@@ -9,6 +9,7 @@ const User = require('../models/User');
 const VerifyToken = require('../models/VerifyToken');
 const generateCode = require('../utils/generateCode');
 const sendEmail = require('../utils/sendEmail');
+const meka = require('../middleware/auth');
 
 // REGISTER
 router.post('/register', [
@@ -126,10 +127,11 @@ router.post('/login', [
 });
 
 // GET USER BY PUBLIC USER ID
-router.get('/user/:publicId', async (req, res) => {
+router.get('/user/:publicId', meka, async (req, res) => {
   try {
     const user = await User.findOne({ publicUserId: req.params.publicId }).select('-password');
     if (!user) return res.status(404).json({ msg: 'User not found' });
+
     res.json({ user: {
       username: user.username,
       name: user.name,
