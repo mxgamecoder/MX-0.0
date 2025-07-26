@@ -67,7 +67,7 @@ router.post('/register', [
     await VerifyToken.deleteMany({ userId: user._id });
     await new VerifyToken({ userId: user._id, code }).save();
 
-    await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
+   // await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
     await sendEmail(email, 'MXAPI Account Created 🎉',
       `Welcome to MXAPI! Your verification code is: ${code}\n\nIf you didn’t request this code, just ignore this message.\n\n🚀 MXAPI – The best & most affordable API in the world, 10x faster than Flash.`);
 
