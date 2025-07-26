@@ -11,6 +11,34 @@ const generateCode = require('../utils/generateCode');
 const sendEmail = require('../utils/sendEmail');
 const meka = require('../middleware/auth');
 
+// PATCH /auth/update-profile
+router.patch("/update-profile", meka, async (req, res) => {
+  const userId = req.user.id; // From decoded JWT token
+  const updates = req.body;
+
+  // Prevent sensitive fields from being edited
+  delete updates.email;
+  delete updates.verified;
+  delete updates.plan;
+  delete updates.balance;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true }
+    );
+
+    res.json({
+      message: "✅ Profile updated successfully.",
+      user: updatedUser
+    });
+  } catch (err) {
+    console.error("Profile update failed:", err);
+    res.status(500).json({ message: "❌ Failed to update profile." });
+  }
+});
+
 // REGISTER
 router.post('/register', [
   body('name').matches(/^[A-Za-z\s]+$/).withMessage('Name must contain only letters'),
