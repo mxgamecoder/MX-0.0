@@ -26,22 +26,25 @@
 
       <!-- Nav Links -->
       <nav class="flex-1 space-y-3 overflow-y-auto">
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">🏠 Home</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📚 Documentary</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📃 API List</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📡 API Status</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">💠 Lumora</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">🆘 Support</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">💰 Balance & Withdraw</a>
+        <a href="dashboard.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🏠 Home</a>
+        <a href="documentary.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📚 Documentary</a>
+        <a href="api-list.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📃 API List</a>
+        <a href="status.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📡 API Status</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">💠 Lumora</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🆘 Support</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">💰 Balance & Withdraw</a>
         <hr class="border-gray-700 my-2" />
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">🔑 API Key</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">💳 Billing</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">👤 Profile</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">🛒 Own API</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📤 Upload</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">⚡ Rent API</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📊 Usage</a>
-        <a href="#" class="block px-3 py-2 rounded-md hover:bg-gray-700">📩 Requests</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🔑 API Key</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">💳 Billing</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">👤 Profile</a>
+        <a href="api-test.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🧪 API Test</a>
+        <a href="own-api.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🛠️ Own API</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📤 Upload</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">⚡ Rent API</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📊 Usage</a>
+        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📩 Requests</a>
+        <hr class="border-gray-700 my-2" />
+        <a href="#" onclick="logout()" class="block px-3 py-2 rounded-md hover:bg-red-700 text-red-400">🔓 Logout</a>
       </nav>
 
       <div class="text-xs text-gray-400 mt-auto pt-4 border-t border-gray-700">
@@ -136,6 +139,14 @@ async function fetchUser() {
 }
 
 fetchUser();
+
+    function logout() {
+  localStorage.removeItem('mxapi_token');
+  localStorage.removeItem('mxapi_id');
+  localStorage.removeItem('mxapi_username');
+  localStorage.removeItem('seenWelcome');
+  window.location.href = 'index.html';
+    }
   </script>
 
 </body>
