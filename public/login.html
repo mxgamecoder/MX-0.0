@@ -47,6 +47,15 @@
 </footer>
 </body>
   <script>
+  // Block already logged-in users from visiting guest pages
+  const token = localStorage.getItem('mxapi_token');
+  const id = localStorage.getItem('mxapi_id');
+
+  if (token && id) {
+    window.location.href = "dashboard.html"; // redirect to dashboard
+  }
+</script>
+  <script>
     const form = document.getElementById('loginForm');
     const messageDiv = document.getElementById('loginMessage');
 
