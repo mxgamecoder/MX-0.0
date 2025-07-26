@@ -130,8 +130,7 @@ router.get('/user/:publicId', async (req, res) => {
   try {
     const user = await User.findOne({ publicUserId: req.params.publicId }).select('-password');
     if (!user) return res.status(404).json({ msg: 'User not found' });
-
-    res.json({
+    res.json({ user: {
       username: user.username,
       name: user.name,
       email: user.email,
@@ -140,7 +139,7 @@ router.get('/user/:publicId', async (req, res) => {
       phone: user.phone,
       verified: user.isVerified,
       plan: user.plan || 'Free'
-    });
+    }});
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
