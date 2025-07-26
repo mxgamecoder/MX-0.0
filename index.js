@@ -32,6 +32,15 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB Error:', err));
 
+app.get('/docs', (req, res) => {
+  res.json({
+    success: true,
+    message: "Welcome to MXAPI 🌍",
+    usage: "To use protected routes like /jest, /nsfw, /fun, etc., add your API key in the URL like this:",
+    example: "https://mxgamecoder-klfx.onrender.com/jest/hug?meka=meka_YourApiKeyHere",
+    tip: "Get your API key by logging into the dashboard and clicking 'API Key' on the sidebar."
+  });
+});
 // ========== Auth Routes ==========
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
