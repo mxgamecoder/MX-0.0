@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📞 Support | MXAPI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #111827;
+    }
+    body * {
+      color: white !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-6 flex items-center justify-center">
+  <div class="bg-gray-900 p-6 rounded-xl shadow-lg max-w-xl w-full">
+    <h1 class="text-2xl font-bold mb-4">📞 Need Help? Contact Support</h1>
+    <p class="mb-4 text-gray-300">Let us know what’s wrong or what you need help with. We’ll get back to you 💬</p>
+
+    <form id="supportForm" class="space-y-4">
+      <input type="text" id="subject" placeholder="📝 Subject" class="w-full p-3 rounded bg-gray-800 focus:outline-none" required />
+      <textarea id="message" placeholder="✍️ Describe your issue..." class="w-full p-3 rounded bg-gray-800 h-32 focus:outline-none" required></textarea>
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-bold">
+        📤 Submit Request
+      </button>
+    </form>
+
+    <p id="statusMsg" class="mt-4 text-green-400 hidden">✅ Message sent successfully!</p>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('mxapi_token');
+    const id = localStorage.getItem('mxapi_id');
+
+    if (!token || !id) {
+      window.location.href = "index.html";
+    }
+
+    document.getElementById('supportForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subject = document.getElementById('subject').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      const res = await fetch('/api/support/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ subject, message })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('statusMsg').classList.remove('hidden');
+        document.getElementById('supportForm').reset();
+      } else {
+        alert('❌ Failed to send message. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
