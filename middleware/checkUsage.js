@@ -25,13 +25,21 @@ module.exports = async function checkUsage(req, res, next) {
   }
 
   // 🧠 Storage increase by 5MB per owned API hit
-  const reqPath = req.path.replace(/^\/+/, '');
-  const matchedApi = freeApis.find(api => reqPath.endsWith(api));
-  const additionalStorage = matchedApi ? 5 : 0;
+const reqPath = req.path.replace(/^\/+/, '');
+const matchedApi = freeApis.find(api => reqPath.endsWith(api));
+const additionalStorage = matchedApi ? 5 : 0;
 
-  usage.count += 1;
-  usage.storage += additionalStorage;
+// 🔐 If API is not in free list, only allow premium users
+if (!matchedApi && user.plan.toLowerCase() === 'free') {
+  return res.status(403).json({
+    success: false,
+    message: "This API is premium-only 🔒. Please upgrade your plan to access it."
+  });
+}
 
-  await usage.save();
-  next();
+usage.count += 1;
+usage.storage += additionalStorage;
+
+await usage.save();
+next();
 };
