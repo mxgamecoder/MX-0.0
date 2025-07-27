@@ -16,6 +16,10 @@ const UserSchema = new mongoose.Schema({
   unique: true,
   sparse: true // allows it to be null until they create one
   },
+  apiKeyRegens: {
+  type: Number,
+  default: 0
+  },
   plan: { type: String, default: 'Free' }
 }, { timestamps: true });
 
