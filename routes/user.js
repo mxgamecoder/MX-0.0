@@ -10,13 +10,19 @@ router.post('/create-api-key', meka, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    if (user.apiKey) return res.status(400).json({ msg: 'API key already exists' });
+    if (!user.apiKeyRegens) user.apiKeyRegens = 0;
+
+    if (user.apiKeyRegens >= 3) {
+      return res.status(403).json({ msg: 'API key regeneration limit reached' });
+    }
 
     const newKey = `meka_${crypto.randomBytes(12).toString('hex')}`;
     user.apiKey = newKey;
+    user.apiKeyRegens += 1;
+
     await user.save();
 
-    res.json({ msg: 'API key created successfully', apiKey: newKey });
+    res.json({ msg: 'API key regenerated', apiKey: newKey, remaining: 3 - user.apiKeyRegens });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
