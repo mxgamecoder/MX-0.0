@@ -4,6 +4,36 @@ const router = express.Router();
 const crypto = require('crypto');
 const meka = require('../middleware/auth');
 const User = require('../models/User');
+const plans = require('./plans');
+const usageModel = require('../models/Usage');
+router.get('/usage', async (req, res) => {
+  const apiKey = req.query.meka;
+
+  if (!apiKey) {
+    return res.status(400).json({ success: false, message: "API key missing." });
+  }
+
+  const user = await User.findOne({ apiKey });
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found." });
+  }
+
+  const plan = plans[user.plan.toLowerCase()] || plans.free;
+
+  // Get usage stats
+  const usage = await usageModel.findOne({ userId: user._id });
+  const used = usage?.count || 0;
+  const storageUsed = usage?.storage || 0;
+
+  res.json({
+    success: true,
+    plan: plan.name,
+    limit: plan.limit,
+    used,
+    storageLimit: plan.storage,
+    storageUsed
+  });
+});
 
 router.post('/create-api-key', meka, async (req, res) => {
   try {
