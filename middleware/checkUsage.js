@@ -1,6 +1,7 @@
+const fs = require('fs');
+const path = require('path');
 const Usage = require('../models/Usage');
 const User = require('../models/User');
-const plans = require('../routes/plan');
 
 module.exports = async function checkUsage(req, res, next) {
   const apiKey = req.query.meka;
@@ -18,14 +19,18 @@ module.exports = async function checkUsage(req, res, next) {
     usage = new Usage({ userId: user._id });
   }
 
-  const plan = plans[user.plan?.toLowerCase()] || plans.free;
-  if (usage.count >= plan.limit) {
-    return res.status(429).json({ success: false, message: "Monthly request limit reached." });
+  // 💾 Count number of files in ../data to compute storage usage
+  const dataPath = path.join(__dirname, '..', 'data');
+  let fileCount = 0;
+
+  try {
+    const files = fs.readdirSync(dataPath);
+    fileCount = files.length;
+  } catch (err) {
+    console.error("Error reading data folder:", err);
   }
 
-  // 🧠 Separate system:
-  usage.count += 1;           // 📊 Track request
-  usage.storage += 5;         // 💾 Add 5MB per request
+  usage.storage = fileCount * 5; // 5MB per file
 
   await usage.save();
   next();
