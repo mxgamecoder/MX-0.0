@@ -1,7 +1,6 @@
 const Usage = require('../models/Usage');
 const User = require('../models/User');
-const freeApis = require('../data/freeApis');
-const planData = require('../routes/plan');
+const plans = require('../routes/plan');
 
 module.exports = async function checkUsage(req, res, next) {
   const apiKey = req.query.meka;
@@ -19,27 +18,15 @@ module.exports = async function checkUsage(req, res, next) {
     usage = new Usage({ userId: user._id });
   }
 
-  const plan = planData[user.plan.toLowerCase()] || planData.free;
+  const plan = plans[user.plan?.toLowerCase()] || plans.free;
   if (usage.count >= plan.limit) {
     return res.status(429).json({ success: false, message: "Monthly request limit reached." });
   }
 
-  // 🧠 Storage increase by 5MB per owned API hit
-const reqPath = req.path.replace(/^\/+/, '');
-const matchedApi = freeApis.find(api => reqPath.endsWith(api));
-const additionalStorage = matchedApi ? 5 : 0;
+  // 🧠 Separate system:
+  usage.count += 1;           // 📊 Track request
+  usage.storage += 5;         // 💾 Add 5MB per request
 
-// 🔐 If API is not in free list, only allow premium users
-if (!matchedApi && user.plan.toLowerCase() === 'free') {
-  return res.status(403).json({
-    success: false,
-    message: "This API is premium-only 🔒. Please upgrade your plan to access it."
-  });
-}
-
-usage.count += 1;
-usage.storage += additionalStorage;
-
-await usage.save();
-next();
+  await usage.save();
+  next();
 };
