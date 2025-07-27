@@ -45,76 +45,98 @@
 <footer class="absolute bottom-4 w-full text-center text-xs text-gray-500">
   Powered by <span class="font-semibold text-blue-600">Lumora</span> × <span class="text-black">MΞKΛ core v4</span>
 </footer>
-</body>
-  <script>
-  // Block already logged-in users from visiting guest pages
+<script>
   const token = localStorage.getItem('mxapi_token');
   const id = localStorage.getItem('mxapi_id');
-
   if (token && id) {
-    window.location.href = "dashboard.html"; // redirect to dashboard
+    window.location.href = "dashboard.html";
   }
 </script>
-  <script>
-    const form = document.getElementById('loginForm');
-    const messageDiv = document.getElementById('loginMessage');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+<script>
+  const form = document.getElementById('loginForm');
+  const messageDiv = document.getElementById('loginMessage');
 
-      const identifier = form.identifier.value.trim();
-      const password = form.password.value.trim();
-      const button = form.querySelector('button');
-      const originalText = button.textContent;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      // Basic front-end validation
-      if (!identifier || !password || password.length < 6) {
-        messageDiv.textContent = '⚠️ Please enter valid credentials.';
-        messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
-        return;
-      }
+    const identifier = form.identifier.value.trim();
+    const password = form.password.value.trim();
+    const button = form.querySelector('button');
+    const originalText = button.textContent;
 
-      // Disable button + show loading
-      button.disabled = true;
-      button.textContent = 'Logging in...';
+    if (!identifier || !password || password.length < 6) {
+      messageDiv.textContent = '⚠️ Please enter valid credentials.';
+      messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
+      return;
+    }
 
-      try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier, password })
+    button.disabled = true;
+    button.textContent = 'Logging in...';
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('mxapi_token', data.token);
+        localStorage.setItem('mxapi_id', data.user.publicUserId);
+
+        // 🔐 Step 1: Check if API key already exists
+        let apiKey = '';
+        const keyCheck = await fetch('/api/user/get-api-key', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${data.token}` }
         });
 
-        const data = await res.json();
-
-        if (res.ok) {
-          messageDiv.textContent = '✅ Login successful! Redirecting...';
-          messageDiv.className = 'text-green-600 text-center mt-4 text-sm font-medium';
-          localStorage.setItem('mxapi_token', data.token);
-localStorage.setItem('mxapi_id', data.user.publicUserId);
-
-setTimeout(() => {
-  if (!localStorage.getItem('seenWelcome')) {
-    localStorage.setItem('seenWelcome', 'true');
-    window.location.href = 'welcome.html';
-  } else {
-    window.location.href = 'dashboard.html';
-  }
-}, 1500);
+        const keyData = await keyCheck.json();
+        if (keyData.apiKey) {
+          apiKey = keyData.apiKey;
         } else {
-          messageDiv.textContent = data.msg || '❌ Login failed.';
-          messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
+          // 🔐 Step 2: Create API key if not found
+          const keyCreate = await fetch('/api/user/create-api-key', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${data.token}` }
+          });
+          const newKeyData = await keyCreate.json();
+          if (newKeyData.apiKey) {
+            apiKey = newKeyData.apiKey;
+          }
         }
-      } catch (err) {
-        console.error(err);
-        messageDiv.textContent = '❌ Network/server error.';
-        messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
-      } finally {
-        button.disabled = false;
-        button.textContent = originalText;
-      }
-    });
-  </script>
 
+        if (apiKey) {
+          localStorage.setItem('mxapi_apikey', apiKey);
+        }
+
+        messageDiv.textContent = '✅ Login successful! Redirecting...';
+        messageDiv.className = 'text-green-600 text-center mt-4 text-sm font-medium';
+
+        setTimeout(() => {
+          if (!localStorage.getItem('seenWelcome')) {
+            localStorage.setItem('seenWelcome', 'true');
+            window.location.href = 'welcome.html';
+          } else {
+            window.location.href = 'dashboard.html';
+          }
+        }, 1500);
+      } else {
+        messageDiv.textContent = data.msg || '❌ Login failed.';
+        messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
+      }
+    } catch (err) {
+      console.error(err);
+      messageDiv.textContent = '❌ Network/server error.';
+      messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
+    } finally {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  });
+</script>
 </body>
 </html>
