@@ -11,7 +11,7 @@ const generateCode = require('../utils/generateCode');
 const sendEmail = require('../utils/sendEmail');
 const meka = require('../middleware/auth');
 const authenticate = require("../middleware/auth"); // JWT middleware to protect route
-const plans = require("../plans");
+const plans = require("./plan");
 
 // PATCH /auth/update-profile
 router.patch("/update-profile", authenticate, async (req, res) => {
