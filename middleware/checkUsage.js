@@ -1,53 +1,28 @@
-const User = require("../models/User");
-const plans = require("../routes/plan");
+const Usage = require('../models/Usage');
+const User = require('../models/User');
 
 module.exports = async function checkUsage(req, res, next) {
-  try {
-    const apiKey = req.query.meka;
+  const apiKey = req.query.meka;
+  if (!apiKey) return res.status(400).json({ success: false, message: "API key missing" });
 
-    if (!apiKey) {
-      return res.status(401).json({ error: "Missing API key ❌" });
-    }
+  const user = await User.findOne({ apiKey });
+  if (!user) return res.status(401).json({ success: false, message: "Invalid API key" });
 
-    const user = await User.findOne({ apiKey });
-    if (!user) {
-      return res.status(404).json({ error: "Invalid API key 🕵️" });
-    }
+  let usage = await Usage.findOne({ userId: user._id });
 
-    const currentPlan = plans[user.plan.toLowerCase()];
-    if (!currentPlan) {
-      return res.status(400).json({ error: "Invalid subscription plan 💳" });
-    }
-
-    const now = new Date();
-    const resetDate = user.monthlyReset || now;
-
-    // 💡 Auto-reset request count monthly
-    const oneMonthLater = new Date(resetDate);
-    oneMonthLater.setMonth(resetDate.getMonth() + 1);
-
-    if (now >= oneMonthLater) {
-      user.requestCount = 0;
-      user.monthlyReset = now;
-    }
-
-    // ❌ Abort if request limit exceeded
-    if (user.requestCount >= currentPlan.limit) {
-      return res.status(429).json({
-        error: `Monthly request limit (${currentPlan.limit}) exceeded for your ${currentPlan.name} 🚫. Upgrade your plan.`
-      });
-    }
-
-    // ✅ Continue and count request
-    user.requestCount += 1;
-    await user.save();
-
-    // Attach user if needed
-    req.user = user;
-    next();
-
-  } catch (err) {
-    console.error("checkUsage error:", err);
-    res.status(500).json({ error: "Server error in usage check" });
+  // Create usage doc if missing
+  if (!usage) {
+    usage = new Usage({ userId: user._id });
   }
+
+  // Optional: check limits
+  const plan = require('../routes/plan')[user.plan.toLowerCase()] || require('../routes/plan').free;
+  if (usage.count >= plan.limit) {
+    return res.status(429).json({ success: false, message: "Monthly request limit reached." });
+  }
+
+  usage.count += 1; // Increment usage
+  await usage.save();
+
+  next();
 };
