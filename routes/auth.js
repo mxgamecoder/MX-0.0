@@ -61,11 +61,7 @@ router.post('/register', [
     if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
     if (age < 12) throw new Error('You must be at least 12 years old');
     return true;
-  }),
-  body('phone').optional({ checkFalsy: true }).matches(/^\d{1,15}$/).withMessage('Phone must be numeric (max 15 digits)')
-], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  }),body('phone').optional({ checkFalsy: true }).matches(/^\+?\d{7,15}$/).withMessage('Phone must be a valid number (with or without +), 7–15 digits')
 
   const { name, username, email, password, phone, dob } = req.body;
 
