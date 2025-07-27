@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const requireApiKey = require('./middleware/apiKey');
 const checkUsage = require('./middleware/checkUsage');
+const Usage = require('./models/Usage');
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -187,3 +188,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+
+function autoMonthlyReset() {
+  let alreadyResetToday = false;
+
+  setInterval(async () => {
+    const now = new Date();
+    const day = now.getDate();
+    const hour = now.getHours();
+
+    if (day === 2 && !alreadyResetToday) {
+      try {
+        const usages = await Usage.find({});
+        for (const usage of usages) {
+          usage.count = 0;
+          usage.storage = 0;
+          usage.lastReset = new Date();
+          await usage.save();
+        }
+
+        console.log(`🔁 Monthly usage reset done on ${now.toDateString()}`);
+        alreadyResetToday = true; // Prevent multiple resets
+      } catch (err) {
+        console.error('❌ Monthly reset failed:', err.message);
+      }
+    }
+
+    // Reset the reset flag after the 2nd
+    if (day !== 2 && alreadyResetToday) {
+      alreadyResetToday = false;
+    }
+
+  }, 1000 * 60 * 60); // Run every hour
+}
+
+autoMonthlyReset(); // Call it when server starts
