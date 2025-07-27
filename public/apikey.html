@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create API Key | MXAPI</title>
+  <title>Your API Key | MXAPI</title>
   <script>
     const token = localStorage.getItem('mxapi_token');
     const userId = localStorage.getItem('mxapi_id');
@@ -12,85 +12,108 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="p-6 flex flex-col items-center justify-center min-h-screen">
-
   <div class="bg-gray-900 p-6 rounded-2xl shadow-xl w-full max-w-md text-center space-y-4">
-    <h2 class="text-2xl font-bold mb-4">🔐 Create API Key</h2>
-    <p class="text-sm text-gray-400">You can only create one API key. Keep it safe!</p>
+    <h2 class="text-2xl font-bold mb-4">🔑 Your API Key</h2>
+    <p class="text-sm text-gray-400">Use this key to access protected MXAPI routes. Keep it safe!</p>
 
-    <div id="result" class="mt-4 space-y-4">
-      <!-- Button to create key -->
-      <button onclick="createApiKey()" id="createBtn"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full font-semibold w-full">
-        Generate API Key 🔑
-      </button>
-
-      <!-- API Key display -->
-      <div id="keyBox" class="hidden bg-gray-800 px-4 py-3 rounded flex items-center justify-between">
-        <div class="flex-1 overflow-auto">
-          <span id="apiKey" class="tracking-widest font-mono text-sm break-all block text-left pr-2">••••••••••••••••••</span>
-        </div>
-        <button onclick="toggleKey()" class="ml-3 text-white text-xl" id="eyeBtn">👁️</button>
+    <div id="keyBox" class="bg-gray-800 px-4 py-3 rounded flex items-center justify-between w-full hidden">
+      <div class="flex-1 overflow-auto">
+        <span id="apiKey" class="tracking-widest font-mono text-sm break-all block text-left pr-2">••••••••••••••••••</span>
       </div>
+      <button onclick="toggleKey()" class="ml-2 text-xl" id="eyeBtn">👁️</button>
+      <button onclick="copyKey()" class="ml-2 text-xl" title="Copy Key">📋</button>
+      <button onclick="regenerateKey()" class="ml-2 text-xl" title="Regenerate Key" id="regenBtn">🔁</button>
     </div>
+
+    <p id="noKey" class="text-red-500 text-sm hidden">⚠️ No API Key found. Please login again.</p>
+    <p id="regenInfo" class="text-xs text-gray-400 hidden"></p>
   </div>
 
   <script>
     let showing = false;
     let savedKey = '';
+    let remaining = 3;
 
     window.onload = async function () {
-      const token = localStorage.getItem("mxapi_token");
-      try {
-        const res = await fetch('https://mxgamecoder-klfx.onrender.com/api/user/get-api-key', {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (data.apiKey) {
-          savedKey = data.apiKey;
-          document.getElementById('createBtn').classList.add('hidden');
-          document.getElementById('keyBox').classList.remove('hidden');
-          document.getElementById('apiKey').textContent = '••••••••••••••••••';
-        }
-      } catch (e) {
-        console.warn("No API key found or failed to fetch");
+      savedKey = localStorage.getItem('mxapi_apikey');
+      const box = document.getElementById('keyBox');
+      const noKey = document.getElementById('noKey');
+      const info = document.getElementById('regenInfo');
+
+      if (savedKey) {
+        document.getElementById('apiKey').textContent = '••••••••••••••••••';
+        box.classList.remove('hidden');
+        // Optional: get remaining regen count from backend
+        try {
+          const res = await fetch('https://mxgamecoder-klfx.onrender.com/api/user/get-api-key', {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem("mxapi_token")}` }
+          });
+          const data = await res.json();
+          if (data.remaining !== undefined) {
+            remaining = data.remaining;
+            info.textContent = `🔁 You have ${remaining} regeneration(s) left.`;
+            info.classList.remove('hidden');
+            if (remaining <= 0) {
+              document.getElementById('regenBtn').disabled = true;
+              document.getElementById('regenBtn').classList.add('opacity-40', 'cursor-not-allowed');
+            }
+          }
+        } catch {}
+      } else {
+        noKey.classList.remove('hidden');
       }
     };
-
-    async function createApiKey() {
-      const token = localStorage.getItem("mxapi_token");
-
-      const res = await fetch('https://mxgamecoder-klfx.onrender.com/api/user/create-api-key', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      const data = await res.json();
-
-      if (data.apiKey) {
-        savedKey = data.apiKey;
-        document.getElementById('apiKey').textContent = savedKey;
-        document.getElementById('createBtn').classList.add('hidden');
-        document.getElementById('keyBox').classList.remove('hidden');
-        showing = true;
-        document.getElementById('eyeBtn').textContent = '🙈';
-      } else {
-        alert(data.msg || "Something went wrong");
-      }
-    }
 
     function toggleKey() {
       const keySpan = document.getElementById('apiKey');
       showing = !showing;
-      if (showing) {
-        keySpan.textContent = savedKey;
-        document.getElementById('eyeBtn').textContent = '🙈';
-      } else {
-        keySpan.textContent = '••••••••••••••••••';
-        document.getElementById('eyeBtn').textContent = '👁️';
+      keySpan.textContent = showing ? savedKey : '••••••••••••••••••';
+      document.getElementById('eyeBtn').textContent = showing ? '🙈' : '👁️';
+    }
+
+    function copyKey() {
+      if (!savedKey) return;
+      navigator.clipboard.writeText(savedKey).then(() => {
+        alert("📋 API Key copied to clipboard");
+      });
+    }
+
+    async function regenerateKey() {
+      if (remaining <= 0) return;
+
+      const confirmRegenerate = confirm("Are you sure you want to regenerate your API key? It will replace your old one.");
+      if (!confirmRegenerate) return;
+
+      try {
+        const res = await fetch('/api/user/create-api-key', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem("mxapi_token")}` }
+        });
+
+        const data = await res.json();
+        if (data.apiKey) {
+          savedKey = data.apiKey;
+          localStorage.setItem('mxapi_apikey', savedKey);
+          document.getElementById('apiKey').textContent = showing ? savedKey : '••••••••••••••••••';
+
+          if (data.remaining !== undefined) {
+            remaining = data.remaining;
+            document.getElementById('regenInfo').textContent = `🔁 You have ${remaining} regeneration(s) left.`;
+            if (remaining <= 0) {
+              document.getElementById('regenBtn').disabled = true;
+              document.getElementById('regenBtn').classList.add('opacity-40', 'cursor-not-allowed');
+            }
+          }
+
+          alert("✅ API key regenerated successfully.");
+        } else {
+          alert(data.msg || "❌ Could not regenerate key.");
+        }
+      } catch (e) {
+        console.error(e);
+        alert("❌ Error occurred while regenerating key.");
       }
     }
   </script>
-
 </body>
 </html>
