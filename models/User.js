@@ -7,20 +7,25 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   dob: { type: Date, required: true },
   phone: { type: String },
-  id2: { type: String, unique: true, required: true }, // Hidden internal ID
-  publicUserId: { type: String, unique: true, required: true }, // Safe public-facing ID
+  id2: { type: String, unique: true, required: true },
+  publicUserId: { type: String, unique: true, required: true },
   isVerified: { type: Boolean, default: false },
   balance: { type: Number, default: 0 },
   apiKey: {
-  type: String,
-  unique: true,
-  sparse: true // allows it to be null until they create one
+    type: String,
+    unique: true,
+    sparse: true
   },
   apiKeyRegens: {
-  type: Number,
-  default: 0
+    type: Number,
+    default: 0
   },
-  plan: { type: String, default: 'Free' }
+  plan: { type: String, default: 'free' },
+
+  // 👉 Newly added
+  coins: { type: Number, default: 0 },
+  requestCount: { type: Number, default: 0 },
+  monthlyReset: { type: Date }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);
