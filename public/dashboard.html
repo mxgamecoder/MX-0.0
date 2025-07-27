@@ -143,6 +143,7 @@ fetchUser();
     function logout() {
   localStorage.removeItem('mxapi_token');
   localStorage.removeItem('mxapi_id');
+  localStorage.removeItem('mxapi_apikey');
   localStorage.removeItem('mxapi_username');
   localStorage.removeItem('seenWelcome');
   window.location.href = 'index.html';
