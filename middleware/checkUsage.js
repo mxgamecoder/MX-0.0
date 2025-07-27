@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const plans = require("../routes/plans");
+const plans = require("../routes/plan");
 
 module.exports = async function checkUsage(req, res, next) {
   try {
