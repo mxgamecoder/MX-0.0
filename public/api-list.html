@@ -216,107 +216,121 @@
     </div>
   </div>
 
-  <script>
-    const allCategories = { nsfw: [], jest: [], fun: [], theend: [] };
-    let currentCategory = '', currentType = '', currentIndex = 0;
+<script>
+  const allCategories = { nsfw: [], jest: [], fun: [], theend: [] };
+  let currentCategory = '', currentType = '', currentIndex = 0;
+  const apiKey = localStorage.getItem("mxapi_apikey");
 
-    async function fetchCategories(route, listId, type) {
-      const res = await fetch(`/${route}`);
-      const data = await res.json();
-      allCategories[route] = data.categories;
+  // First check if API key is available before anything
+  if (!apiKey) {
+    alert(`⚠️ Your API Key is missing. 
 
-      const container = document.getElementById(listId);
-      container.innerHTML = '';
-      data.categories.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.textContent = cat;
-        btn.onclick = () => { currentIndex = 0; fetchResult(`${route}/${cat}`, type, cat); };
-        container.appendChild(btn);
+This can happen after a platform update. Please go back to the dashboard, click on the sidebar, scroll down and select "Logout", then log back in.
+
+This action is normal.`);
+    throw new Error("API key missing");
+  }
+
+  async function fetchCategories(route, listId, type) {
+    const res = await fetch(`/${route}?meka=${apiKey}`);
+    const data = await res.json();
+    allCategories[route] = data.categories;
+
+    const container = document.getElementById(listId);
+    container.innerHTML = '';
+    data.categories.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.textContent = cat;
+      btn.onclick = () => {
+        currentIndex = 0;
+        fetchResult(`${route}/${cat}`, type, cat);
+      };
+      container.appendChild(btn);
+    });
+  }
+
+  async function fetchResult(endpoint, type, catName) {
+    currentCategory = catName;
+    currentType = type;
+
+    const res = await fetch(`/${endpoint}?meka=${apiKey}`);
+    const data = await res.json();
+
+    document.getElementById("resultOverlay").classList.remove("hidden");
+
+    let content = '';
+    if (type === 'image') {
+      content = `<img src="${data.imageUrl}" alt="Image Result">`;
+      document.getElementById("resultActions").innerHTML = `
+        <a href="${data.imageUrl}" download><button>💾 Download</button></a>
+        <button id="nextBtn" onclick="showNext()">➡️ Next</button>
+      `;
+    } else {
+      content = `<p>${data.content}</p>`;
+      document.getElementById("resultActions").innerHTML = `
+        <button id="nextBtn" onclick="showNext()">➡️ Next</button>
+      `;
+    }
+
+    document.getElementById("resultContent").innerHTML = content;
+  }
+
+  async function showNext() {
+    const btn = document.getElementById("nextBtn");
+    btn.disabled = true;
+    btn.textContent = "Nextting...";
+
+    const endpoint = findEndpoint(currentCategory);
+    if (!endpoint) return;
+
+    await fetchResult(endpoint, currentType, currentCategory);
+    btn.disabled = false;
+    btn.textContent = "➡️ Next";
+  }
+
+  function findEndpoint(category) {
+    for (let type in allCategories) {
+      if (allCategories[type].includes(category)) {
+        return `${type}/${category}`;
+      }
+    }
+    return null;
+  }
+
+  function closeResult() {
+    document.getElementById("resultOverlay").classList.add("hidden");
+    document.getElementById("resultContent").innerHTML = "";
+    document.getElementById("resultActions").innerHTML = "";
+  }
+
+  function filterRange(startChar, endChar) {
+    for (let type in allCategories) {
+      const list = document.getElementById(type + 'List');
+      list.innerHTML = '';
+      allCategories[type].forEach(cat => {
+        const first = cat[0].toUpperCase();
+        if (first >= startChar && first <= endChar) {
+          const btn = document.createElement("button");
+          btn.textContent = cat;
+          btn.onclick = () => fetchResult(`${type}/${cat}`, 'image', cat);
+          list.appendChild(btn);
+        }
       });
     }
+  }
 
-    async function fetchResult(endpoint, type, catName) {
-      currentCategory = catName;
-      currentType = type;
-
-      const res = await fetch(`/${endpoint}`);
-      const data = await res.json();
-
-      document.getElementById("resultOverlay").classList.remove("hidden");
-
-      let content = '';
-      if (type === 'image') {
-        content = `<img src="${data.imageUrl}" alt="Image Result">`;
-        document.getElementById("resultActions").innerHTML = `
-          <a href="${data.imageUrl}" download><button>💾 Download</button></a>
-          <button id="nextBtn" onclick="showNext()">➡️ Next</button>
-        `;
-      } else {
-        content = `<p>${data.content}</p>`;
-        document.getElementById("resultActions").innerHTML = `
-          <button id="nextBtn" onclick="showNext()">➡️ Next</button>
-        `;
-      }
-
-      document.getElementById("resultContent").innerHTML = content;
-    }
-
-    async function showNext() {
-      const btn = document.getElementById("nextBtn");
-      btn.disabled = true;
-      btn.textContent = "Nextting...";
-
-      const endpoint = findEndpoint(currentCategory);
-      if (!endpoint) return;
-
-      await fetchResult(endpoint, currentType, currentCategory);
-      btn.disabled = false;
-      btn.textContent = "➡️ Next";
-    }
-
-    function findEndpoint(category) {
-      for (let type in allCategories) {
-        if (allCategories[type].includes(category)) {
-          return `${type}/${category}`;
-        }
-      }
-      return null;
-    }
-
-    function closeResult() {
-      document.getElementById("resultOverlay").classList.add("hidden");
-      document.getElementById("resultContent").innerHTML = "";
-      document.getElementById("resultActions").innerHTML = "";
-    }
-
-    function filterRange(startChar, endChar) {
-      for (let type in allCategories) {
-        const list = document.getElementById(type + 'List');
-        list.innerHTML = '';
-        allCategories[type].forEach(cat => {
-          const first = cat[0].toUpperCase();
-          if (first >= startChar && first <= endChar) {
-            const btn = document.createElement("button");
-            btn.textContent = cat;
-            btn.onclick = () => fetchResult(`${type}/${cat}`, 'image', cat);
-            list.appendChild(btn);
-          }
-        });
-      }
-    }
-
-    function resetFilters() {
-      fetchAll();
-    }
-
-    async function fetchAll() {
-      await fetchCategories("nsfw", "nsfwList", "image");
-      await fetchCategories("jest", "jestList", "image");
-      await fetchCategories("fun", "funList", "text");
-      await fetchCategories("theend", "theendList", "text");
-    }
-
+  function resetFilters() {
     fetchAll();
-  </script>
+  }
+
+  async function fetchAll() {
+    await fetchCategories("nsfw", "nsfwList", "image");
+    await fetchCategories("jest", "jestList", "image");
+    await fetchCategories("fun", "funList", "text");
+    await fetchCategories("theend", "theendList", "text");
+  }
+
+  fetchAll();
+</script>
 </body>
 </html>
