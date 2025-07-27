@@ -3,7 +3,7 @@ const path = require('path');
 const Usage = require('../models/Usage');
 const User = require('../models/User');
 const plans = require('../routes/plan');
-const freeApis = require('../data/freeapi');
+const freeApis = require('../data/freeApis');
 
 module.exports = async function checkUsage(req, res, next) {
   const apiKey = req.query.meka;
