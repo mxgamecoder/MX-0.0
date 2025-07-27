@@ -33,7 +33,7 @@
 
     async function loadOwnedApis() {
       try {
-        const res = await fetch('/api/user/profile', {
+        const res = await fetch('/api/user/assign-free-apis', {
           headers: {
             Authorization: `Bearer ${token}`
           }
