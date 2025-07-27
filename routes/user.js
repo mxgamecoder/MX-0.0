@@ -8,6 +8,19 @@ const plans = require('./plan');
 const usageModel = require('../models/Usage');
 const freeApis = require('../data/freeApis');
 
+// Get owned APIs (for frontend display)
+router.get('/get-owned-apis', meka, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    res.json({ ownedApis: user.ownedApis || [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 router.post('/assign-free-apis', meka, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
