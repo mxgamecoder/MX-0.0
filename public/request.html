@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MXAPI | Request Usage</title>
+  <script>
+    // Auth check
+    const token = localStorage.getItem('mxapi_token');
+    const userId = localStorage.getItem('mxapi_id');
+    const apiKey = localStorage.getItem('mxapi_apikey');
+
+    if (!token || !userId) {
+      window.location.href = "index.html";
+    }
+
+    if (!apiKey) {
+      alert("🪪 Missing API Key!\nGo to Dashboard → Sidebar → Logout, then log back in. This is normal.");
+      throw new Error("No API key found. Abort request usage check.");
+    }
+  </script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white p-4">
+  <h1 class="text-2xl font-bold mb-4">📊 Request Usage</h1>
+  <div id="usageContainer" class="bg-gray-800 p-4 rounded-lg shadow-lg"></div>
+
+  <script>
+    async function loadUsage() {
+      const res = await fetch(`/api/user/usage?meka=${apiKey}`);
+      const data = await res.json();
+
+      if (!data.success) {
+        return document.getElementById('usageContainer').innerHTML = "⚠️ Failed to load usage.";
+      }
+
+      const percentUsed = Math.min((data.used / data.limit) * 100, 100).toFixed(1);
+      const percentStorage = Math.min((data.storageUsed / data.storageLimit) * 100, 100).toFixed(1);
+
+      document.getElementById('usageContainer').innerHTML = `
+        <p>🧾 <strong>Plan:</strong> ${data.plan}</p>
+        <p>🚀 <strong>Requests:</strong> ${data.used} / ${data.limit}</p>
+        <div class="w-full bg-gray-700 rounded-full h-4 my-2">
+          <div class="bg-green-500 h-4 rounded-full" style="width: ${percentUsed}%"></div>
+        </div>
+
+        <p>🗂️ <strong>Storage:</strong> ${data.storageUsed}MB / ${data.storageLimit}MB</p>
+        <div class="w-full bg-gray-700 rounded-full h-4 my-2">
+          <div class="bg-blue-500 h-4 rounded-full" style="width: ${percentStorage}%"></div>
+        </div>
+      `;
+    }
+
+    loadUsage();
+  </script>
+</body>
+</html>
