@@ -20,10 +20,14 @@ router.get('/usage', async (req, res) => {
 
   const plan = plans[user.plan.toLowerCase()] || plans.free;
 
-  // Get usage stats
-  const usage = await usageModel.findOne({ userId: user._id });
-  const used = usage?.count || 0;
-  const storageUsed = usage?.storage || 0;
+  // ✅ Create usage doc if it doesn't exist
+  let usage = await usageModel.findOne({ userId: user._id });
+  if (!usage) {
+    usage = await usageModel.create({ userId: user._id });
+  }
+
+  const used = usage.count;
+  const storageUsed = usage.storage;
 
   res.json({
     success: true,
