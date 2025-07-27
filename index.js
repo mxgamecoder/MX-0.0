@@ -46,6 +46,8 @@ app.get('/docs', (req, res) => {
 // ========== Auth Routes ==========
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
+const supportRoute = require('./routes/support');
+app.use('/api/support', supportRoute);
 // ========== Static Files ==========
 app.use('/jest', express.static(path.join(__dirname, 'jest')));
 app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
