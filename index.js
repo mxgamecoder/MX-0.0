@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const requireApiKey = require('./middleware/apiKey');
+const checkUsage = require('./middleware/checkUsage');
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,8 +53,7 @@ app.use('/theend', express.static(path.join(__dirname, 'theend')));
 
 // ======== apikey ===============
 // Protect only /jest, /nsfw, /fun, and /theend
-app.use(['/jest', '/nsfw', '/fun', '/theend'], requireApiKey);
-
+app.use(['/jest', '/nsfw', '/fun', '/theend'], requireApiKey, checkUsage);
 // ========== Random Image Logic ==========
 function serveRandomImage(folderPath, folderUrl) {
   return (req, res) => {
