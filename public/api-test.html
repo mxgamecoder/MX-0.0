@@ -151,66 +151,80 @@
     <div id="curlCommand" class="curl-box"></div>
   </div>
 
-  <script>
-    const categorySelect = document.getElementById("categorySelect");
-    const outputDiv = document.getElementById("output");
-    const imagePreview = document.getElementById("imagePreview");
-    const curlDiv = document.getElementById("curlCommand");
+<script>
+  const categorySelect = document.getElementById("categorySelect");
+  const outputDiv = document.getElementById("output");
+  const imagePreview = document.getElementById("imagePreview");
+  const curlDiv = document.getElementById("curlCommand");
 
-    const sources = {
-      "/jest": "🎭 Jest",
-      "/nsfw": "🔞 NSFW",
-      "/fun": "🎉 Fun",
-      "/theend": "👾 Theend"
-    };
+  const sources = {
+    "/jest": "🎭 Jest",
+    "/nsfw": "🔞 NSFW",
+    "/fun": "🎉 Fun",
+    "/theend": "👾 Theend"
+  };
 
-    async function loadEndpoints() {
-      categorySelect.innerHTML = '';
-      for (const [url, label] of Object.entries(sources)) {
-        try {
-          const res = await fetch(url);
-          const data = await res.json();
-          if (data.categories) {
-            data.categories.forEach(cat => {
-              const option = document.createElement("option");
-              option.value = `${url}/${cat}`;
-              option.textContent = `${label} - ${cat}`;
-              categorySelect.appendChild(option);
-            });
-          }
-        } catch (err) {
-          console.warn("Failed to load:", url);
-        }
-      }
-    }
+  // 🔐 Get API Key from localStorage
+  const apiKey = localStorage.getItem("mxapi_apikey");
 
-    async function testApi() {
-      const endpoint = categorySelect.value;
-      outputDiv.innerHTML = '⏳ Testing...';
-      imagePreview.innerHTML = '';
-      curlDiv.innerHTML = '';
+  // ❌ Stop everything if missing
+  if (!apiKey) {
+    alert(`⚠️ Your API Key is missing.
 
+This can happen after a platform update. Please go back to the dashboard, click on the sidebar, scroll down and select "Logout", then log back in.
+
+This action is normal.`);
+    throw new Error("API key missing, aborting script.");
+  }
+
+  async function loadEndpoints() {
+    categorySelect.innerHTML = '';
+    for (const [url, label] of Object.entries(sources)) {
       try {
-        const res = await fetch(endpoint);
+        const res = await fetch(`${url}?meka=${apiKey}`);
         const data = await res.json();
-
-        outputDiv.textContent = JSON.stringify(data, null, 2);
-
-        if (data.imageUrl) {
-          const img = document.createElement("img");
-          img.src = data.imageUrl;
-          imagePreview.appendChild(img);
+        if (data.categories) {
+          data.categories.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = `${url}/${cat}`;
+            option.textContent = `${label} - ${cat}`;
+            categorySelect.appendChild(option);
+          });
         }
-
-        const curl = `curl ${window.location.origin}${endpoint}`;
-        curlDiv.textContent = `💡 CURL:\n${curl}`;
       } catch (err) {
-        outputDiv.innerHTML = `<div class="error">❌ Failed to fetch or parse JSON. Maybe this endpoint doesn’t return valid JSON?</div>`;
-        curlDiv.textContent = `curl ${window.location.origin}${endpoint}`;
+        console.warn("⚠️ Failed to load:", url, err);
       }
     }
+  }
 
-    loadEndpoints();
-  </script>
+  async function testApi() {
+    const endpoint = categorySelect.value;
+    const fullUrl = `${endpoint}?meka=${apiKey}`;
+    outputDiv.innerHTML = '⏳ Testing...';
+    imagePreview.innerHTML = '';
+    curlDiv.innerHTML = '';
+
+    try {
+      const res = await fetch(fullUrl);
+      const data = await res.json();
+
+      outputDiv.textContent = JSON.stringify(data, null, 2);
+
+      if (data.imageUrl) {
+        const img = document.createElement("img");
+        img.src = data.imageUrl;
+        imagePreview.appendChild(img);
+      }
+
+      const curl = `curl "${window.location.origin}${fullUrl}"`;
+      curlDiv.textContent = `💡 CURL:\n${curl}`;
+    } catch (err) {
+      outputDiv.innerHTML = `<div class="error">❌ Failed to fetch or parse JSON. Maybe this endpoint doesn’t return valid JSON?</div>`;
+      curlDiv.textContent = `curl "${window.location.origin}${fullUrl}"`;
+    }
+  }
+
+  loadEndpoints();
+</script>
 </body>
 </html>
