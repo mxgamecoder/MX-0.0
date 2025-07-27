@@ -16,6 +16,10 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     sparse: true
   },
+  ownedApis: {
+  type: [String], // Array of API IDs or names
+  default: []
+},
   apiKeyRegens: {
     type: Number,
     default: 0
