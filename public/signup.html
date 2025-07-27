@@ -89,9 +89,9 @@
       return /^[a-zA-Z\s]+$/.test(name);
     }
 
-    function isOnlyNumbers(phone) {
-      return /^\d{1,15}$/.test(phone);
-    }
+function isOnlyNumbers(phone) {
+  return /^\+?\d{7,15}$/.test(phone);
+}
 
     function isAtLeast12YearsOld(dob) {
       const birthDate = new Date(dob);
@@ -138,7 +138,7 @@
       }
 
       if (!isOnlyNumbers(phone)) {
-        return showError("❌ Phone number must contain only numbers (max 15 digits).");
+        return showError("❌ Phone number must be valid with 7–15 digits (you can start with +).");
       }
 
       if (password.length < 10) {
