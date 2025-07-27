@@ -6,6 +6,27 @@ const meka = require('../middleware/auth');
 const User = require('../models/User');
 const plans = require('./plan');
 const usageModel = require('../models/Usage');
+const freeApis = require('../data/freeApis');
+
+router.post('/assign-free-apis', meka, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    if (user.ownedApis && user.ownedApis.length >= 10) {
+      return res.status(400).json({ msg: 'Free APIs already assigned' });
+    }
+
+    user.ownedApis = freeApis.slice(0, 10); // Give first 10
+    await user.save();
+
+    res.json({ msg: 'Free APIs assigned', ownedApis: user.ownedApis });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 router.get('/usage', async (req, res) => {
   const apiKey = req.query.meka;
 
