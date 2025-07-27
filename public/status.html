@@ -150,6 +150,19 @@
 <script>
 const statusContainer = document.getElementById('statusContainer');
 
+// 🔐 Get API Key
+const apiKey = localStorage.getItem("mxapi_apikey");
+
+// ❌ Block everything if missing
+if (!apiKey) {
+  alert(`⚠️ Your API Key is missing.
+
+This might happen after a system update. Please return to the dashboard, click the sidebar, scroll down, and log out. Then log in again.
+
+This is a normal action.`);
+  throw new Error("API key missing. Aborting...");
+}
+
 const apiSources = {
   "🎭 Jest": "/jest",
   "🔞 NSFW": "/nsfw",
@@ -162,7 +175,7 @@ async function fetchAllStatuses() {
 
   for (const [groupName, baseUrl] of Object.entries(apiSources)) {
     try {
-      const res = await fetch(baseUrl);
+      const res = await fetch(`${baseUrl}?meka=${apiKey}`);
       const data = await res.json();
       const categories = data.categories;
 
@@ -210,11 +223,11 @@ function buildGroup(groupName, type, endpoints) {
 
 function checkStatus(url, statusElement) {
   const start = performance.now();
-  fetch(url)
+  fetch(`${url}?meka=${apiKey}`)
     .then(res => res.json())
     .then(data => {
       const duration = performance.now() - start;
-      if (data.success) {
+      if (data.success || data.imageUrl || data.content) {
         statusElement.className = 'status ok';
         statusElement.textContent = `✅ ${Math.round(duration)}ms`;
       } else {
@@ -237,6 +250,5 @@ function showError(groupName, message) {
 
 fetchAllStatuses();
 </script>
-
 </body>
 </html>
