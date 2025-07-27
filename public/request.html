@@ -20,12 +20,12 @@
     }
   </script>
 </head>
-<body class="bg-gray-950 text-white min-h-screen flex">
+<body class="bg-gradient-to-br from-gray-950 to-black text-white min-h-screen flex font-sans">
 
   <!-- Sidebar -->
-  <aside class="w-60 bg-gray-900 p-4 space-y-4 hidden md:block">
+  <aside class="w-60 bg-gray-900 p-4 space-y-4 hidden md:block shadow-2xl border-r border-gray-800">
     <h2 class="text-xl font-bold text-green-400">☁️ MXAPI</h2>
-    <nav class="space-y-2">
+    <nav class="space-y-2 text-sm">
       <a href="dashboard.html" class="block hover:bg-gray-700 px-3 py-2 rounded">🏠 Dashboard</a>
       <a href="profile.html" class="block hover:bg-gray-700 px-3 py-2 rounded">👤 Profile</a>
       <a href="apikey.html" class="block hover:bg-gray-700 px-3 py-2 rounded">🔑 API Key</a>
@@ -36,21 +36,21 @@
 
   <!-- Main Content -->
   <main class="flex-1 p-6">
-    <div class="max-w-2xl mx-auto bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+    <div class="max-w-2xl mx-auto bg-gray-900/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
 
       <!-- Banner w/ static image -->
       <div class="relative">
         <img src="https://i.ibb.co/Y4QnkC8v/images.jpg" class="w-full h-40 object-cover" />
         <div class="absolute -bottom-8 left-6">
-          <img src="https://i.ibb.co/JjMphBCP/avatar.jpg" class="w-16 h-16 rounded-full border-4 border-gray-900" alt="Avatar">
+          <img src="https://i.ibb.co/JjMphBCP/avatar.jpg" class="w-16 h-16 rounded-full border-4 border-gray-900 shadow-xl" alt="Avatar">
         </div>
       </div>
 
       <!-- Stats Card -->
       <div class="p-6 pt-10">
-        <h1 class="text-2xl font-bold mb-6 text-green-400">📊 Request & Storage Usage</h1>
+        <h1 class="text-2xl font-bold mb-4 text-green-400">📊 Request & Storage Usage</h1>
         <div id="usageContainer" class="space-y-6">
-          <p>Loading your stats... ⏳</p>
+          <p class="text-sm text-gray-400">Loading your stats... ⏳</p>
         </div>
       </div>
 
@@ -69,20 +69,27 @@
       const percentUsed = Math.min((data.used / data.limit) * 100, 100).toFixed(1);
       const percentStorage = Math.min((data.storageUsed / data.storageLimit) * 100, 100).toFixed(1);
 
+      const usageWarning = percentUsed > 80 ? `<p class="text-yellow-400 mt-2 animate-pulse">⚠️ You're reaching your request limit!</p>` : "";
+      const storageWarning = percentStorage > 80 ? `<p class="text-yellow-400 mt-2 animate-pulse">⚠️ Storage almost full!</p>` : "";
+
       document.getElementById('usageContainer').innerHTML = `
         <div>
-          <p class="text-lg mb-1">🧾 <strong>Plan:</strong> ${data.plan}</p>
-          <p class="mb-1">🚀 <strong>Requests:</strong> ${data.used} / ${data.limit}</p>
-          <div class="w-full bg-gray-700 rounded-full h-4">
-            <div class="bg-green-500 h-4 rounded-full" style="width: ${percentUsed}%"></div>
+          <p class="text-lg mb-1 flex items-center gap-2">🧾 <strong>Plan:</strong> ${data.plan} 
+            <span class="text-xs bg-green-600/20 px-2 py-0.5 rounded-full border border-green-600">${data.plan === "Elite" ? "⭐ Top Tier" : "💼 Active"}</span>
+          </p>
+          <p class="mb-1">🚀 <strong>Requests:</strong> ${data.used} / ${data.limit} (${percentUsed}%)</p>
+          <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-green-400 to-green-600 h-4 transition-all duration-700 ease-in-out" style="width: ${percentUsed}%"></div>
           </div>
+          ${usageWarning}
         </div>
 
         <div>
-          <p class="mt-4 mb-1">🗂️ <strong>Storage:</strong> ${data.storageUsed}MB / ${data.storageLimit}MB</p>
-          <div class="w-full bg-gray-700 rounded-full h-4">
-            <div class="bg-blue-500 h-4 rounded-full" style="width: ${percentStorage}%"></div>
+          <p class="mt-4 mb-1">🗂️ <strong>Storage:</strong> ${data.storageUsed}MB / ${data.storageLimit}MB (${percentStorage}%)</p>
+          <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-4 transition-all duration-700 ease-in-out" style="width: ${percentStorage}%"></div>
           </div>
+          ${storageWarning}
         </div>
       `;
     }
