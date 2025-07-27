@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My APIs | MXAPI</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #111827;
+    }
+    body * {
+      color: white !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+  <h1 class="text-2xl font-bold mb-4">🎁 Your Free APIs</h1>
+
+  <div id="apiList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl">
+    <!-- APIs will be inserted here -->
+  </div>
+
+  <p id="emptyState" class="text-center mt-6 hidden">🙁 You have no owned APIs yet.</p>
+
+  <script>
+    const token = localStorage.getItem('mxapi_token');
+    const id = localStorage.getItem('mxapi_id');
+
+    if (!token || !id) {
+      window.location.href = 'index.html';
+    }
+
+    async function loadOwnedApis() {
+      try {
+        const res = await fetch('/api/user/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const userData = await res.json();
+
+        const apis = userData.ownedApis || [];
+        const container = document.getElementById('apiList');
+        const empty = document.getElementById('emptyState');
+
+        if (apis.length === 0) {
+          empty.classList.remove('hidden');
+          return;
+        }
+
+        apis.forEach(api => {
+          const card = document.createElement('div');
+          card.className = 'bg-gray-800 rounded-xl p-4 shadow-md flex items-center gap-4';
+          card.innerHTML = `
+            <div class="text-3xl">⚙️</div>
+            <div>
+              <div class="font-semibold">${api}</div>
+              <div class="text-sm text-gray-400">Available in your account</div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        alert("⚠️ Failed to load your APIs.");
+      }
+    }
+
+    loadOwnedApis();
+  </script>
+</body>
+</html>
