@@ -100,13 +100,17 @@ router.post('/buy', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Not enough coins 💰' });
   }
 
-  const alreadyOwned = user.ownedAPIs.find(owned =>
-    owned.name === api.name && owned.category === api.category
-  );
+  // ✅ Fix for both string and object format
+  const alreadyOwned = user.ownedAPIs.some(entry => {
+    if (typeof entry === 'string') return entry === api.filePath;
+    return entry.name === api.name && entry.category === api.category;
+  });
+
   if (alreadyOwned) {
     return res.status(400).json({ success: false, message: 'You already own this API' });
   }
 
+  // 🟩 Add to user
   user.coins -= api.price;
   user.ownedAPIs.push({
     name: api.name,
@@ -114,6 +118,7 @@ router.post('/buy', async (req, res) => {
     filePath: api.filePath,
     purchasedAt: new Date()
   });
+
   api.available -= 1;
 
   await user.save();
@@ -121,5 +126,4 @@ router.post('/buy', async (req, res) => {
 
   res.json({ success: true, message: 'API purchased successfully 🎉' });
 });
-
 module.exports = router;
