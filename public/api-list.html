@@ -12,7 +12,7 @@
     }
   </script>  
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>  
+  <style>
     :root {
       --bg-color: #121212;
       --card-bg: #1e1e1e;
@@ -20,110 +20,63 @@
       --accent: #00bcd4;
       --accent-hover: #0097a7;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: var(--bg-color);
       color: var(--text-color);
       font-family: "Segoe UI", sans-serif;
       padding: 1rem;
     }
-    h1, h2 { text-align: center; margin-bottom: 1rem; }
-    .filter-bar {
-      display: flex;
-      overflow-x: auto;
-      gap: 0.5rem;
-      padding: 1rem;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-    }
-    .filter-bar button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.2s;
-    }
-    .filter-bar button:hover { background: var(--accent-hover); }
-    .section {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 0 10px rgba(0, 188, 212, 0.1);
-    }
-    .section h2 {
-      margin-bottom: 1rem;
-      color: var(--accent);
-      border-bottom: 1px solid var(--accent);
-      padding-bottom: 0.5rem;
-      text-align: left;
-    }
-    .category-list button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 0.7rem 1rem;
-      margin: 0.3rem 0;
-      background: #2a2a2a;
-      border: none;
-      color: #fff;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .category-list button:hover { background: #383838; }
-  </style>  
-</head>  
-<body>  
-  <h1>⚡ MSWORLD API Explorer</h1>
+  </style>
+</head>
+<body>
+  <h1 class="text-3xl font-bold text-center mb-6">⚡ MSWORLD API Explorer</h1>
 
-  <div class="w-full flex justify-center mb-4">
+  <!-- ✨ SEARCH BAR -->
+  <div class="w-full flex justify-center mb-6">
     <input
       type="text"
       id="searchInput"
       placeholder="🔍 Search APIs..."
-      class="bg-[#2a2a2a] text-white px-4 py-2 w-[90%] max-w-md rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+      class="bg-[#2a2a2a] text-white placeholder-gray-400 px-5 py-2 rounded-full w-[90%] max-w-md focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-200"
       oninput="searchCategories()"
     />
   </div>
 
-  <div class="filter-bar">  
-    <button onclick="filterRange('A', 'E')">A–E</button>  
-    <button onclick="filterRange('F', 'K')">F–K</button>  
-    <button onclick="filterRange('L', 'P')">L–P</button>  
-    <button onclick="filterRange('Q', 'T')">Q–T</button>  
-    <button onclick="filterRange('U', 'Z')">U–Z</button>  
-    <button onclick="resetFilters()">🔁 Reset</button>  
-  </div>  
-
-  <div class="section">
-    <h2>🔞 NSFW</h2>
-    <div class="category-list" id="nsfwList"></div>
-    <div class="text-center text-sm text-gray-400 mt-2 hidden" id="nsfwEmpty">API not yet available 😔</div>
-  </div>
-  <div class="section">
-    <h2>🎭 Jest</h2>
-    <div class="category-list" id="jestList"></div>
-    <div class="text-center text-sm text-gray-400 mt-2 hidden" id="jestEmpty">API not yet available 😔</div>
-  </div>
-  <div class="section">
-    <h2>🎈 Fun</h2>
-    <div class="category-list" id="funList"></div>
-    <div class="text-center text-sm text-gray-400 mt-2 hidden" id="funEmpty">API not yet available 😔</div>
-  </div>
-  <div class="section">
-    <h2>👾 Theend</h2>
-    <div class="category-list" id="theendList"></div>
-    <div class="text-center text-sm text-gray-400 mt-2 hidden" id="theendEmpty">API not yet available 😔</div>
+  <!-- ✨ A–Z FILTER BAR -->
+  <div class="flex flex-wrap justify-center gap-2 mb-8">
+    <button onclick="filterRange('A','E')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">A–E</button>
+    <button onclick="filterRange('F','K')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">F–K</button>
+    <button onclick="filterRange('L','P')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">L–P</button>
+    <button onclick="filterRange('Q','T')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">Q–T</button>
+    <button onclick="filterRange('U','Z')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">U–Z</button>
+    <button onclick="resetFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">🔁 Reset</button>
   </div>
 
-  <script>  
-    const allCategories = { nsfw: [], jest: [], fun: [], theend: [] };  
-    const apiKey = localStorage.getItem("mxapi_apikey");  
+  <!-- ✨ SECTIONS -->
+  <div class="bg-[#1e1e1e] p-4 rounded-lg mb-6 shadow-md">
+    <h2 class="text-cyan-400 text-xl font-semibold mb-2">🔞 NSFW</h2>
+    <div id="nsfwList" class="category-list"></div>
+    <div id="nsfwEmpty" class="text-center text-sm text-gray-400 mt-2 hidden">API not yet available 😔</div>
+  </div>
+  <div class="bg-[#1e1e1e] p-4 rounded-lg mb-6 shadow-md">
+    <h2 class="text-cyan-400 text-xl font-semibold mb-2">🎭 Jest</h2>
+    <div id="jestList" class="category-list"></div>
+    <div id="jestEmpty" class="text-center text-sm text-gray-400 mt-2 hidden">API not yet available 😔</div>
+  </div>
+  <div class="bg-[#1e1e1e] p-4 rounded-lg mb-6 shadow-md">
+    <h2 class="text-cyan-400 text-xl font-semibold mb-2">🎈 Fun</h2>
+    <div id="funList" class="category-list"></div>
+    <div id="funEmpty" class="text-center text-sm text-gray-400 mt-2 hidden">API not yet available 😔</div>
+  </div>
+  <div class="bg-[#1e1e1e] p-4 rounded-lg mb-6 shadow-md">
+    <h2 class="text-cyan-400 text-xl font-semibold mb-2">👾 Theend</h2>
+    <div id="theendList" class="category-list"></div>
+    <div id="theendEmpty" class="text-center text-sm text-gray-400 mt-2 hidden">API not yet available 😔</div>
+  </div>
+
+  <script>
+    const allCategories = { nsfw: [], jest: [], fun: [], theend: [] };
+    const apiKey = localStorage.getItem("mxapi_apikey");
 
     if (!apiKey) {
       alert(`⚠️ Your API Key is missing.\n\nThis can happen after a platform update. Please go back to the dashboard, click on the sidebar, scroll down and select "Logout", then log back in.\n\nThis action is normal.`);
@@ -141,11 +94,11 @@
       data.categories.forEach(cat => {
         const btn = document.createElement("button");
         btn.textContent = cat;
-        btn.classList.add("searchable");
+        btn.className = "block w-full text-left bg-[#2a2a2a] hover:bg-[#383838] text-white px-4 py-2 mb-2 rounded-md font-semibold searchable transition duration-200";
         btn.setAttribute("data-name", cat.toLowerCase());
         btn.onclick = () => {
-          if (btn.style.display === "none") return; // block filtered clicks
-          console.log(`Clicked on category: ${route}/${cat}`);
+          if (btn.style.display === "none") return;
+          console.log(`Clicked: ${route}/${cat}`);
         };
         container.appendChild(btn);
       });
@@ -163,11 +116,11 @@
           if (first >= startChar && first <= endChar) {
             const btn = document.createElement("button");
             btn.textContent = cat;
-            btn.classList.add("searchable");
+            btn.className = "block w-full text-left bg-[#2a2a2a] hover:bg-[#383838] text-white px-4 py-2 mb-2 rounded-md font-semibold searchable transition duration-200";
             btn.setAttribute("data-name", cat.toLowerCase());
             btn.onclick = () => {
               if (btn.style.display === "none") return;
-              console.log(`Filtered Click: ${type}/${cat}`);
+              console.log(`Filtered: ${type}/${cat}`);
             };
             list.appendChild(btn);
             anyVisible = true;
@@ -184,7 +137,6 @@
 
     function searchCategories() {
       const query = document.getElementById("searchInput").value.toLowerCase();
-
       Object.keys(allCategories).forEach(type => {
         const list = document.getElementById(type + "List");
         const empty = document.getElementById(type + "Empty");
@@ -209,6 +161,6 @@
     }
 
     fetchAll();
-  </script>  
-</body>  
+  </script>
+</body>
 </html>
