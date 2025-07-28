@@ -4,56 +4,64 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My APIs | MXAPI</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-  <style>
-    body {
-      background-color: #111827;
-    }
-    body * {
-      color: white !important;
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
-  <h1 class="text-2xl font-bold mb-4">🎁 Your Free APIs</h1>
+<body class="min-h-screen bg-zinc-950 text-white flex flex-col items-center p-4">
+
+  <h1 class="text-3xl font-bold mb-4 text-cyan-400">🎁 Your Free APIs</h1>
+
+  <div class="w-full max-w-3xl mb-6">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="🔍 Search your AI..."
+      oninput="filterApis()"
+      class="w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+    />
+  </div>
 
   <div id="apiList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl">
-    <!-- APIs will be inserted here -->
+    <!-- API cards inserted here -->
   </div>
 
   <p id="emptyState" class="text-center mt-6 hidden">🙁 You have no owned APIs yet.</p>
+  <p id="notFound" class="text-center mt-6 hidden">🛒 You don’t own this AI. Please purchase it.</p>
 
   <script>
     const token = localStorage.getItem('mxapi_token');
     const id = localStorage.getItem('mxapi_id');
+    if (!token || !id) window.location.href = 'index.html';
 
-    if (!token || !id) {
-      window.location.href = 'index.html';
-    }
+    let ownedApis = [];
 
     async function loadOwnedApis() {
       try {
-  const res = await fetch('/api/user/get-owned-apis', {
-  method: 'GET',
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-});
+        const res = await fetch('/api/user/get-owned-apis', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
         const userData = await res.json();
+        ownedApis = userData.ownedApis || [];
 
-        const apis = userData.ownedApis || [];
         const container = document.getElementById('apiList');
         const empty = document.getElementById('emptyState');
+        const notFound = document.getElementById('notFound');
 
-        if (apis.length === 0) {
+        container.innerHTML = '';
+        notFound.classList.add('hidden');
+
+        if (ownedApis.length === 0) {
           empty.classList.remove('hidden');
           return;
         }
 
-        apis.forEach(api => {
+        empty.classList.add('hidden');
+        ownedApis.forEach(api => {
           const card = document.createElement('div');
-          card.className = 'bg-gray-800 rounded-xl p-4 shadow-md flex items-center gap-4';
+          card.className = 'bg-zinc-800 rounded-xl p-4 shadow-md flex items-center gap-4';
           card.innerHTML = `
             <div class="text-3xl">⚙️</div>
             <div>
@@ -66,6 +74,33 @@
       } catch (err) {
         console.error(err);
         alert("⚠️ Failed to load your APIs.");
+      }
+    }
+
+    function filterApis() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase();
+      const container = document.getElementById('apiList');
+      const notFound = document.getElementById('notFound');
+
+      container.innerHTML = '';
+      const filtered = ownedApis.filter(api => api.toLowerCase().includes(keyword));
+
+      if (filtered.length === 0 && ownedApis.length > 0) {
+        notFound.classList.remove('hidden');
+      } else {
+        notFound.classList.add('hidden');
+        filtered.forEach(api => {
+          const card = document.createElement('div');
+          card.className = 'bg-zinc-800 rounded-xl p-4 shadow-md flex items-center gap-4';
+          card.innerHTML = `
+            <div class="text-3xl">⚙️</div>
+            <div>
+              <div class="font-semibold">${api}</div>
+              <div class="text-sm text-gray-400">Available in your account</div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
       }
     }
 
