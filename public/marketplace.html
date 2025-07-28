@@ -14,13 +14,21 @@
       class="w-full p-2 rounded bg-gray-900 border border-gray-700 text-white placeholder-gray-400">
   </div>
 
-  <div class="flex gap-2 mb-4 flex-wrap">
+  <div class="flex flex-wrap gap-2 mb-4">
     <button onclick="filterGroup('ALL')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">All</button>
     <button onclick="filterGroup('A-E')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">A-E</button>
     <button onclick="filterGroup('F-I')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">F-I</button>
     <button onclick="filterGroup('J-O')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">J-O</button>
     <button onclick="filterGroup('P-T')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">P-T</button>
     <button onclick="filterGroup('U-Z')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">U-Z</button>
+    <select onchange="filterByCoins()" id="coin-filter" class="px-4 py-2 bg-gray-700 text-white rounded">
+      <option value="all">Filter by Coins</option>
+      <option value="10">≤ 10 Coins</option>
+      <option value="25">≤ 25 Coins</option>
+      <option value="50">≤ 50 Coins</option>
+      <option value="100">≤ 100 Coins</option>
+    </select>
+    <button onclick="fetchMarketplaceApis()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded">🔄 Reset</button>
   </div>
 
   <div id="not-found" class="text-red-400 mb-4 hidden">Not available yet 😞. Contact admin if needed.</div>
@@ -76,9 +84,10 @@
         const image = api.image || "https://i.ibb.co/JjMphBCP/avatar.jpg";
         const isOwned = owned.some(o => o.name === api.name && o.category === api.category);
         const usageMsg = api.usageMessage ? `<p class='text-yellow-300 text-sm mt-1'>${api.usageMessage}</p>` : "";
+
         const button = isOwned
           ? `<button disabled class='w-full mt-3 py-2 bg-gray-600 rounded text-white cursor-not-allowed'>✅ Owned</button>`
-          : `<button onclick="buyApi('${api._id || ''}')" class='w-full mt-3 py-2 bg-green-600 hover:bg-green-500 rounded text-white'>🛍 Buy</button>`;
+          : `<button id="buy-${api._id}" onclick="buyApi('${api._id}', this)" class='w-full mt-3 py-2 bg-green-600 hover:bg-green-500 rounded text-white'>🛍 Buy</button>`;
 
         container.innerHTML += `
           <div class='bg-gray-800 p-4 rounded shadow'>
@@ -94,23 +103,33 @@
       });
     }
 
-    async function buyApi(apiId) {
+    async function buyApi(apiId, btn) {
       if (!apiId) return alert("Invalid API ID.");
+
       const confirmBuy = confirm("Buy this API?");
       if (!confirmBuy) return;
 
-      const res = await fetch('/api/marketplace/buy', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    userId: localStorage.getItem('mxapi_id'),
-    apiId: api._id   // ✅ make sure this is included
-  })
-});
+      // Disable the button
+      btn.disabled = true;
+      btn.innerText = "⏳ Purchasing...";
 
-      const data = await res.json();
-      alert(data.message);
-      if (data.success) fetchMarketplaceApis();
+      try {
+        const res = await fetch('/api/marketplace/buy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, apiId })
+        });
+
+        const data = await res.json();
+        alert(data.message);
+
+        // Refresh list after success or failure
+        fetchMarketplaceApis();
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+        btn.disabled = false;
+        btn.innerText = "🛍 Buy";
+      }
     }
 
     function searchApis() {
@@ -132,6 +151,14 @@
 
       const chars = map[group];
       const filtered = allApis.filter(api => chars.includes(api.name[0].toLowerCase()));
+      displayApis(filtered);
+    }
+
+    function filterByCoins() {
+      const maxCoins = document.getElementById("coin-filter").value;
+      if (maxCoins === "all") return displayApis(allApis);
+
+      const filtered = allApis.filter(api => (api.price || 0) <= parseInt(maxCoins));
       displayApis(filtered);
     }
 
