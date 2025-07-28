@@ -23,8 +23,7 @@ router.get('/user/owned-apis/:userId', async (req, res) => {
       return {
         name,
         category,
-        filePath: fp,
-        free: true
+        filePath: fp
       };
     });
 
