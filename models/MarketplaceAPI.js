@@ -13,8 +13,9 @@ const MarketplaceAPISchema = new mongoose.Schema({
     type: String,
     default: 'active'
   },
-  filePath: String,
-  usageMessage: String // 👈 New field to explain how to use the API
+  filePath: String,      // e.g. 'fun/joke'
+  usageMessage: String,  // 🟢 How to use the API (manual message)
+  image: String          // 🟢 Optional image URL
 });
 
 module.exports = mongoose.model('MarketplaceAPI', MarketplaceAPISchema);
