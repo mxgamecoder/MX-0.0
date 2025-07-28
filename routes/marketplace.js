@@ -8,16 +8,18 @@ const path = require('path');
 const freeApis = require('../data/freeApis'); // ✅ Include free APIs
 
 // Get user's owned APIs including free ones
+// Get user's owned APIs including free ones
 router.get('/user/owned-apis/:userId', async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findOne({ publicUserId: userId }); // ✅ fixed
+
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    const userOwned = user.ownedApis || []; // ✅ FIXED: was user.ownedAPis
+    const userOwned = user.ownedApis || [];
 
-    // Add free APIs (optional)
+    // Add free APIs
     const freeOwned = freeApis.map(fp => {
       const [category, name] = fp.split('/');
       return {
@@ -31,6 +33,7 @@ router.get('/user/owned-apis/:userId', async (req, res) => {
 
     res.json({ success: true, owned: combined });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
