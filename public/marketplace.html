@@ -9,11 +9,13 @@
 <body class="p-4">
   <h1 class="text-3xl font-bold mb-4">🛒 Marketplace</h1>
 
+  <!-- Search -->
   <div class="mb-4">
     <input id="search" type="text" oninput="searchApis()" placeholder="Search for an API..."
       class="w-full p-2 rounded bg-gray-900 border border-gray-700 text-white placeholder-gray-400">
   </div>
 
+  <!-- Filters -->
   <div class="flex flex-wrap gap-2 mb-4">
     <button onclick="filterGroup('ALL')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">All</button>
     <button onclick="filterGroup('A-E')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">A-E</button>
@@ -21,6 +23,7 @@
     <button onclick="filterGroup('J-O')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">J-O</button>
     <button onclick="filterGroup('P-T')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">P-T</button>
     <button onclick="filterGroup('U-Z')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">U-Z</button>
+
     <select onchange="filterByCoins()" id="coin-filter" class="px-4 py-2 bg-gray-700 text-white rounded">
       <option value="all">Filter by Coins</option>
       <option value="10">≤ 10 Coins</option>
@@ -28,11 +31,20 @@
       <option value="50">≤ 50 Coins</option>
       <option value="100">≤ 100 Coins</option>
     </select>
+
     <button onclick="fetchMarketplaceApis()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded">🔄 Reset</button>
   </div>
 
   <div id="not-found" class="text-red-400 mb-4 hidden">Not available yet 😞. Contact admin if needed.</div>
   <div id="api-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+  <!-- Modal Popup -->
+  <div id="popup" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
+    <div class="bg-gray-900 text-white p-6 rounded-xl w-[90%] max-w-md text-center shadow-xl">
+      <p id="popup-message" class="mb-4 text-lg"></p>
+      <button onclick="closePopup()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded text-white">Okay</button>
+    </div>
+  </div>
 
   <script>
     const token = localStorage.getItem('mxapi_token');
@@ -40,8 +52,9 @@
     const apiKey = localStorage.getItem('mxapi_apikey');
 
     if (!token || !userId || !apiKey) {
-      alert("You're missing login or API key. Please go to the dashboard and log out, then log in again.");
-      window.location.href = "index.html";
+      showPopup("You're missing login or API key. Please go to the dashboard and log out, then log in again.", () => {
+        window.location.href = "index.html";
+      });
     }
 
     let allApis = [];
@@ -60,11 +73,10 @@
         const ownedData = await ownedRes.json();
 
         owned = ownedData.owned || [];
-
         allApis = [...(dbData.apis || []), ...(jsonData.apis || [])];
         displayApis(allApis);
       } catch (err) {
-        alert("Failed to load marketplace APIs.");
+        showPopup("Failed to load marketplace APIs.");
       }
     }
 
@@ -82,19 +94,33 @@
       apiList.forEach(api => {
         const name = api.name || api.filePath;
         const image = api.image || "https://i.ibb.co/JjMphBCP/avatar.jpg";
-        const isOwned = owned.some(o => o.name === api.name && o.category === api.category);
+        const price = api.price || 0;
+        const available = api.available ?? 9999;
         const usageMsg = api.usageMessage ? `<p class='text-yellow-300 text-sm mt-1'>${api.usageMessage}</p>` : "";
 
-        const button = isOwned
-          ? `<button disabled class='w-full mt-3 py-2 bg-gray-600 rounded text-white cursor-not-allowed'>✅ Owned</button>`
-          : `<button id="buy-${api._id}" onclick="buyApi('${api._id}', this)" class='w-full mt-3 py-2 bg-green-600 hover:bg-green-500 rounded text-white'>🛍 Buy</button>`;
+        const isOwned = owned.some(o => {
+          const matchName = o.name === api.name;
+          const matchCategory = o.category === api.category;
+          const matchPath = o.filePath === api.filePath;
+          return (matchName && matchCategory) || matchPath;
+        });
+
+        let button = "";
+
+        if (isOwned) {
+          button = `<button disabled class='w-full mt-3 py-2 bg-purple-700 rounded text-white cursor-not-allowed'>👑 Owner</button>`;
+        } else if (available <= 0) {
+          button = `<button disabled class='w-full mt-3 py-2 bg-gray-600 rounded text-white cursor-not-allowed'>⛔ Out of Stock</button>`;
+        } else {
+          button = `<button id="buy-${api._id}" onclick="buyApi('${api._id}', this)" class='w-full mt-3 py-2 bg-green-600 hover:bg-green-500 rounded text-white'>🛍 Buy</button>`;
+        }
 
         container.innerHTML += `
           <div class='bg-gray-800 p-4 rounded shadow'>
             <img src="${image}" class="h-40 w-full object-cover rounded mb-2" />
             <h2 class="text-xl font-bold">${name}</h2>
             <p class="text-sm text-gray-300">${api.description || 'No description'}</p>
-            <p class="text-sm text-blue-400">💰 ${api.price || 0} Coins</p>
+            <p class="text-sm text-blue-400">💰 ${price} Coins</p>
             <p class="text-sm text-pink-400">📁 ${api.category}</p>
             ${usageMsg}
             ${button}
@@ -104,12 +130,7 @@
     }
 
     async function buyApi(apiId, btn) {
-      if (!apiId) return alert("Invalid API ID.");
-
-      const confirmBuy = confirm("Buy this API?");
-      if (!confirmBuy) return;
-
-      // Disable the button
+      if (!apiId) return showPopup("Invalid API ID.");
       btn.disabled = true;
       btn.innerText = "⏳ Purchasing...";
 
@@ -121,12 +142,10 @@
         });
 
         const data = await res.json();
-        alert(data.message);
-
-        // Refresh list after success or failure
-        fetchMarketplaceApis();
+        showPopup(data.message);
+        await fetchMarketplaceApis();
       } catch (err) {
-        alert("Something went wrong. Please try again.");
+        showPopup("Something went wrong. Please try again.");
         btn.disabled = false;
         btn.innerText = "🛍 Buy";
       }
@@ -148,7 +167,6 @@
         "ALL": null
       };
       if (group === "ALL") return displayApis(allApis);
-
       const chars = map[group];
       const filtered = allApis.filter(api => chars.includes(api.name[0].toLowerCase()));
       displayApis(filtered);
@@ -157,9 +175,31 @@
     function filterByCoins() {
       const maxCoins = document.getElementById("coin-filter").value;
       if (maxCoins === "all") return displayApis(allApis);
-
       const filtered = allApis.filter(api => (api.price || 0) <= parseInt(maxCoins));
       displayApis(filtered);
+    }
+
+    // Show Modal Popup
+    function showPopup(message, callback = null) {
+      const popup = document.getElementById("popup");
+      const popupMsg = document.getElementById("popup-message");
+      popupMsg.innerText = message;
+      popup.classList.remove("hidden");
+
+      // Optional callback on close
+      popup.dataset.callback = callback ? "yes" : "";
+      popup.dataset.callbackFunc = callback ? callback.toString() : "";
+    }
+
+    // Close Modal
+    function closePopup() {
+      const popup = document.getElementById("popup");
+      popup.classList.add("hidden");
+
+      // Trigger callback if available
+      if (popup.dataset.callback === "yes") {
+        window.location.href = "index.html";
+      }
     }
 
     fetchMarketplaceApis();
