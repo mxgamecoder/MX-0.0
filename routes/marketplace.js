@@ -6,6 +6,19 @@ const User = require('../models/User');
 const fs = require('fs');
 const path = require('path');
 
+router.get('/user/owned-apis/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    res.json({ success: true, owned: user.ownedAPIs || [] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 // GET: Load APIs from local JSON file
 router.get('/json', async (req, res) => {
   try {
