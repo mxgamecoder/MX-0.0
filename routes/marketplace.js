@@ -4,8 +4,13 @@ const router = express.Router();
 const MarketplaceAPI = require('../models/MarketplaceAPI');
 
 // POST: Upload a new API to marketplace
+// POST: Upload a new API to marketplace
 router.post('/upload', async (req, res) => {
-  const { name, category, description, createdBy, price, duration, available } = req.body;
+  const {
+    name, category, description,
+    createdBy, price, duration, available,
+    usageMessage // 👈 Receive from frontend
+  } = req.body;
 
   const newApi = new MarketplaceAPI({
     name,
@@ -15,7 +20,8 @@ router.post('/upload', async (req, res) => {
     price,
     duration,
     available,
-    filePath: `${category}/${name}`
+    filePath: `${category}/${name}`,
+    usageMessage // 👈 Save it
   });
 
   await newApi.save();
