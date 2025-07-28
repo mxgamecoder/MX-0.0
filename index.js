@@ -43,6 +43,22 @@ app.get('/docs', (req, res) => {
     tip: "Get your API key by logging into the dashboard and clicking 'API Key' on the sidebar."
   });
 });
+app.get('/status-check/:type/:category', async (req, res) => {
+  const { type, category } = req.params;
+
+  const validMap = {
+    fun: Object.keys(funCategories),
+    jest: jestCategories,
+    nsfw: nsfwCategories,
+    theend: ['ai']
+  };
+
+  if (!validMap[type] || !validMap[type].includes(category)) {
+    return res.status(404).json({ success: false, message: "Endpoint not found" });
+  }
+
+  res.json({ success: true, message: "Endpoint available" });
+});
 // ========== Auth Routes ==========
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
