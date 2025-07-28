@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MXAPI Marketplace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen px-4 py-6">
+  <h1 class="text-3xl font-bold mb-4 text-center">🛒 API Marketplace</h1>
+
+  <!-- Search -->
+  <div class="flex justify-center mb-4">
+    <input id="searchInput" type="text" placeholder="Search for an API..." class="p-2 rounded w-full max-w-md text-black" />
+  </div>
+
+  <!-- Alphabet Filters -->
+  <div class="flex flex-wrap justify-center gap-2 mb-6 text-sm font-medium">
+    <button onclick="filterGroup('A-E')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">A–E</button>
+    <button onclick="filterGroup('F-I')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">F–I</button>
+    <button onclick="filterGroup('J-O')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">J–O</button>
+    <button onclick="filterGroup('P-T')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">P–T</button>
+    <button onclick="filterGroup('U-Z')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">U–Z</button>
+    <button onclick="filterGroup('ALL')" class="bg-purple-700 hover:bg-purple-600 px-3 py-1 rounded">ALL</button>
+  </div>
+
+  <!-- Result Area -->
+  <div id="apiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- APIs will be injected here -->
+  </div>
+
+  <script>
+    let allApis = [];
+
+    // Load from MongoDB and JSON
+    async function fetchMarketplaceApis() {
+      try {
+        const [mongoRes, jsonRes] = await Promise.all([
+          fetch('/marketplace/all'),
+          fetch('/marketplace/json')
+        ]);
+        const mongoData = await mongoRes.json();
+        const jsonData = await jsonRes.json();
+        allApis = [...mongoData.apis, ...jsonData.apis];
+        displayApis(allApis);
+      } catch (err) {
+        console.error("Error fetching APIs:", err);
+      }
+    }
+
+    // Show APIs
+    function displayApis(apis) {
+      const container = document.getElementById('apiList');
+      container.innerHTML = '';
+
+      if (!apis.length) {
+        container.innerHTML = `<div class="col-span-full text-center text-yellow-400">Not available yet 😞. Try again or contact admin.</div>`;
+        return;
+      }
+
+      apis.forEach(api => {
+        const image = api.image || 'https://i.ibb.co/JjMphBCP/avatar.jpg';
+        const name = api.name || api.route || "Unnamed";
+        const usage = api.usageMessage ? `<p class="text-sm mt-2 text-green-400">🔧 Usage: ${api.usageMessage}</p>` : '';
+        
+        container.innerHTML += `
+          <div class="bg-gray-800 p-4 rounded-lg shadow">
+            <img src="${image}" class="w-full h-40 object-cover rounded mb-3" />
+            <h2 class="text-xl font-bold">${name}</h2>
+            <p class="text-sm text-gray-300">${api.description || 'No description'}</p>
+            <p class="text-sm text-blue-400">💰 ${api.price || 0} Coins</p>
+            <p class="text-sm text-pink-400">📁 ${api.category || api.type}</p>
+            ${usage}
+          </div>
+        `;
+      });
+    }
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', function () {
+      const term = this.value.toLowerCase();
+      const filtered = allApis.filter(api =>
+        (api.name || '').toLowerCase().includes(term) ||
+        (api.route || '').toLowerCase().includes(term)
+      );
+      displayApis(filtered);
+    });
+
+    // Group filter
+    function filterGroup(range) {
+      if (range === 'ALL') return displayApis(allApis);
+
+      const [start, end] = range.split('-');
+      const regex = new RegExp(`^[${start}-${end}]`, 'i');
+      const filtered = allApis.filter(api => regex.test(api.name || api.route || ''));
+      displayApis(filtered);
+    }
+
+    fetchMarketplaceApis();
+  </script>
+</body>
+</html>
