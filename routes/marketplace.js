@@ -36,13 +36,20 @@ router.get('/user/owned-apis/:userId', async (req, res) => {
   }
 });
 
-// GET: Load APIs from local JSON file
+// GET: Load APIs from local JSON file and inject _id if missing
 router.get('/json', async (req, res) => {
   try {
     const filePath = path.join(__dirname, '../data/marketplace-data.json');
     const data = fs.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(data);
-    res.json({ success: true, apis: parsed });
+
+    // Inject fake _id if not present
+    const withId = parsed.map((api, index) => ({
+      _id: api._id || `json_api_${index + 1}`,
+      ...api
+    }));
+
+    res.json({ success: true, apis: withId });
   } catch (err) {
     console.error('[MARKETPLACE JSON ERROR]', err);
     res.status(500).json({ success: false, error: 'Failed to load marketplace APIs from JSON' });
@@ -91,6 +98,11 @@ router.get('/all', async (req, res) => {
 router.post('/buy', async (req, res) => {
   const { userId, apiId } = req.body;
 
+  // ❌ Prevent buying static JSON APIs
+  if (apiId.startsWith('json_api_')) {
+    return res.status(400).json({ success: false, message: 'Static APIs cannot be purchased.' });
+  }
+
   const api = await MarketplaceAPI.findById(apiId);
   const user = await User.findById(userId);
 
@@ -100,7 +112,6 @@ router.post('/buy', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Not enough coins 💰' });
   }
 
-  // ✅ Fix for both string and object format
   const alreadyOwned = user.ownedAPIs.some(entry => {
     if (typeof entry === 'string') return entry === api.filePath;
     return entry.name === api.name && entry.category === api.category;
@@ -110,7 +121,6 @@ router.post('/buy', async (req, res) => {
     return res.status(400).json({ success: false, message: 'You already own this API' });
   }
 
-  // 🟩 Add to user
   user.coins -= api.price;
   user.ownedAPIs.push({
     name: api.name,
