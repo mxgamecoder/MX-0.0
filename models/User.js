@@ -16,17 +16,19 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     sparse: true
   },
-  ownedApis: {
-  type: [String], // Array of API IDs or names
-  default: []
-},
+  ownedApis: [{
+    name: String,
+    category: String,
+    filePath: String,
+    purchasedAt: Date
+  }],
   apiKeyRegens: {
     type: Number,
     default: 0
   },
   plan: { type: String, default: 'free' },
 
-  // 👉 Newly added
+  // Newly added
   coins: { type: Number, default: 0 },
   requestCount: { type: Number, default: 0 },
   monthlyReset: { type: Date }
