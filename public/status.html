@@ -5,60 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🧠 MX API Status</title>
   <script>
-  const token = localStorage.getItem('mxapi_token');
-  const id = localStorage.getItem('mxapi_id');
+    const token = localStorage.getItem('mxapi_token');
+    const id = localStorage.getItem('mxapi_id');
 
-  // If token or ID is missing, block access
-  if (!token || !id) {
-    window.location.href = "index.html"; // redirect to login
-  }
-</script>
+    if (!token || !id) {
+      window.location.href = "index.html";
+    }
+  </script>
   <style>
     :root {
       --bg-color: #121212;
       --card-bg: #1e1e1e;
-      --text-color: #f5f5f5;
+      --text-color: #f0f0f0;
+      --accent: #00bcd4;
+      --accent-hover: #0097a7;
       --ok-color: #00e676;
       --warn-color: #ffeb3b;
       --fail-color: #ff5252;
-      --glow: 0 0 10px rgba(0, 188, 212, 0.5);
     }
 
     * {
-      box-sizing: border-box;
-      padding: 0;
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
       background: var(--bg-color);
       color: var(--text-color);
-      padding: 2rem 1rem;
+      font-family: "Segoe UI", sans-serif;
+      padding: 1rem;
     }
 
     h1 {
       text-align: center;
       margin-bottom: 2rem;
-      font-size: 2rem;
-      color: var(--text-color);
     }
 
     .group {
       background: var(--card-bg);
       border-radius: 12px;
-      padding: 1rem 1.2rem;
+      padding: 1rem;
       margin-bottom: 2rem;
-      box-shadow: var(--glow);
+      box-shadow: 0 0 10px rgba(0, 188, 212, 0.1);
     }
 
     .group-title {
       font-size: 1.3rem;
       font-weight: bold;
-      margin-bottom: 1rem;
-      color: #00bcd4;
-      border-bottom: 1px solid #00bcd4;
+      color: var(--accent);
+      border-bottom: 1px solid var(--accent);
       padding-bottom: 0.3rem;
+      margin-bottom: 1rem;
     }
 
     .endpoint {
@@ -85,32 +83,28 @@
       font-size: 0.9rem;
       padding: 0.4rem 0.6rem;
       border-radius: 8px;
-      transition: all 0.2s ease;
     }
 
     .ok {
       background: var(--ok-color);
       color: #000;
-      box-shadow: 0 0 5px var(--ok-color);
     }
 
     .warn {
       background: var(--warn-color);
       color: #222;
-      box-shadow: 0 0 5px var(--warn-color);
     }
 
     .fail {
       background: var(--fail-color);
       color: #fff;
-      box-shadow: 0 0 5px var(--fail-color);
     }
 
     .loader {
       width: 18px;
       height: 18px;
       border: 3px solid #444;
-      border-top: 3px solid #00bcd4;
+      border-top: 3px solid var(--accent);
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: auto;
@@ -119,48 +113,20 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-
-    .note {
-      text-align: center;
-      margin-top: 2rem;
-      color: #888;
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 600px) {
-      .endpoint {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.4rem;
-      }
-
-      .status {
-        align-self: flex-end;
-      }
-    }
   </style>
 </head>
 <body>
 
 <h1>📊 MX API Status Dashboard</h1>
-
 <div id="statusContainer">Loading...</div>
-<div class="note">🔁 This page auto-checks all endpoints live.</div>
 
 <script>
-const statusContainer = document.getElementById('statusContainer');
-
-// 🔐 Get API Key
 const apiKey = localStorage.getItem("mxapi_apikey");
+const statusContainer = document.getElementById("statusContainer");
 
-// ❌ Block everything if missing
 if (!apiKey) {
-  alert(`⚠️ Your API Key is missing.
-
-This might happen after a system update. Please return to the dashboard, click the sidebar, scroll down, and log out. Then log in again.
-
-This is a normal action.`);
-  throw new Error("API key missing. Aborting...");
+  alert("API Key missing. Please log out and log in again.");
+  throw new Error("API key missing");
 }
 
 const apiSources = {
@@ -172,15 +138,12 @@ const apiSources = {
 
 async function fetchAllStatuses() {
   statusContainer.innerHTML = '';
-
   for (const [groupName, baseUrl] of Object.entries(apiSources)) {
     try {
       const res = await fetch(`${baseUrl}?meka=${apiKey}`);
       const data = await res.json();
-      const categories = data.categories;
-
-      if (Array.isArray(categories)) {
-        buildGroup(groupName, baseUrl.replace('/', ''), categories);
+      if (Array.isArray(data.categories)) {
+        buildGroup(groupName, baseUrl.replace('/', ''), data.categories);
       } else {
         showError(groupName, "⚠️ Invalid response format");
       }
@@ -209,7 +172,7 @@ function buildGroup(groupName, type, endpoints) {
 
     const statusSpan = document.createElement('span');
     statusSpan.className = 'status';
-    statusSpan.innerHTML = `<div class="loader"></div>`;
+    statusSpan.innerHTML = '<div class="loader"></div>';
 
     endpointDiv.appendChild(nameSpan);
     endpointDiv.appendChild(statusSpan);
@@ -244,7 +207,7 @@ function checkStatus(url, statusElement) {
 function showError(groupName, message) {
   const group = document.createElement('div');
   group.className = 'group';
-  group.innerHTML = `<div class="group-title">${groupName}</div><div style="color:#ff5252;">${message}</div>`;
+  group.innerHTML = `<div class="group-title">${groupName}</div><div style="color:var(--fail-color);">${message}</div>`;
   statusContainer.appendChild(group);
 }
 
