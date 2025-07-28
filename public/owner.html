@@ -41,7 +41,7 @@
         });
 
         const data = await res.json();
-        ownedApis = data.ownedApis || [];
+        ownedApis = data.owned || [];
 
         const container = document.getElementById('apiList');
         const empty = document.getElementById('emptyState');
