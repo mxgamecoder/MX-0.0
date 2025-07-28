@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Joke API",
+    "route": "/fun/joke",
+    "category": "Fun",
+    "description": "Returns a funny joke 😂",
+    "creator": "MX-GΔMΞCØDΞR",
+    "price": 10,
+    "duration": 0,
+    "available": 999,
+    "type": "fun",
+    "image": "https://i.ibb.co/JjMphBCP/avatar.jpg"
+  },
+  {
+    "name": "Cat Image",
+    "route": "/jest/cat",
+    "category": "Image",
+    "description": "Sends a random cute cat 🐱 image",
+    "creator": "MX-GΔMΞCØDΞR",
+    "price": 15,
+    "duration": 0,
+    "available": 100,
+    "type": "jest",
+    "image": "https://i.ibb.co/JjMphBCP/avatar.jpg"
+  }
+  // Add more here...
+]
