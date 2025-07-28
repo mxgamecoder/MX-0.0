@@ -25,26 +25,23 @@
   </div>
 
   <p id="emptyState" class="text-center mt-6 hidden">🙁 You have no owned APIs yet.</p>
-  <p id="notFound" class="text-center mt-6 hidden">🛒 You don’t own this API. Please purchase it.</p>
+  <p id="notFound" class="text-center mt-6 hidden">🛒 No API matches your search. Try again or contact admin.</p>
 
   <script>
     const token = localStorage.getItem('mxapi_token');
-    const id = localStorage.getItem('mxapi_id');
-    if (!token || !id) window.location.href = 'index.html';
+    const userId = localStorage.getItem('mxapi_id');
+    if (!token || !userId) window.location.href = 'index.html';
 
     let ownedApis = [];
 
     async function loadOwnedApis() {
       try {
-        const res = await fetch('/api/user/get-owned-apis', {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        const res = await fetch(`/api/marketplace/user/owned-apis/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        const userData = await res.json();
-        ownedApis = userData.ownedApis || [];
+        const data = await res.json();
+        ownedApis = data.ownedApis || [];
 
         const container = document.getElementById('apiList');
         const empty = document.getElementById('emptyState');
@@ -60,12 +57,15 @@
 
         empty.classList.add('hidden');
         ownedApis.forEach(api => {
+          const name = typeof api === 'string'
+            ? api
+            : api.filePath || `${api.category}/${api.name}`;
           const card = document.createElement('div');
           card.className = 'bg-zinc-800 rounded-xl p-4 shadow-md flex items-center gap-4';
           card.innerHTML = `
             <div class="text-3xl">⚙️</div>
             <div>
-              <div class="font-semibold">${api.filePath || `${api.category}/${api.name}`}</div>
+              <div class="font-semibold">${name}</div>
               <div class="text-sm text-gray-400">Available in your account</div>
             </div>
           `;
@@ -83,19 +83,27 @@
       const notFound = document.getElementById('notFound');
 
       container.innerHTML = '';
-      const filtered = ownedApis.filter(api => api.toLowerCase().includes(keyword));
+      const filtered = ownedApis.filter(api => {
+        const name = typeof api === 'string'
+          ? api
+          : api.filePath || `${api.category}/${api.name}`;
+        return name.toLowerCase().includes(keyword);
+      });
 
       if (filtered.length === 0 && ownedApis.length > 0) {
         notFound.classList.remove('hidden');
       } else {
         notFound.classList.add('hidden');
         filtered.forEach(api => {
+          const name = typeof api === 'string'
+            ? api
+            : api.filePath || `${api.category}/${api.name}`;
           const card = document.createElement('div');
           card.className = 'bg-zinc-800 rounded-xl p-4 shadow-md flex items-center gap-4';
           card.innerHTML = `
             <div class="text-3xl">⚙️</div>
             <div>
-              <div class="font-semibold">${api}</div>
+              <div class="font-semibold">${name}</div>
               <div class="text-sm text-gray-400">Available in your account</div>
             </div>
           `;
