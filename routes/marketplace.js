@@ -3,6 +3,22 @@ const express = require('express');
 const router = express.Router();
 const MarketplaceAPI = require('../models/MarketplaceAPI');
 const User = require('../models/User');
+const fs = require('fs');
+const path = require('path');
+
+// GET: Load APIs from local JSON file
+router.get('/json', async (req, res) => {
+  try {
+    const filePath = path.join(__dirname, '../data/marketplace-data.json');
+    const data = fs.readFileSync(filePath, 'utf8');
+    const parsed = JSON.parse(data);
+    res.json({ success: true, apis: parsed });
+  } catch (err) {
+    console.error('[MARKETPLACE JSON ERROR]', err);
+    res.status(500).json({ success: false, error: 'Failed to load marketplace APIs from JSON' });
+  }
+});
+
 // POST: Upload a new API to marketplace
 router.post('/upload', async (req, res) => {
   const {
