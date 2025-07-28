@@ -13,8 +13,6 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5000',
   'https://mxgamecoder-klfx.onrender.com',
 ];
 
@@ -64,6 +62,8 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 const supportRoute = require('./routes/support');
 app.use('/api/support', supportRoute);
+const marketplaceRoutes = require('./routes/marketplace');
+app.use('/api/marketplace', marketplaceRoutes);
 // ========== Static Files ==========
 app.use('/jest', express.static(path.join(__dirname, 'jest')));
 app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
