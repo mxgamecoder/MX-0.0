@@ -35,8 +35,8 @@
     async function fetchMarketplaceApis() {
       try {
         const [mongoRes, jsonRes] = await Promise.all([
-          fetch('/marketplace/all'),
-          fetch('/marketplace/json')
+          fetch('/api/marketplace/all'),
+          fetch('/api/marketplace/json')
         ]);
         const mongoData = await mongoRes.json();
         const jsonData = await jsonRes.json();
