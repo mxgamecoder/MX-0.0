@@ -99,42 +99,68 @@ router.get('/all', async (req, res) => {
 router.post('/buy', async (req, res) => {
   const { userId, apiId } = req.body;
 
+  const user = await User.findOne({ publicUserId: userId });
+  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+  let api;
+  let isStatic = false;
+
+  // Check if it's a static (JSON) API
   if (apiId.startsWith('json_api_')) {
-    return res.status(400).json({ success: false, message: 'Static APIs cannot be purchased.' });
+    try {
+      const filePath = path.join(__dirname, '../data/marketplace-data.json');
+      const jsonData = fs.readFileSync(filePath, 'utf8');
+      const parsed = JSON.parse(jsonData);
+
+      const index = parseInt(apiId.replace('json_api_', '')) - 1;
+      if (parsed[index]) {
+        api = parsed[index];
+        api._id = apiId;
+        isStatic = true;
+      } else {
+        return res.status(404).json({ success: false, message: 'API not found in JSON' });
+      }
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: 'Error reading static API' });
+    }
+  } else {
+    api = await MarketplaceAPI.findById(apiId);
+    if (!api) return res.status(404).json({ success: false, message: 'API not found' });
   }
 
-  const api = await MarketplaceAPI.findById(apiId);
-  const user = await User.findOne({ publicUserId: userId }); // ✅ fixed here
-
-  if (!api || !user) {
-    return res.status(404).json({ success: false, message: 'User or API not found' });
-  }
-
+  // Check coin balance
   if (user.coins < api.price) {
     return res.status(400).json({ success: false, message: 'Not enough coins 💰' });
   }
 
+  // Prevent duplicate purchase
   const alreadyOwned = user.ownedApis.some(entry => {
-    if (typeof entry === 'string') return entry === api.filePath;
-    return entry.name === api.name && entry.category === api.category;
+    return entry.filePath === `${api.category}/${api.name}`;
   });
 
   if (alreadyOwned) {
     return res.status(400).json({ success: false, message: 'You already own this API' });
   }
 
+  // Deduct coins
   user.coins -= api.price;
+
+  // Add to owned APIs
   user.ownedApis.push({
     name: api.name,
     category: api.category,
-    filePath: api.filePath,
+    filePath: `${api.category}/${api.name}`,
     purchasedAt: new Date()
   });
 
-  api.available -= 1;
+  // Update available if it's from MongoDB
+  if (!isStatic) {
+    api.available -= 1;
+    await api.save();
+  }
 
   await user.save();
-  await api.save();
 
   res.json({ success: true, message: 'API purchased successfully 🎉' });
 });
