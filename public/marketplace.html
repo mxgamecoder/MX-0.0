@@ -2,122 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MXAPI Marketplace</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="marketplace.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-white min-h-screen px-4 py-6">
-  <h1 class="text-3xl font-bold mb-4 text-center">🛒 API Marketplace</h1>
+<body class="bg-gray-900 text-white font-sans">
+  <div class="p-4">
+    <h1 class="text-3xl font-bold mb-4">🛒 MXAPI Marketplace</h1>
 
-  <!-- Search -->
-  <div class="flex justify-center mb-4">
-    <input id="searchInput" type="text" placeholder="Search for an API..." class="p-2 rounded w-full max-w-md text-black" />
+    <!-- Search -->
+    <input type="text" id="search" placeholder="🔍 Search for an API..." 
+           class="w-full p-2 mb-4 text-black rounded" oninput="searchApis()"/>
+
+    <!-- A-Z Filters -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      <button onclick="filterGroup('A-E')" class="filter-btn">A–E</button>
+      <button onclick="filterGroup('F-I')" class="filter-btn">F–I</button>
+      <button onclick="filterGroup('J-O')" class="filter-btn">J–O</button>
+      <button onclick="filterGroup('P-T')" class="filter-btn">P–T</button>
+      <button onclick="filterGroup('U-Z')" class="filter-btn">U–Z</button>
+      <button onclick="filterGroup('ALL')" class="filter-btn">ALL</button>
+    </div>
+
+    <!-- APIs -->
+    <div id="api-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- APIs will load here -->
+    </div>
+
+    <!-- Not Found -->
+    <p id="not-found" class="text-center text-red-400 mt-6 hidden">Not available yet 😞 – contact admin</p>
   </div>
 
-  <!-- Alphabet Filters -->
-  <div class="flex flex-wrap justify-center gap-2 mb-6 text-sm font-medium">
-    <button onclick="filterGroup('A-E')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">A–E</button>
-    <button onclick="filterGroup('F-I')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">F–I</button>
-    <button onclick="filterGroup('J-O')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">J–O</button>
-    <button onclick="filterGroup('P-T')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">P–T</button>
-    <button onclick="filterGroup('U-Z')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">U–Z</button>
-    <button onclick="filterGroup('ALL')" class="bg-purple-700 hover:bg-purple-600 px-3 py-1 rounded">ALL</button>
-  </div>
-
-  <!-- Error or Info Message -->
-  <div id="messageArea" class="text-center text-yellow-400 mb-6 hidden"></div>
-
-  <!-- Result Area -->
-  <div id="apiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- APIs will be injected here -->
-  </div>
-
-  <script>
-    let allApis = [];
-
-    async function fetchMarketplaceApis() {
-      try {
-        console.log("Fetching marketplace APIs...");
-        const [mongoRes, jsonRes] = await Promise.all([
-          fetch('/api/marketplace/all'),
-          fetch('/api/marketplace/json')
-        ]);
-
-        if (!mongoRes.ok) throw new Error("MongoDB APIs failed to load.");
-        if (!jsonRes.ok) throw new Error("JSON APIs failed to load.");
-
-        const mongoData = await mongoRes.json();
-        const jsonData = await jsonRes.json();
-
-        console.log("MongoDB APIs:", mongoData);
-        console.log("JSON APIs:", jsonData);
-
-        allApis = [...(mongoData.apis || []), ...(jsonData.apis || [])];
-
-        if (!allApis.length) {
-          return showMessage("Not available yet 😞. Try again later or contact admin.");
-        }
-
-        displayApis(allApis);
-      } catch (err) {
-        console.error("Error fetching APIs:", err);
-        showMessage("⚠️ Could not load marketplace APIs. Check the backend or JSON route.");
-      }
+  <style>
+    .filter-btn {
+      background-color: #2d3748;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
     }
-
-    function showMessage(msg) {
-      const msgDiv = document.getElementById('messageArea');
-      msgDiv.innerText = msg;
-      msgDiv.classList.remove('hidden');
+    .filter-btn:hover {
+      background-color: #4a5568;
     }
-
-    function displayApis(apis) {
-      const container = document.getElementById('apiList');
-      const msgDiv = document.getElementById('messageArea');
-      msgDiv.classList.add('hidden');
-      container.innerHTML = '';
-
-      if (!apis.length) {
-        return showMessage("No matching APIs found 😞.");
-      }
-
-      apis.forEach(api => {
-        const image = api.image || 'https://i.ibb.co/JjMphBCP/avatar.jpg';
-        const name = api.name || api.route || "Unnamed";
-        const usage = api.usageMessage ? `<p class="text-sm mt-2 text-green-400">🔧 Usage: ${api.usageMessage}</p>` : '';
-
-        container.innerHTML += `
-          <div class="bg-gray-800 p-4 rounded-lg shadow">
-            <img src="${image}" class="w-full h-40 object-cover rounded mb-3" />
-            <h2 class="text-xl font-bold">${name}</h2>
-            <p class="text-sm text-gray-300">${api.description || 'No description'}</p>
-            <p class="text-sm text-blue-400">💰 ${api.price || 0} Coins</p>
-            <p class="text-sm text-pink-400">📁 ${api.category || api.type}</p>
-            ${usage}
-          </div>
-        `;
-      });
-    }
-
-    document.getElementById('searchInput').addEventListener('input', function () {
-      const term = this.value.toLowerCase();
-      const filtered = allApis.filter(api =>
-        (api.name || '').toLowerCase().includes(term) ||
-        (api.route || '').toLowerCase().includes(term)
-      );
-      displayApis(filtered);
-    });
-
-    function filterGroup(range) {
-      if (range === 'ALL') return displayApis(allApis);
-
-      const [start, end] = range.split('-');
-      const regex = new RegExp(`^[${start}-${end}]`, 'i');
-      const filtered = allApis.filter(api => regex.test(api.name || api.route || ''));
-      displayApis(filtered);
-    }
-
-    fetchMarketplaceApis();
-  </script>
+  </style>
 </body>
 </html>
