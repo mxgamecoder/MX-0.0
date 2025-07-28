@@ -23,6 +23,11 @@ router.post('/upload', async (req, res) => {
   res.json({ success: true, message: 'API uploaded successfully to marketplace 🎉' });
 });
 
+router.get('/all', async (req, res) => {
+  const apis = await MarketplaceAPI.find({});
+  res.json({ success: true, apis });
+});
+
 // routes/marketplace.js continued
 const User = require('../models/User');
 
