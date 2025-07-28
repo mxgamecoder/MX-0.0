@@ -24,11 +24,16 @@ module.exports = async function checkUsage(req, res, next) {
     usage = new Usage({ userId: user._id });
   }
 
-// ❌ Block any API user no own
-if (!user.ownedApis?.includes(endpoint)) {
+// ❌ Block any API user no own// Extract endpoint parts like: catch/chatgpt → category = 'catch', name = 'chatgpt'
+const [category, name] = endpoint.split('/');
+
+// Check if this user owns the API
+const userOwns = user.ownedApis.find(a => a.name === name && a.category === category);
+
+if (!userOwns) {
   return res.status(403).json({
     success: false,
-    message: "🚫 You do not own this API. Go to dashboard to add it."
+    message: "🚫 You do not own this API. Go to dashboard to rent/buy it."
   });
 }
 
