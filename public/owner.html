@@ -8,7 +8,7 @@
 </head>
 <body class="min-h-screen bg-zinc-950 text-white flex flex-col items-center p-4">
 
-  <h1 class="text-3xl font-bold mb-4 text-cyan-400">🎁 Your Free APIs</h1>
+  <h1 class="text-3xl font-bold mb-4 text-cyan-400">🎁 Your Owned APIs</h1>
 
   <div class="w-full max-w-3xl mb-6">
     <input
@@ -65,7 +65,7 @@
           card.innerHTML = `
             <div class="text-3xl">⚙️</div>
             <div>
-              <div class="font-semibold">${api}</div>
+              <div class="font-semibold">${api.filePath || `${api.category}/${api.name}`}</div>
               <div class="text-sm text-gray-400">Available in your account</div>
             </div>
           `;
