@@ -38,13 +38,13 @@
   <div id="not-found" class="text-red-400 mb-4 hidden">Not available yet 😞. Contact admin if needed.</div>
   <div id="api-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-<!-- Modal Popup -->
-<div id="popup" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 transition-all duration-300 ease-in-out">
-  <div class="bg-gray-900 text-white p-6 rounded-xl w-[90%] max-w-md max-h-[50vh] text-center shadow-2xl transform scale-95 opacity-0 transition-all duration-300 ease-in-out" id="popup-content">
-    <p id="popup-message" class="mb-4 text-lg"></p>
-    <button onclick="closePopup()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded text-white">Okay</button>
+  <!-- Modal Popup -->
+  <div id="popup" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
+    <div class="bg-gray-900 text-white p-6 rounded-xl w-[90%] max-w-md text-center shadow-xl">
+      <p id="popup-message" class="mb-4 text-lg"></p>
+      <button onclick="closePopup()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded text-white">Okay</button>
+    </div>
   </div>
-</div>
 
   <script>
     const token = localStorage.getItem('mxapi_token');
@@ -172,53 +172,35 @@
       displayApis(filtered);
     }
 
-function filterByCoins() {
-  const maxCoins = document.getElementById("coin-filter").value;
-  if (maxCoins === "all") return displayApis(allApis);
-
-  const filtered = allApis.filter(api => (api.price || 0) <= parseInt(maxCoins));
-  if (!filtered.length) {
-    showPopup("No APIs match this coin filter 😢");
-  } else {
-    displayApis(filtered);
-  }
-}
-
-// Show Modal Popup with Animation
-function showPopup(message, callback = null) {
-  const popup = document.getElementById("popup");
-  const popupContent = document.getElementById("popup-content");
-  const popupMsg = document.getElementById("popup-message");
-
-  popupMsg.innerText = message;
-  popup.classList.remove("hidden");
-
-  // Trigger animation
-  setTimeout(() => {
-    popupContent.classList.remove("scale-95", "opacity-0");
-    popupContent.classList.add("scale-100", "opacity-100");
-  }, 10);
-
-  popup.dataset.callback = callback ? "yes" : "";
-  popup.dataset.callbackFunc = callback ? callback.toString() : "";
-}
-
-// Close Modal
-function closePopup() {
-  const popup = document.getElementById("popup");
-  const popupContent = document.getElementById("popup-content");
-
-  // Animate hide
-  popupContent.classList.add("scale-95", "opacity-0");
-  popupContent.classList.remove("scale-100", "opacity-100");
-
-  setTimeout(() => {
-    popup.classList.add("hidden");
-
-    if (popup.dataset.callback === "yes") {
-      window.location.href = "index.html";
+    function filterByCoins() {
+      const maxCoins = document.getElementById("coin-filter").value;
+      if (maxCoins === "all") return displayApis(allApis);
+      const filtered = allApis.filter(api => (api.price || 0) <= parseInt(maxCoins));
+      displayApis(filtered);
     }
-  }, 300);
+
+    // Show Modal Popup
+    function showPopup(message, callback = null) {
+      const popup = document.getElementById("popup");
+      const popupMsg = document.getElementById("popup-message");
+      popupMsg.innerText = message;
+      popup.classList.remove("hidden");
+
+      // Optional callback on close
+      popup.dataset.callback = callback ? "yes" : "";
+      popup.dataset.callbackFunc = callback ? callback.toString() : "";
+    }
+
+    // Close Modal
+    function closePopup() {
+      const popup = document.getElementById("popup");
+      popup.classList.add("hidden");
+
+      // Trigger callback if available
+      if (popup.dataset.callback === "yes") {
+        window.location.href = "index.html";
+      }
+    }
 
     fetchMarketplaceApis();
   </script>
