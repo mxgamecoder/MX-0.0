@@ -56,7 +56,22 @@ app.use('/theend', express.static(path.join(__dirname, 'theend')));
 
 // ======== apikey ===============
 // Protect only /jest, /nsfw, /fun, and /theend
-app.use(['/jest', '/nsfw', '/fun', '/theend'], requireApiKey, checkUsage);
+// 🚫 Don't check API key for category list like /fun, /jest, /nsfw
+app.get('/fun', (req, res) => {
+  res.json({ success: true, message: "Available fun categories.", categories: Object.keys(funCategories) });
+});
+app.get('/jest', (req, res) => {
+  res.json({ success: true, message: "Available jest categories.", categories: jestCategories });
+});
+app.get('/nsfw', (req, res) => {
+  res.json({ success: true, message: "Available nsfw categories.", categories: nsfwCategories });
+});
+app.get('/theend', (req, res) => {
+  res.json({ success: true, message: "Available theend categories.", categories: ['ai'] });
+});
+
+// ✅ Now protect only the real API usage like /fun/joke, /jest/hug etc
+app.use(['/fun/:category', '/jest/:category', '/nsfw/:category', '/theend/:category'], requireApiKey, checkUsage);
 // ========== Random Image Logic ==========
 function serveRandomImage(folderPath, folderUrl) {
   return (req, res) => {
