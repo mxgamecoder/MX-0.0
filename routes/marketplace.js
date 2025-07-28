@@ -5,7 +5,9 @@ const MarketplaceAPI = require('../models/MarketplaceAPI');
 const User = require('../models/User');
 const fs = require('fs');
 const path = require('path');
+const freeApis = require('../data/freeApis'); // ✅ Include free APIs
 
+// Get user's owned APIs including free ones
 router.get('/user/owned-apis/:userId', async (req, res) => {
   const { userId } = req.params;
 
@@ -13,7 +15,22 @@ router.get('/user/owned-apis/:userId', async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    res.json({ success: true, owned: user.ownedAPIs || [] });
+    const userOwned = user.ownedAPIs || [];
+
+    // Convert freeApis to match the shape of ownedAPIs
+    const freeOwned = freeApis.map(fp => {
+      const [category, name] = fp.split('/');
+      return {
+        name,
+        category,
+        filePath: fp,
+        free: true
+      };
+    });
+
+    const combined = [...userOwned, ...freeOwned];
+
+    res.json({ success: true, owned: combined });
   } catch (err) {
     res.status(500).json({ success: false, message: "Server error" });
   }
@@ -42,8 +59,8 @@ router.post('/upload', async (req, res) => {
     price,
     duration,
     available,
-    usageMessage,  // 👈 Already handled
-    image          // ✅ Add this line
+    usageMessage,
+    image
   } = req.body;
 
   const newApi = new MarketplaceAPI({
@@ -56,7 +73,7 @@ router.post('/upload', async (req, res) => {
     available,
     filePath: `${category}/${name}`,
     usageMessage,
-    image // ✅ Save the image into DB
+    image
   });
 
   await newApi.save();
@@ -64,11 +81,13 @@ router.post('/upload', async (req, res) => {
   res.json({ success: true, message: 'API uploaded successfully to marketplace 🎉' });
 });
 
+// GET: All APIs from MongoDB
 router.get('/all', async (req, res) => {
   const apis = await MarketplaceAPI.find({});
   res.json({ success: true, apis });
 });
 
+// POST: Buy an API
 router.post('/buy', async (req, res) => {
   const { userId, apiId } = req.body;
 
@@ -81,7 +100,6 @@ router.post('/buy', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Not enough coins 💰' });
   }
 
-  // Check if already owned
   const alreadyOwned = user.ownedAPIs.find(owned =>
     owned.name === api.name && owned.category === api.category
   );
@@ -89,7 +107,6 @@ router.post('/buy', async (req, res) => {
     return res.status(400).json({ success: false, message: 'You already own this API' });
   }
 
-  // Update both records
   user.coins -= api.price;
   user.ownedAPIs.push({
     name: api.name,
