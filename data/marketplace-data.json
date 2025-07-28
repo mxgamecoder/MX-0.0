@@ -1,27 +1,26 @@
 [
   {
     "name": "Joke API",
-    "route": "/fun/joke",
-    "category": "Fun",
+    "filePath": "fun/joke",
+    "category": "fun",
     "description": "Returns a funny joke 😂",
-    "creator": "MX-GΔMΞCØDΞR",
+    "createdBy": "MX-GΔMΞCØDΞR",
     "price": 10,
     "duration": 0,
     "available": 999,
-    "type": "fun",
+    "usageMessage": "Use this by calling /fun/joke with your API key via ?meka=xxx",
     "image": "https://i.ibb.co/JjMphBCP/avatar.jpg"
   },
   {
     "name": "Cat Image",
-    "route": "/jest/cat",
-    "category": "Image",
+    "filePath": "jest/cat",
+    "category": "jest",
     "description": "Sends a random cute cat 🐱 image",
-    "creator": "MX-GΔMΞCØDΞR",
+    "createdBy": "MX-GΔMΞCØDΞR",
     "price": 15,
     "duration": 0,
     "available": 100,
-    "type": "jest",
+    "usageMessage": "Use this by calling /jest/cat with ?meka=your_key",
     "image": "https://i.ibb.co/JjMphBCP/avatar.jpg"
   }
-  // Add more here...
 ]
