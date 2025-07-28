@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>MXAPI Marketplace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen px-4 py-6">
@@ -23,45 +24,68 @@
     <button onclick="filterGroup('ALL')" class="bg-purple-700 hover:bg-purple-600 px-3 py-1 rounded">ALL</button>
   </div>
 
+  <!-- Error or Info Message -->
+  <div id="messageArea" class="text-center text-yellow-400 mb-6 hidden"></div>
+
   <!-- Result Area -->
-  <div id="apiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div id="apiList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     <!-- APIs will be injected here -->
   </div>
 
   <script>
     let allApis = [];
 
-    // Load from MongoDB and JSON
     async function fetchMarketplaceApis() {
       try {
+        console.log("Fetching marketplace APIs...");
         const [mongoRes, jsonRes] = await Promise.all([
           fetch('/api/marketplace/all'),
           fetch('/api/marketplace/json')
         ]);
+
+        if (!mongoRes.ok) throw new Error("MongoDB APIs failed to load.");
+        if (!jsonRes.ok) throw new Error("JSON APIs failed to load.");
+
         const mongoData = await mongoRes.json();
         const jsonData = await jsonRes.json();
-        allApis = [...mongoData.apis, ...jsonData.apis];
+
+        console.log("MongoDB APIs:", mongoData);
+        console.log("JSON APIs:", jsonData);
+
+        allApis = [...(mongoData.apis || []), ...(jsonData.apis || [])];
+
+        if (!allApis.length) {
+          return showMessage("Not available yet 😞. Try again later or contact admin.");
+        }
+
         displayApis(allApis);
       } catch (err) {
         console.error("Error fetching APIs:", err);
+        showMessage("⚠️ Could not load marketplace APIs. Check the backend or JSON route.");
       }
     }
 
-    // Show APIs
+    function showMessage(msg) {
+      const msgDiv = document.getElementById('messageArea');
+      msgDiv.innerText = msg;
+      msgDiv.classList.remove('hidden');
+    }
+
     function displayApis(apis) {
       const container = document.getElementById('apiList');
+      const msgDiv = document.getElementById('messageArea');
+      msgDiv.classList.add('hidden');
       container.innerHTML = '';
 
       if (!apis.length) {
-        container.innerHTML = `<div class="col-span-full text-center text-yellow-400">Not available yet 😞. Try again or contact admin.</div>`;
-        return;
+        return showMessage("No matching APIs found 😞.");
       }
 
       apis.forEach(api => {
         const image = api.image || 'https://i.ibb.co/JjMphBCP/avatar.jpg';
         const name = api.name || api.route || "Unnamed";
         const usage = api.usageMessage ? `<p class="text-sm mt-2 text-green-400">🔧 Usage: ${api.usageMessage}</p>` : '';
-        
+
         container.innerHTML += `
           <div class="bg-gray-800 p-4 rounded-lg shadow">
             <img src="${image}" class="w-full h-40 object-cover rounded mb-3" />
@@ -75,7 +99,6 @@
       });
     }
 
-    // Search
     document.getElementById('searchInput').addEventListener('input', function () {
       const term = this.value.toLowerCase();
       const filtered = allApis.filter(api =>
@@ -85,7 +108,6 @@
       displayApis(filtered);
     });
 
-    // Group filter
     function filterGroup(range) {
       if (range === 'ALL') return displayApis(allApis);
 
