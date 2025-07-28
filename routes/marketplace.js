@@ -8,7 +8,6 @@ const path = require('path');
 const freeApis = require('../data/freeApis'); // ✅ Include free APIs
 
 // Get user's owned APIs including free ones
-// Get user's owned APIs including free ones
 router.get('/user/owned-apis/:userId', async (req, res) => {
   const { userId } = req.params;
 
@@ -100,15 +99,16 @@ router.get('/all', async (req, res) => {
 router.post('/buy', async (req, res) => {
   const { userId, apiId } = req.body;
 
-  // ❌ Prevent buying static JSON APIs
   if (apiId.startsWith('json_api_')) {
     return res.status(400).json({ success: false, message: 'Static APIs cannot be purchased.' });
   }
 
   const api = await MarketplaceAPI.findById(apiId);
-  const user = await User.findById(userId);
+  const user = await User.findOne({ publicUserId: userId }); // ✅ fixed here
 
-  if (!api || !user) return res.status(404).json({ success: false, message: 'User or API not found' });
+  if (!api || !user) {
+    return res.status(404).json({ success: false, message: 'User or API not found' });
+  }
 
   if (user.coins < api.price) {
     return res.status(400).json({ success: false, message: 'Not enough coins 💰' });
@@ -138,4 +138,5 @@ router.post('/buy', async (req, res) => {
 
   res.json({ success: true, message: 'API purchased successfully 🎉' });
 });
+
 module.exports = router;
