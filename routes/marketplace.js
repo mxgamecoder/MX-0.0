@@ -15,7 +15,7 @@ router.get('/user/owned-apis/:userId', async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    const userOwned = user.ownedAPIs || [];
+    const userOwned = user.ownedAPis || [];
 
     // Convert freeApis to match the shape of ownedAPIs
     const freeOwned = freeApis.map(fp => {
@@ -111,7 +111,7 @@ router.post('/buy', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Not enough coins 💰' });
   }
 
-  const alreadyOwned = user.ownedAPIs.some(entry => {
+  const alreadyOwned = user.ownedAPis.some(entry => {
     if (typeof entry === 'string') return entry === api.filePath;
     return entry.name === api.name && entry.category === api.category;
   });
@@ -121,7 +121,7 @@ router.post('/buy', async (req, res) => {
   }
 
   user.coins -= api.price;
-  user.ownedAPIs.push({
+  user.ownedAPis.push({
     name: api.name,
     category: api.category,
     filePath: api.filePath,
