@@ -8,38 +8,50 @@ const plans = require('./plan');
 const usageModel = require('../models/Usage');
 const freeApis = require('../data/freeApis');
 
-// Get owned APIs (for frontend display)
+// ✅ Get owned APIs (for frontend display)
 router.get('/get-owned-apis', meka, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    res.json({ ownedApIs: user.ownedApIs || [] });
+    res.json({ ownedApis: user.ownedApis || [] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
 
+// ✅ Assign free APIs if not yet assigned
 router.post('/assign-free-apis', meka, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    if (user.ownedApIs && user.ownedApIs.length >= 10) {
+    if (user.ownedApis && user.ownedApis.length >= 10) {
       return res.status(400).json({ msg: 'Free APIs already assigned' });
     }
 
-    user.ownedAPIs = freeApis.slice(0, 10); // Give first 10
+    // Convert string list into object format
+    const freeAssigned = freeApis.slice(0, 10).map(fp => {
+      const [category, name] = fp.split('/');
+      return {
+        name,
+        category,
+        filePath: fp
+      };
+    });
+
+    user.ownedApis = freeAssigned;
     await user.save();
 
-    res.json({ msg: 'Free APIs assigned', ownedApis: user.ownedApIs });
+    res.json({ msg: 'Free APIs assigned', ownedApis: user.ownedApis });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
 
+// ✅ Check user usage and limits
 router.get('/usage', async (req, res) => {
   const apiKey = req.query.meka;
 
@@ -54,7 +66,6 @@ router.get('/usage', async (req, res) => {
 
   const plan = plans[user.plan.toLowerCase()] || plans.free;
 
-  // ✅ Create usage doc if it doesn't exist
   let usage = await usageModel.findOne({ userId: user._id });
   if (!usage) {
     usage = await usageModel.create({ userId: user._id });
@@ -73,6 +84,7 @@ router.get('/usage', async (req, res) => {
   });
 });
 
+// ✅ Regenerate API Key (max 3 times)
 router.post('/create-api-key', meka, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -97,7 +109,7 @@ router.post('/create-api-key', meka, async (req, res) => {
   }
 });
 
-// Fetch existing API key
+// ✅ Fetch existing API key
 router.get('/get-api-key', meka, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
