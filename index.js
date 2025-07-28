@@ -114,19 +114,19 @@ const jestCategories = [
 jestCategories.forEach(category => {
   app.get(`/jest/${category}`, serveRandomImage(`jest/${category}`, `/jest/${category}`));
 });
-app.get('/jest', (req, res) => {
+/*app.get('/jest', (req, res) => {
   res.json({ success: true, message: "Available jest categories.", categories: jestCategories });
 });
-
+*/
 // ========== NSFW CATEGORIES ==========
 const nsfwCategories = ['neko', 'waifu', 'shemale', 'blowjob'];
 nsfwCategories.forEach(category => {
   app.get(`/nsfw/${category}`, serveRandomImage(`nsfw/${category}`, `/nsfw/${category}`));
 });
-app.get('/nsfw', (req, res) => {
+/*app.get('/nsfw', (req, res) => {
   res.json({ success: true, message: "Available nsfw categories.", categories: nsfwCategories });
 });
-
+*/
 // ========== FUN CATEGORIES ==========
 const jokes = require('./fun/joke');
 const facts = require('./fun/fact');
@@ -172,10 +172,10 @@ Object.entries(funCategories).forEach(([key, values]) => {
     });
   });
 });
-app.get('/fun', (req, res) => {
+/*app.get('/fun', (req, res) => {
   res.json({ success: true, message: "Available fun categories.", categories: Object.keys(funCategories) });
 });
-
+*/
 // ========== AI ROUTE ==========
 app.post('/theend/ai', async (req, res) => {
   const { prompt } = req.body;
