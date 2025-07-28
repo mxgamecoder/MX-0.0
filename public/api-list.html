@@ -2,335 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧠 MSWORLD API Explorer 2025</title>
-  <script>
-  const token = localStorage.getItem('mxapi_token');
-  const id = localStorage.getItem('mxapi_id');
-
-  // If token or ID is missing, block access
-  if (!token || !id) {
-    window.location.href = "index.html"; // redirect to login
-  }
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My APIs | MXAPI</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
   <style>
-    :root {
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --text-color: #f0f0f0;
-      --accent: #00bcd4;
-      --accent-hover: #0097a7;
-      --danger: #ff5252;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-family: "Segoe UI", sans-serif;
-      padding: 1rem;
+      background-color: #111827;
+    }
+    body * {
+      color: white !important;
     }
 
-    h1, h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-
-    .filter-bar {
-      display: flex;
-      overflow-x: auto;
-      gap: 0.5rem;
-      padding: 1rem;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .filter-bar button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
+    button {
+      background-color: #1f2937;
       padding: 0.5rem 1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.2s;
+      border-radius: 0.5rem;
+      margin: 0.3rem;
+      transition: background-color 0.2s ease;
     }
 
-    .filter-bar button:hover {
-      background: var(--accent-hover);
-    }
-
-    .section {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 0 10px rgba(0, 188, 212, 0.1);
-    }
-
-    .section h2 {
-      margin-bottom: 1rem;
-      color: var(--accent);
-      border-bottom: 1px solid var(--accent);
-      padding-bottom: 0.5rem;
-      text-align: left;
-    }
-
-    .category-list button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 0.7rem 1rem;
-      margin: 0.3rem 0;
-      background: #2a2a2a;
-      border: none;
-      color: #fff;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .category-list button:hover {
-      background: #383838;
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      z-index: 9999;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .overlay-content {
-      background: var(--card-bg);
-      padding: 2rem;
-      border-radius: 12px;
-      max-width: 600px;
-      width: 100%;
-      color: var(--text-color);
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 0 20px rgba(0, 188, 212, 0.2);
-      text-align: center;
-    }
-
-    .overlay-content img {
-      max-width: 100%;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-    }
-
-    .overlay-content > button {
-      background: var(--danger);
-      color: white;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      cursor: pointer;
-    }
-
-    .overlay-content > button:hover {
-      background: #d32f2f;
-    }
-
-    #resultActions {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-    }
-
-    #resultActions button,
-    #resultActions a button {
-      background: var(--accent);
-      color: white;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #resultActions button:hover,
-    #resultActions a button:hover {
-      background: var(--accent-hover);
+    button:hover {
+      background-color: #374151;
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center justify-start p-4">
+  <h1 class="text-2xl font-bold my-4">🎁 Your Free APIs</h1>
 
-  <h1>⚡ MSWORLD API Explorer</h1>
-
-  <div class="filter-bar">
-    <button onclick="filterRange('A', 'E')">A–E</button>
-    <button onclick="filterRange('F', 'K')">F–K</button>
-    <button onclick="filterRange('L', 'P')">L–P</button>
-    <button onclick="filterRange('Q', 'T')">Q–T</button>
-    <button onclick="filterRange('U', 'Z')">U–Z</button>
-    <button onclick="resetFilters()">🔁 Reset</button>
+  <div class="w-full max-w-xl mb-6">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="🔍 Search your free APIs..."
+      class="w-full p-3 rounded-lg bg-gray-700 text-white border-none focus:outline-none"
+      oninput="filterApis(this.value)"
+    />
   </div>
 
-  <div class="section">
-    <h2>🔞 NSFW</h2>
-    <div class="category-list" id="nsfwList"></div>
+  <div id="apiList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl">
+    <!-- APIs will be inserted here -->
   </div>
 
-  <div class="section">
-    <h2>🎭 Jest</h2>
-    <div class="category-list" id="jestList"></div>
-  </div>
+  <p id="emptyState" class="text-center mt-6 hidden">🙁 You have no owned APIs yet.</p>
 
-  <div class="section">
-    <h2>🎈 Fun</h2>
-    <div class="category-list" id="funList"></div>
-  </div>
-  
-  <div class="section">
-    <h2>👾 Theend</h2>
-    <div class="category-list" id="funList"></div>
-  </div>
+  <script>
+    const token = localStorage.getItem('mxapi_token');
+    const id = localStorage.getItem('mxapi_id');
 
-  <div id="resultOverlay" class="overlay hidden">
-    <div class="overlay-content">
-      <button onclick="closeResult()">❌ Close</button>
-      <div id="resultContent"></div>
-      <div id="resultActions"></div>
-    </div>
-  </div>
-
-<script>
-  const allCategories = { nsfw: [], jest: [], fun: [], theend: [] };
-  let currentCategory = '', currentType = '', currentIndex = 0;
-  const apiKey = localStorage.getItem("mxapi_apikey");
-
-  // First check if API key is available before anything
-  if (!apiKey) {
-    alert(`⚠️ Your API Key is missing. 
-
-This can happen after a platform update. Please go back to the dashboard, click on the sidebar, scroll down and select "Logout", then log back in.
-
-This action is normal.`);
-    throw new Error("API key missing");
-  }
-
-  async function fetchCategories(route, listId, type) {
-    const res = await fetch(`/${route}?meka=${apiKey}`);
-    const data = await res.json();
-    allCategories[route] = data.categories;
-
-    const container = document.getElementById(listId);
-    container.innerHTML = '';
-    data.categories.forEach(cat => {
-      const btn = document.createElement("button");
-      btn.textContent = cat;
-      btn.onclick = () => {
-        currentIndex = 0;
-        fetchResult(`${route}/${cat}`, type, cat);
-      };
-      container.appendChild(btn);
-    });
-  }
-
-  async function fetchResult(endpoint, type, catName) {
-    currentCategory = catName;
-    currentType = type;
-
-    const res = await fetch(`/${endpoint}?meka=${apiKey}`);
-    const data = await res.json();
-
-    document.getElementById("resultOverlay").classList.remove("hidden");
-
-    let content = '';
-    if (type === 'image') {
-      content = `<img src="${data.imageUrl}" alt="Image Result">`;
-      document.getElementById("resultActions").innerHTML = `
-        <a href="${data.imageUrl}" download><button>💾 Download</button></a>
-        <button id="nextBtn" onclick="showNext()">➡️ Next</button>
-      `;
-    } else {
-      content = `<p>${data.content}</p>`;
-      document.getElementById("resultActions").innerHTML = `
-        <button id="nextBtn" onclick="showNext()">➡️ Next</button>
-      `;
+    if (!token || !id) {
+      window.location.href = 'index.html';
     }
 
-    document.getElementById("resultContent").innerHTML = content;
-  }
+    let ownedApis = [];
 
-  async function showNext() {
-    const btn = document.getElementById("nextBtn");
-    btn.disabled = true;
-    btn.textContent = "Nextting...";
+    async function loadOwnedApis() {
+      try {
+        const res = await fetch('/api/user/assign-free-apis', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
-    const endpoint = findEndpoint(currentCategory);
-    if (!endpoint) return;
+        const userData = await res.json();
+        ownedApis = userData.ownedApis || [];
 
-    await fetchResult(endpoint, currentType, currentCategory);
-    btn.disabled = false;
-    btn.textContent = "➡️ Next";
-  }
+        const container = document.getElementById('apiList');
+        const empty = document.getElementById('emptyState');
 
-  function findEndpoint(category) {
-    for (let type in allCategories) {
-      if (allCategories[type].includes(category)) {
-        return `${type}/${category}`;
+        container.innerHTML = '';
+        if (ownedApis.length === 0) {
+          empty.classList.remove('hidden');
+          return;
+        }
+
+        empty.classList.add('hidden');
+        ownedApis.forEach(api => addApiCard(api));
+      } catch (err) {
+        console.error(err);
+        alert("⚠️ Failed to load your APIs.");
       }
     }
-    return null;
-  }
 
-  function closeResult() {
-    document.getElementById("resultOverlay").classList.add("hidden");
-    document.getElementById("resultContent").innerHTML = "";
-    document.getElementById("resultActions").innerHTML = "";
-  }
-
-  function filterRange(startChar, endChar) {
-    for (let type in allCategories) {
-      const list = document.getElementById(type + 'List');
-      list.innerHTML = '';
-      allCategories[type].forEach(cat => {
-        const first = cat[0].toUpperCase();
-        if (first >= startChar && first <= endChar) {
-          const btn = document.createElement("button");
-          btn.textContent = cat;
-          btn.onclick = () => fetchResult(`${type}/${cat}`, 'image', cat);
-          list.appendChild(btn);
-        }
-      });
+    function addApiCard(apiName) {
+      const card = document.createElement('div');
+      card.className = 'bg-gray-800 rounded-xl p-4 shadow-md flex items-center gap-4';
+      card.innerHTML = `
+        <div class="text-3xl">⚙️</div>
+        <div>
+          <div class="font-semibold">${apiName}</div>
+          <div class="text-sm text-gray-400">Available in your account</div>
+        </div>
+      `;
+      document.getElementById('apiList').appendChild(card);
     }
-  }
 
-  function resetFilters() {
-    fetchAll();
-  }
+    function filterApis(query) {
+      const container = document.getElementById('apiList');
+      container.innerHTML = '';
 
-  async function fetchAll() {
-    await fetchCategories("nsfw", "nsfwList", "image");
-    await fetchCategories("jest", "jestList", "image");
-    await fetchCategories("fun", "funList", "text");
-    await fetchCategories("theend", "theendList", "text");
-  }
+      const filtered = ownedApis.filter(api => api.toLowerCase().includes(query.toLowerCase()));
 
-  fetchAll();
-</script>
+      if (filtered.length === 0) {
+        document.getElementById('emptyState').classList.remove('hidden');
+      } else {
+        document.getElementById('emptyState').classList.add('hidden');
+        filtered.forEach(api => addApiCard(api));
+      }
+    }
+
+    loadOwnedApis();
+  </script>
 </body>
 </html>
