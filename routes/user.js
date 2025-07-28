@@ -14,7 +14,7 @@ router.get('/get-owned-apis', meka, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    res.json({ ownedApis: user.ownedApis || [] });
+    res.json({ ownedApIs: user.ownedApIs || [] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
@@ -26,14 +26,14 @@ router.post('/assign-free-apis', meka, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    if (user.ownedApis && user.ownedApis.length >= 10) {
+    if (user.ownedApIs && user.ownedApIs.length >= 10) {
       return res.status(400).json({ msg: 'Free APIs already assigned' });
     }
 
-    user.ownedApis = freeApis.slice(0, 10); // Give first 10
+    user.ownedAPIs = freeApis.slice(0, 10); // Give first 10
     await user.save();
 
-    res.json({ msg: 'Free APIs assigned', ownedApis: user.ownedApis });
+    res.json({ msg: 'Free APIs assigned', ownedApis: user.ownedApIs });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
