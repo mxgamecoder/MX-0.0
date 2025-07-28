@@ -178,7 +178,7 @@ function buildGroup(groupName, type, endpoints) {
     endpointDiv.appendChild(statusSpan);
     group.appendChild(endpointDiv);
 
-    checkStatus(`/${type}/${name}`, statusSpan);
+    checkStatus(`/status-check/${type}/${name}`, statusSpan);
   });
 
   statusContainer.appendChild(group);
