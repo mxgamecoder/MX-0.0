@@ -2,14 +2,19 @@
 const express = require('express');
 const router = express.Router();
 const MarketplaceAPI = require('../models/MarketplaceAPI');
-
-// POST: Upload a new API to marketplace
+const User = require('../models/User');
 // POST: Upload a new API to marketplace
 router.post('/upload', async (req, res) => {
   const {
-    name, category, description,
-    createdBy, price, duration, available,
-    usageMessage // 👈 Receive from frontend
+    name,
+    category,
+    description,
+    createdBy,
+    price,
+    duration,
+    available,
+    usageMessage,  // 👈 Already handled
+    image          // ✅ Add this line
   } = req.body;
 
   const newApi = new MarketplaceAPI({
@@ -21,7 +26,8 @@ router.post('/upload', async (req, res) => {
     duration,
     available,
     filePath: `${category}/${name}`,
-    usageMessage // 👈 Save it
+    usageMessage,
+    image // ✅ Save the image into DB
   });
 
   await newApi.save();
@@ -33,9 +39,6 @@ router.get('/all', async (req, res) => {
   const apis = await MarketplaceAPI.find({});
   res.json({ success: true, apis });
 });
-
-// routes/marketplace.js continued
-const User = require('../models/User');
 
 router.post('/buy', async (req, res) => {
   const { userId, apiId } = req.body;
