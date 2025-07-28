@@ -1,48 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-black text-white">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MXAPI Marketplace</title>
-  <script defer src="marketplace.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white font-sans">
-  <div class="p-4">
-    <h1 class="text-3xl font-bold mb-4">🛒 MXAPI Marketplace</h1>
+<body class="p-4">
+  <h1 class="text-3xl font-bold mb-4">🛒 Marketplace</h1>
 
-    <!-- Search -->
-    <input type="text" id="search" placeholder="🔍 Search for an API..." 
-           class="w-full p-2 mb-4 text-black rounded" oninput="searchApis()"/>
-
-    <!-- A-Z Filters -->
-    <div class="flex flex-wrap gap-2 mb-6">
-      <button onclick="filterGroup('A-E')" class="filter-btn">A–E</button>
-      <button onclick="filterGroup('F-I')" class="filter-btn">F–I</button>
-      <button onclick="filterGroup('J-O')" class="filter-btn">J–O</button>
-      <button onclick="filterGroup('P-T')" class="filter-btn">P–T</button>
-      <button onclick="filterGroup('U-Z')" class="filter-btn">U–Z</button>
-      <button onclick="filterGroup('ALL')" class="filter-btn">ALL</button>
-    </div>
-
-    <!-- APIs -->
-    <div id="api-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- APIs will load here -->
-    </div>
-
-    <!-- Not Found -->
-    <p id="not-found" class="text-center text-red-400 mt-6 hidden">Not available yet 😞 – contact admin</p>
+  <div class="mb-4">
+    <input id="search" type="text" oninput="searchApis()" placeholder="Search for an API..."
+      class="w-full p-2 rounded bg-gray-900 border border-gray-700 text-white placeholder-gray-400">
   </div>
 
-  <style>
-    .filter-btn {
-      background-color: #2d3748;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
+  <div class="flex gap-2 mb-4 flex-wrap">
+    <button onclick="filterGroup('ALL')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">All</button>
+    <button onclick="filterGroup('A-E')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">A-E</button>
+    <button onclick="filterGroup('F-I')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">F-I</button>
+    <button onclick="filterGroup('J-O')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">J-O</button>
+    <button onclick="filterGroup('P-T')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">P-T</button>
+    <button onclick="filterGroup('U-Z')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">U-Z</button>
+  </div>
+
+  <div id="not-found" class="text-red-400 mb-4 hidden">Not available yet 😞. Contact admin if needed.</div>
+  <div id="api-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+  <script>
+    const token = localStorage.getItem('mxapi_token');
+    const userId = localStorage.getItem('mxapi_id');
+    const apiKey = localStorage.getItem('mxapi_apikey');
+
+    if (!token || !userId || !apiKey) {
+      alert("You're missing login or API key. Please go to the dashboard and log out, then log in again.");
+      window.location.href = "index.html";
     }
-    .filter-btn:hover {
-      background-color: #4a5568;
+
+    let allApis = [];
+    let owned = [];
+
+    async function fetchMarketplaceApis() {
+      try {
+        const [dbRes, jsonRes, ownedRes] = await Promise.all([
+          fetch('/api/marketplace/all'),
+          fetch('/api/marketplace/json'),
+          fetch(`/api/marketplace/user/owned-apis/${userId}`)
+        ]);
+
+        const dbData = await dbRes.json();
+        const jsonData = await jsonRes.json();
+        const ownedData = await ownedRes.json();
+
+        owned = ownedData.owned || [];
+
+        allApis = [...(dbData.apis || []), ...(jsonData.apis || [])];
+        displayApis(allApis);
+      } catch (err) {
+        alert("Failed to load marketplace APIs.");
+      }
     }
-  </style>
+
+    function displayApis(apiList) {
+      const container = document.getElementById("api-container");
+      const notFound = document.getElementById("not-found");
+      container.innerHTML = "";
+      notFound.classList.add("hidden");
+
+      if (!apiList.length) {
+        notFound.classList.remove("hidden");
+        return;
+      }
+
+      apiList.forEach(api => {
+        const name = api.name || api.filePath;
+        const image = api.image || "https://i.ibb.co/JjMphBCP/avatar.jpg";
+        const isOwned = owned.some(o => o.name === api.name && o.category === api.category);
+        const usageMsg = api.usageMessage ? `<p class='text-yellow-300 text-sm mt-1'>${api.usageMessage}</p>` : "";
+        const button = isOwned
+          ? `<button disabled class='w-full mt-3 py-2 bg-gray-600 rounded text-white cursor-not-allowed'>✅ Owned</button>`
+          : `<button onclick="buyApi('${api._id || ''}')" class='w-full mt-3 py-2 bg-green-600 hover:bg-green-500 rounded text-white'>🛍 Buy</button>`;
+
+        container.innerHTML += `
+          <div class='bg-gray-800 p-4 rounded shadow'>
+            <img src="${image}" class="h-40 w-full object-cover rounded mb-2" />
+            <h2 class="text-xl font-bold">${name}</h2>
+            <p class="text-sm text-gray-300">${api.description || 'No description'}</p>
+            <p class="text-sm text-blue-400">💰 ${api.price || 0} Coins</p>
+            <p class="text-sm text-pink-400">📁 ${api.category}</p>
+            ${usageMsg}
+            ${button}
+          </div>
+        `;
+      });
+    }
+
+    async function buyApi(apiId) {
+      if (!apiId) return alert("Invalid API ID.");
+      const confirmBuy = confirm("Buy this API?");
+      if (!confirmBuy) return;
+
+      const res = await fetch('/api/marketplace/buy', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, apiId })
+      });
+
+      const data = await res.json();
+      alert(data.message);
+      if (data.success) fetchMarketplaceApis();
+    }
+
+    function searchApis() {
+      const term = document.getElementById("search").value.toLowerCase();
+      const filtered = allApis.filter(api => api.name.toLowerCase().includes(term));
+      displayApis(filtered);
+    }
+
+    function filterGroup(group) {
+      const map = {
+        "A-E": ["a", "b", "c", "d", "e"],
+        "F-I": ["f", "g", "h", "i"],
+        "J-O": ["j", "k", "l", "m", "n", "o"],
+        "P-T": ["p", "q", "r", "s", "t"],
+        "U-Z": ["u", "v", "w", "x", "y", "z"],
+        "ALL": null
+      };
+      if (group === "ALL") return displayApis(allApis);
+
+      const chars = map[group];
+      const filtered = allApis.filter(api => chars.includes(api.name[0].toLowerCase()));
+      displayApis(filtered);
+    }
+
+    fetchMarketplaceApis();
+  </script>
 </body>
 </html>
