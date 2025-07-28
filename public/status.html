@@ -3,224 +3,176 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧠 MSWORLD API Explorer 2025</title>
+  <title>🧠 MX API Status</title>
   <script>
     const token = localStorage.getItem('mxapi_token');
     const id = localStorage.getItem('mxapi_id');
-    if (!token || !id) {
-      window.location.href = "index.html";
-    }
+    if (!token || !id) window.location.href = "index.html";
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#121212] text-white font-sans p-4 min-h-screen">
+<body class="bg-zinc-950 text-white font-sans px-4 py-6">
 
-  <h1 class="text-3xl font-bold text-center mb-4">⚡ MSWORLD API Explorer</h1>
+  <h1 class="text-3xl font-bold text-center text-cyan-400 mb-6">📊 MX API Status Dashboard</h1>
 
   <div class="flex justify-center mb-6">
     <input
       id="searchInput"
       type="text"
-      placeholder="🔍 Search for an API..."
-      class="w-full max-w-xl px-4 py-3 rounded-lg bg-[#1e1e1e] text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-      oninput="filterSearch()"
+      placeholder="🔍 Search endpoint..."
+      class="w-full max-w-md px-4 py-2 rounded-lg bg-zinc-800 text-white border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+      oninput="filterEndpoints()"
     />
   </div>
 
-  <div class="flex flex-wrap gap-2 justify-center mb-6">
-    <button onclick="filterRange('A', 'E')" class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full font-semibold">A–E</button>
-    <button onclick="filterRange('F', 'K')" class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full font-semibold">F–K</button>
-    <button onclick="filterRange('L', 'P')" class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full font-semibold">L–P</button>
-    <button onclick="filterRange('Q', 'T')" class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full font-semibold">Q–T</button>
-    <button onclick="filterRange('U', 'Z')" class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full font-semibold">U–Z</button>
-    <button onclick="resetFilters()" class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-full font-semibold">🔁 Reset</button>
-  </div>
-
-  <!-- Category Sections -->
-  <div class="space-y-8">
-    <div class="bg-[#1e1e1e] p-4 rounded-xl shadow" id="nsfwSection">
-      <h2 class="text-cyan-400 text-xl border-b border-cyan-500 pb-1 mb-2">🔞 NSFW</h2>
-      <div id="nsfwList" class="space-y-2"></div>
-    </div>
-
-    <div class="bg-[#1e1e1e] p-4 rounded-xl shadow" id="jestSection">
-      <h2 class="text-cyan-400 text-xl border-b border-cyan-500 pb-1 mb-2">🎭 Jest</h2>
-      <div id="jestList" class="space-y-2"></div>
-    </div>
-
-    <div class="bg-[#1e1e1e] p-4 rounded-xl shadow" id="funSection">
-      <h2 class="text-cyan-400 text-xl border-b border-cyan-500 pb-1 mb-2">🎈 Fun</h2>
-      <div id="funList" class="space-y-2"></div>
-    </div>
-
-    <div class="bg-[#1e1e1e] p-4 rounded-xl shadow" id="theendSection">
-      <h2 class="text-cyan-400 text-xl border-b border-cyan-500 pb-1 mb-2">👾 Theend</h2>
-      <div id="theendList" class="space-y-2"></div>
-    </div>
-  </div>
-
-  <!-- Result Overlay -->
-  <div id="resultOverlay" class="hidden fixed inset-0 bg-black bg-opacity-70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-    <div class="bg-[#1e1e1e] p-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl text-center">
-      <button onclick="closeResult()" class="mb-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-bold">❌ Close</button>
-      <div id="resultContent" class="mb-4"></div>
-      <div id="resultActions" class="flex flex-wrap justify-center gap-4"></div>
-    </div>
-  </div>
+  <div id="statusContainer" class="space-y-6">Loading...</div>
 
   <script>
     const apiKey = localStorage.getItem("mxapi_apikey");
-    const allCategories = { nsfw: [], jest: [], fun: [], theend: [] };
-    let currentCategory = '', currentType = '', currentIndex = 0;
+    const statusContainer = document.getElementById("statusContainer");
 
     if (!apiKey) {
-      alert(`⚠️ Your API Key is missing.
-
-This can happen after a platform update. Please go back to the dashboard, click on the sidebar, scroll down and select "Logout", then log back in.
-
-This action is normal.`);
+      alert("API Key missing. Please log out and log in again.");
       throw new Error("API key missing");
     }
 
-    async function fetchCategories(route, listId, type) {
-      const res = await fetch(`/${route}?meka=${apiKey}`);
-      const data = await res.json();
-      allCategories[route] = data.categories;
+    const apiSources = {
+      "🎭 Jest": "/jest",
+      "🔞 NSFW": "/nsfw",
+      "🎉 Fun": "/fun",
+      "👾 Theend": "/theend"
+    };
 
-      const container = document.getElementById(listId);
-      container.innerHTML = '';
+    let allGroups = {}; // For search filtering
 
-      if (data.categories.length === 0) {
-        container.innerHTML = `<p class="text-center text-gray-400 py-2">API not available yet 😔</p>`;
-      } else {
-        data.categories.forEach(cat => {
-          const btn = document.createElement("button");
-          btn.textContent = cat;
-          btn.className = "w-full text-left bg-[#2a2a2a] hover:bg-[#383838] px-4 py-2 rounded-lg font-semibold";
-          btn.onclick = () => {
-            currentIndex = 0;
-            fetchResult(`${route}/${cat}`, type, cat);
-          };
-          container.appendChild(btn);
-        });
-      }
-    }
-
-    async function fetchResult(endpoint, type, catName) {
-      currentCategory = catName;
-      currentType = type;
-
-      const res = await fetch(`/${endpoint}?meka=${apiKey}`);
-      const data = await res.json();
-
-      document.getElementById("resultOverlay").classList.remove("hidden");
-
-      let content = '';
-      if (type === 'image') {
-        content = `<img src="${data.imageUrl}" alt="Image Result" class="rounded-lg max-w-full mx-auto mb-4">`;
-        document.getElementById("resultActions").innerHTML = `
-          <a href="${data.imageUrl}" download><button class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-lg font-bold">💾 Download</button></a>
-          <button id="nextBtn" onclick="showNext()" class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-lg font-bold">➡️ Next</button>
-        `;
-      } else {
-        content = `<p class="text-lg">${data.content}</p>`;
-        document.getElementById("resultActions").innerHTML = `
-          <button id="nextBtn" onclick="showNext()" class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-lg font-bold">➡️ Next</button>
-        `;
-      }
-
-      document.getElementById("resultContent").innerHTML = content;
-    }
-
-    async function showNext() {
-      const btn = document.getElementById("nextBtn");
-      btn.disabled = true;
-      btn.textContent = "Nextting...";
-
-      const endpoint = findEndpoint(currentCategory);
-      if (!endpoint) return;
-
-      await fetchResult(endpoint, currentType, currentCategory);
-      btn.disabled = false;
-      btn.textContent = "➡️ Next";
-    }
-
-    function findEndpoint(category) {
-      for (let type in allCategories) {
-        if (allCategories[type].includes(category)) {
-          return `${type}/${category}`;
-        }
-      }
-      return null;
-    }
-
-    function closeResult() {
-      document.getElementById("resultOverlay").classList.add("hidden");
-      document.getElementById("resultContent").innerHTML = "";
-      document.getElementById("resultActions").innerHTML = "";
-    }
-
-    function filterRange(startChar, endChar) {
-      for (let type in allCategories) {
-        const list = document.getElementById(type + 'List');
-        list.innerHTML = '';
-        let found = false;
-
-        allCategories[type].forEach(cat => {
-          const first = cat[0].toUpperCase();
-          if (first >= startChar && first <= endChar) {
-            const btn = document.createElement("button");
-            btn.textContent = cat;
-            btn.className = "w-full text-left bg-[#2a2a2a] hover:bg-[#383838] px-4 py-2 rounded-lg font-semibold";
-            btn.onclick = () => fetchResult(`${type}/${cat}`, type === 'fun' || type === 'theend' ? 'text' : 'image', cat);
-            list.appendChild(btn);
-            found = true;
+    async function fetchAllStatuses() {
+      statusContainer.innerHTML = '';
+      for (const [groupName, baseUrl] of Object.entries(apiSources)) {
+        try {
+          const res = await fetch(`${baseUrl}?meka=${apiKey}`);
+          const data = await res.json();
+          const groupKey = baseUrl.replace('/', '');
+          if (Array.isArray(data.categories)) {
+            allGroups[groupKey] = data.categories;
+            buildGroup(groupName, groupKey, data.categories);
+          } else {
+            showError(groupName, "⚠️ Invalid response format");
           }
-        });
-
-        if (!found) {
-          list.innerHTML = `<p class="text-center text-gray-400 py-2">API not available yet 😔</p>`;
+        } catch (err) {
+          showError(groupName, "❌ Failed to fetch data");
         }
       }
     }
 
-    function resetFilters() {
-      fetchAll();
-      document.getElementById("searchInput").value = "";
+    function buildGroup(groupName, type, endpoints) {
+      const group = document.createElement('div');
+      group.className = 'bg-zinc-900 rounded-xl p-4 shadow-lg';
+      group.dataset.groupType = type;
+
+      const title = document.createElement('div');
+      title.className = 'text-xl font-semibold text-cyan-400 border-b border-cyan-700 pb-1 mb-4';
+      title.textContent = groupName;
+      group.appendChild(title);
+
+      const container = document.createElement('div');
+      container.className = 'space-y-2';
+      container.id = `group-${type}`;
+      group.appendChild(container);
+
+      if (!endpoints || endpoints.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'text-gray-400 text-center';
+        empty.textContent = 'API not available yet 😔';
+        container.appendChild(empty);
+      } else {
+        endpoints.forEach(name => {
+          const row = document.createElement('div');
+          row.className = 'flex justify-between items-center border-b border-zinc-700 pb-2';
+
+          const label = document.createElement('span');
+          label.className = 'font-medium';
+          label.textContent = `/${type}/${name}`;
+
+          const status = document.createElement('span');
+          status.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-zinc-700 text-gray-300';
+          status.innerHTML = `<div class="w-4 h-4 border-2 border-zinc-500 border-t-cyan-400 rounded-full animate-spin mx-auto"></div>`;
+
+          row.appendChild(label);
+          row.appendChild(status);
+          container.appendChild(row);
+
+          checkStatus(`/status-check/${type}/${name}`, status);
+        });
+      }
+
+      statusContainer.appendChild(group);
     }
 
-    function filterSearch() {
+    function checkStatus(url, statusElement) {
+      const start = performance.now();
+      fetch(`${url}?meka=${apiKey}`)
+        .then(res => res.json())
+        .then(data => {
+          const duration = performance.now() - start;
+          if (data.success || data.imageUrl || data.content) {
+            statusElement.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-green-400 text-black';
+            statusElement.textContent = `✅ ${Math.round(duration)}ms`;
+          } else {
+            statusElement.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-yellow-400 text-black';
+            statusElement.textContent = `⚠️ Error`;
+          }
+        })
+        .catch(() => {
+          statusElement.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-red-500 text-white';
+          statusElement.textContent = `❌ Offline`;
+        });
+    }
+
+    function showError(groupName, message) {
+      const group = document.createElement('div');
+      group.className = 'bg-zinc-900 rounded-xl p-4 shadow-lg';
+      group.innerHTML = `<div class="text-xl font-semibold text-cyan-400 border-b border-cyan-700 pb-1 mb-2">${groupName}</div>
+                         <div class="text-red-400">${message}</div>`;
+      statusContainer.appendChild(group);
+    }
+
+    function filterEndpoints() {
       const keyword = document.getElementById("searchInput").value.toLowerCase();
-      for (let type in allCategories) {
-        const list = document.getElementById(type + 'List');
-        list.innerHTML = '';
-        let found = false;
+      for (const type in allGroups) {
+        const container = document.getElementById(`group-${type}`);
+        container.innerHTML = '';
 
-        allCategories[type].forEach(cat => {
-          if (cat.toLowerCase().includes(keyword)) {
-            const btn = document.createElement("button");
-            btn.textContent = cat;
-            btn.className = "w-full text-left bg-[#2a2a2a] hover:bg-[#383838] px-4 py-2 rounded-lg font-semibold";
-            btn.onclick = () => fetchResult(`${type}/${cat}`, type === 'fun' || type === 'theend' ? 'text' : 'image', cat);
-            list.appendChild(btn);
-            found = true;
-          }
-        });
+        const matches = allGroups[type].filter(name => name.toLowerCase().includes(keyword));
 
-        if (!found) {
-          list.innerHTML = `<p class="text-center text-gray-400 py-2">API not available yet 😔</p>`;
+        if (matches.length === 0) {
+          const msg = document.createElement('p');
+          msg.className = 'text-gray-400 text-center';
+          msg.textContent = 'API not available yet 😔';
+          container.appendChild(msg);
+        } else {
+          matches.forEach(name => {
+            const row = document.createElement('div');
+            row.className = 'flex justify-between items-center border-b border-zinc-700 pb-2';
+
+            const label = document.createElement('span');
+            label.className = 'font-medium';
+            label.textContent = `/${type}/${name}`;
+
+            const status = document.createElement('span');
+            status.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-zinc-700 text-gray-300';
+            status.innerHTML = `<div class="w-4 h-4 border-2 border-zinc-500 border-t-cyan-400 rounded-full animate-spin mx-auto"></div>`;
+
+            row.appendChild(label);
+            row.appendChild(status);
+            container.appendChild(row);
+
+            checkStatus(`/status-check/${type}/${name}`, status);
+          });
         }
       }
     }
 
-    async function fetchAll() {
-      await fetchCategories("nsfw", "nsfwList", "image");
-      await fetchCategories("jest", "jestList", "image");
-      await fetchCategories("fun", "funList", "text");
-      await fetchCategories("theend", "theendList", "text");
-    }
-
-    fetchAll();
+    fetchAllStatuses();
   </script>
 </body>
 </html>
