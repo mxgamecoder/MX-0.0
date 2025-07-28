@@ -100,10 +100,13 @@
       if (!confirmBuy) return;
 
       const res = await fetch('/api/marketplace/buy', {
-        method: 'POST',
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, apiId })
-      });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    userId: localStorage.getItem('mxapi_id'),
+    apiId: api._id   // ✅ make sure this is included
+  })
+});
 
       const data = await res.json();
       alert(data.message);
