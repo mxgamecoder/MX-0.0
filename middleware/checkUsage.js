@@ -24,13 +24,13 @@ module.exports = async function checkUsage(req, res, next) {
     usage = new Usage({ userId: user._id });
   }
 
-  // ❌ Reject if user tries premium API without permission
-  if (user.plan === 'free' && !freeApis.includes(endpoint)) {
-    return res.status(403).json({
-      success: false,
-      message: "🚫 This API requires an upgrade to access."
-    });
-  }
+// ❌ Block any API user no own
+if (!user.ownedApis?.includes(endpoint)) {
+  return res.status(403).json({
+    success: false,
+    message: "🚫 You do not own this API. Go to dashboard to add it."
+  });
+}
 
   // ✅ Track usage count
   const plan = plans[user.plan?.toLowerCase()] || plans.free;
