@@ -27,92 +27,83 @@
   <p id="emptyState" class="text-center mt-6 hidden">🙁 You have no owned APIs yet.</p>
   <p id="notFound" class="text-center mt-6 hidden">🛒 No API matches your search. Try again or contact admin.</p>
 
-  <script>
-    const token = localStorage.getItem('mxapi_token');
-    const userId = localStorage.getItem('mxapi_id');
-    if (!token || !userId) window.location.href = 'index.html';
+<script>
+  const token = localStorage.getItem('mxapi_token');
+  const userId = localStorage.getItem('mxapi_id');
+  if (!token || !userId) window.location.href = 'index.html';
 
-    let ownedApis = [];
+  let ownedApis = [];
 
-    async function loadOwnedApis() {
-      try {
-        const res = await fetch(`/api/marketplace/user/owned-apis/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+  async function loadOwnedApis() {
+    try {
+      const res = await fetch(`/api/marketplace/user/owned-apis/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-        const data = await res.json();
-        ownedApis = data.owned || [];
+      const data = await res.json();
+      ownedApis = data.owned || [];
 
-        const container = document.getElementById('apiList');
-        const empty = document.getElementById('emptyState');
-        const notFound = document.getElementById('notFound');
-
-        container.innerHTML = '';
-        notFound.classList.add('hidden');
-
-        if (ownedApis.length === 0) {
-          empty.classList.remove('hidden');
-          return;
-        }
-
-        empty.classList.add('hidden');
-        ownedApis.forEach(api => {
-          const name = typeof api === 'string'
-            ? api
-            : api.filePath || `${api.category}/${api.name}`;
-          const card = document.createElement('div');
-          card.className = 'bg-zinc-800 rounded-xl p-4 shadow-md flex items-center gap-4';
-          card.innerHTML = `
-            <div class="text-3xl">⚙️</div>
-            <div>
-              <div class="font-semibold">${name}</div>
-              <div class="text-sm text-gray-400">Available in your account</div>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error(err);
-        alert("⚠️ Failed to load your APIs.");
-      }
-    }
-
-    function filterApis() {
-      const keyword = document.getElementById('searchInput').value.toLowerCase();
       const container = document.getElementById('apiList');
+      const empty = document.getElementById('emptyState');
       const notFound = document.getElementById('notFound');
 
       container.innerHTML = '';
-      const filtered = ownedApis.filter(api => {
-        const name = typeof api === 'string'
-          ? api
-          : api.filePath || `${api.category}/${api.name}`;
-        return name.toLowerCase().includes(keyword);
-      });
+      notFound.classList.add('hidden');
 
-      if (filtered.length === 0 && ownedApis.length > 0) {
-        notFound.classList.remove('hidden');
-      } else {
-        notFound.classList.add('hidden');
-        filtered.forEach(api => {
-          const name = typeof api === 'string'
-            ? api
-            : api.filePath || `${api.category}/${api.name}`;
-          const card = document.createElement('div');
-          card.className = 'bg-zinc-800 rounded-xl p-4 shadow-md flex items-center gap-4';
-          card.innerHTML = `
-            <div class="text-3xl">⚙️</div>
-            <div>
-              <div class="font-semibold">${name}</div>
-              <div class="text-sm text-gray-400">Available in your account</div>
-            </div>
-          `;
-          container.appendChild(card);
-        });
+      if (ownedApis.length === 0) {
+        empty.classList.remove('hidden');
+        return;
       }
-    }
 
-    loadOwnedApis();
-  </script>
+      empty.classList.add('hidden');
+      ownedApis.forEach(renderApiCard);
+    } catch (err) {
+      console.error(err);
+      alert("⚠️ Failed to load your APIs.");
+    }
+  }
+
+  function renderApiCard(api) {
+    const name = api.name || (typeof api === 'string' ? api : 'Unknown API');
+    const category = api.category || 'general';
+    const description = api.description || 'No description available.';
+    const image = api.image || 'https://i.ibb.co/JjMphBCP/avatar.jpg';
+
+    const card = document.createElement('div');
+    card.className = 'bg-zinc-800 rounded-xl p-3 shadow-md flex gap-4 items-start';
+
+    card.innerHTML = `
+      <img src="${image}" alt="${name}" class="w-12 h-12 object-cover rounded-md border border-zinc-700" />
+      <div class="flex-1">
+        <div class="font-semibold text-cyan-300">${name}</div>
+        <div class="text-sm text-gray-400 mb-1">${category}</div>
+        <p class="text-sm text-gray-300">${description}</p>
+      </div>
+    `;
+
+    document.getElementById('apiList').appendChild(card);
+  }
+
+  function filterApis() {
+    const keyword = document.getElementById('searchInput').value.toLowerCase();
+    const container = document.getElementById('apiList');
+    const notFound = document.getElementById('notFound');
+
+    container.innerHTML = '';
+    const filtered = ownedApis.filter(api => {
+      const name = api.name || (typeof api === 'string' ? api : '');
+      return name.toLowerCase().includes(keyword);
+    });
+
+    if (filtered.length === 0 && ownedApis.length > 0) {
+      notFound.classList.remove('hidden');
+    } else {
+      notFound.classList.add('hidden');
+      filtered.forEach(renderApiCard);
+    }
+  }
+
+  loadOwnedApis();
+</script>
 </body>
 </html>
