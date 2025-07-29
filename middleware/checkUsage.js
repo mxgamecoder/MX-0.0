@@ -24,13 +24,12 @@ module.exports = async function checkUsage(req, res, next) {
     usage = new Usage({ userId: user._id });
   }
 
-// ❌ Block any API user no own// Extract endpoint parts like: catch/chatgpt → category = 'catch', name = 'chatgpt'
+// ❌ Block any API user no own (unless it's a free API)
 const [category, name] = endpoint.split('/');
-
-// Check if this user owns the API
 const userOwns = user.ownedApis.find(a => a.name === name && a.category === category);
+const isFreeApi = freeApis.includes(`${category}/${name}`);
 
-if (!userOwns) {
+if (!userOwns && !isFreeApi) {
   return res.status(403).json({
     success: false,
     message: "🚫 You do not own this API. Go to dashboard to rent/buy it."
@@ -45,16 +44,8 @@ if (!userOwns) {
 
   usage.count += 5; // 👈 still count request usage
 
-  // ✅ Storage logic (5MB per file in /data)
-  try {
-    const dataFolder = path.join(__dirname, '..', 'data');
-    const files = fs.readdirSync(dataFolder).filter(file => fs.statSync(path.join(dataFolder, file)).isFile());
-
-    usage.storage = files.length * 5;
-  } catch (err) {
-    console.error("❌ Failed to read data folder:", err);
-    return res.status(500).json({ success: false, message: "Could not calculate storage" });
-  }
+// ✅ Storage logic based on number of owned APIs (5MB each)
+usage.storage = user.ownedApis.length * 5;
 
   await usage.save();
   next();
