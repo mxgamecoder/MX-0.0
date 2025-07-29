@@ -45,8 +45,8 @@ if (!userOwns && !isFreeApi) {
   usage.count += 5; // 👈 still count request usage
 
 // ✅ Storage logic based on number of owned APIs (5MB each)
-usage.storage = user.ownedApis.length * 5;
-
+const validApis = user.ownedApis.filter(api => api && api.name && api.category);
+usage.storage = validApis.length * 5;
   await usage.save();
   next();
 };
