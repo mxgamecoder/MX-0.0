@@ -12,23 +12,60 @@ router.get('/user/owned-apis/:userId', async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const user = await User.findOne({ publicUserId: userId }); // ✅ fixed
-
+    const user = await User.findOne({ publicUserId: userId });
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     const userOwned = user.ownedApis || [];
 
-    // Add free APIs
+    // Load marketplace data from MongoDB
+    const mongoApis = await MarketplaceAPI.find({}).lean();
+
+    // Load static JSON APIs
+    const jsonData = fs.readFileSync(path.join(__dirname, '../data/marketplace-data.json'), 'utf8');
+    const staticApis = JSON.parse(jsonData);
+
+    // Combine both sources
+    const allApis = [...mongoApis, ...staticApis.map((api, i) => ({
+      _id: `json_api_${i + 1}`,
+      ...api
+    }))];
+
+    // Add metadata to each free API
     const freeOwned = freeApis.map(fp => {
       const [category, name] = fp.split('/');
+      const filePath = `${category}/${name}`;
+
+      const match = allApis.find(api =>
+        api.name === name && api.category === category
+      );
+
       return {
         name,
         category,
-        filePath: fp
+        filePath,
+        description: match?.description || 'No description available.',
+        image: match?.image || 'https://i.ibb.co/JjMphBCP/avatar.jpg',
       };
     });
 
-    const combined = [...userOwned, ...freeOwned];
+    // Add metadata to each user-owned API
+    const enrichedUserOwned = userOwned.map(api => {
+      const filePath = api.filePath || `${api.category}/${api.name}`;
+
+      const match = allApis.find(entry =>
+        entry.name === api.name && entry.category === api.category
+      );
+
+      return {
+        ...api,
+        filePath,
+        description: match?.description || 'No description available.',
+        image: match?.image || 'https://i.ibb.co/JjMphBCP/avatar.jpg',
+      };
+    });
+
+    // Final combined list
+    const combined = [...enrichedUserOwned, ...freeOwned];
 
     res.json({ success: true, owned: combined });
   } catch (err) {
