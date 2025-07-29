@@ -116,18 +116,20 @@
         }
 
 container.innerHTML += `
-  <div class="bg-gray-800 p-4 rounded shadow flex gap-4 items-start">
-    <img src="${image}" class="w-24 h-24 object-cover rounded" />
-    <div>
-      <h2 class="text-lg font-bold text-white">😮 ${name}</h2>
-      <p class="text-sm text-gray-300">😱 ${api.description || 'No description'}</p>
-      <p class="text-sm text-yellow-300">🧑‍💻 Created By: ${api.createdBy || 'Unknown'}</p>
-      <p class="text-sm text-blue-400">💰 ${price} Coins</p>
-      <p class="text-sm text-pink-400">📁 Category: ${api.category}</p>
-      <p class="text-sm text-green-300">📦 Available: ${available}</p>
-      <p class="text-sm text-purple-300">⏳ Duration: ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
-      👀 ${usageMsg}
-       ${button}
+  <div class="bg-gray-800 p-3 rounded-lg shadow-md flex items-start space-x-4">
+    <div class="flex-shrink-0">
+      <img src="${image}" alt="${name}" class="w-16 h-16 rounded object-cover border border-gray-700" />
+    </div>
+    <div class="flex-grow">
+      <h2 class="text-lg font-bold text-white mb-1">😮 ${name}</h2>
+      <p class="text-sm text-gray-300 mb-1">😱 ${api.description || 'No description'}</p>
+      <p class="text-sm text-yellow-300 mb-1">🧑‍💻 Created By: ${api.createdBy || 'Unknown'}</p>
+      <p class="text-sm text-blue-400 mb-1">💰 ${price} Coins</p>
+      <p class="text-sm text-pink-400 mb-1">📁 Category: ${api.category}</p>
+      <p class="text-sm text-green-300 mb-1">📦 Available: ${available}</p>
+      <p class="text-sm text-purple-300 mb-1">⏳ Duration: ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
+      ${usageMsg}
+      ${button}
     </div>
   </div>
 `;
