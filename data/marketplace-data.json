@@ -9,7 +9,11 @@
     "duration": 0,
     "available": 999,
     "usageMessage": "Use this by calling /fun/joke with your API key via ?meka=xxx",
-    "image": "https://i.ibb.co/JjMphBCP/avatar.jpg"
+    "image": "https://i.ibb.co/JjMphBCP/avatar.jpg",
+    "lastUpdated": "2025-07-30T00:00:00.000Z",
+    "likes": 0,
+    "dislikes": 0,
+    "comments": []
   },
   {
     "name": "Cat Image",
@@ -21,6 +25,10 @@
     "duration": 0,
     "available": 100,
     "usageMessage": "Use this by calling /jest/cat with ?meka=your_key",
-    "image": "https://i.ibb.co/JjMphBCP/avatar.jpg"
+    "image": "https://i.ibb.co/JjMphBCP/avatar.jpg",
+    "lastUpdated": "2025-07-30T00:00:00.000Z",
+    "likes": 0,
+    "dislikes": 0,
+    "comments": []
   }
 ]
