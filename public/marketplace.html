@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="p-4">
+
   <h1 class="text-3xl font-bold mb-4">🛒 Marketplace</h1>
 
   <!-- Search -->
@@ -23,7 +24,6 @@
     <button onclick="filterGroup('J-O')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">J-O</button>
     <button onclick="filterGroup('P-T')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">P-T</button>
     <button onclick="filterGroup('U-Z')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">U-Z</button>
-
     <select onchange="filterByCoins()" id="coin-filter" class="px-4 py-2 bg-gray-700 text-white rounded">
       <option value="all">Filter by Coins</option>
       <option value="10">≤ 10 Coins</option>
@@ -38,11 +38,19 @@
   <div id="not-found" class="text-red-400 mb-4 hidden">Not available yet 😞. Contact admin if needed.</div>
   <div id="api-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-  <!-- Modal Popup -->
-  <div id="popup" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-50">
-    <div class="bg-gray-900 text-white p-6 rounded-xl w-[90%] max-w-md h-[50vh] flex flex-col justify-center text-center shadow-xl">
+  <!-- Popup -->
+  <div id="popup" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-[999]">
+    <div class="bg-gray-900 text-white p-6 rounded-xl w-[90%] max-w-md h-[30vh] flex flex-col justify-center text-center shadow-xl">
       <p id="popup-message" class="mb-4 text-lg"></p>
       <button onclick="closePopup()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded text-white">Okay</button>
+    </div>
+  </div>
+
+  <!-- Fullscreen Modal -->
+  <div id="apiFullPopup" class="fixed inset-0 bg-[#0f0f1a] z-50 hidden overflow-y-auto min-h-screen p-6">
+    <div class="w-full max-w-4xl mx-auto bg-[#1e1e2f] text-white p-6 rounded-2xl shadow-lg relative">
+      <button onclick="closeApiFullPopup()" class="absolute top-5 right-6 text-xl text-red-400 hover:text-red-300">✖</button>
+      <div id="apiFullContent"></div>
     </div>
   </div>
 
@@ -92,81 +100,104 @@
       }
 
       apiList.forEach(api => {
-        const name = api.name || api.filePath;
         const image = api.image || "https://i.ibb.co/JjMphBCP/avatar.jpg";
-        const price = api.price || 0;
-        const available = api.available ?? 9999;
-        const usageMsg = api.usageMessage ? `<p class='text-yellow-300 text-sm mt-1'>${api.usageMessage}</p>` : "";
+        container.innerHTML += `
+          <div onclick="showFullApi('${api._id}')" class="bg-[#1e1e2f] hover:bg-[#2a2a3f] transition-all cursor-pointer p-3 rounded-xl shadow mb-3">
+            <h2 class="text-white font-bold text-base mb-1">${api.name}</h2>
+            <p class="text-gray-300 text-sm mb-1 line-clamp-2">${api.description || 'No description available.'}</p>
+            <p class="text-yellow-300 text-sm mb-1">💰 ${api.price || 0} Coins</p>
+            <p class="text-blue-300 text-xs mb-1">🧑‍💻 ${api.createdBy || 'Unknown'}</p>
 
-        const isOwned = owned.some(o => {
-          const matchName = o.name === api.name;
-          const matchCategory = o.category === api.category;
-          const matchPath = o.filePath === api.filePath;
-          return (matchName && matchCategory) || matchPath;
-        });
+            <div class="flex justify-between items-center text-sm text-gray-400 mb-1">
+              <div class="flex gap-4">
+                <span>👍 0</span>
+                <span>👎 0</span>
+                <span>💬 0</span>
+              </div>
+              <div class="text-xs text-yellow-400 font-semibold">${getTag(api)}</div>
+            </div>
+            <p class="text-xs text-gray-400 italic">ℹ️ Tap to see full API details</p>
+          </div>
+        `;
+      });
+    }
 
-        let button = "";
+    function getTag(api) {
+      if (api.isHot) return "🔥 Hot";
+      if (api.isNew) return "🆕 New";
+      if (api.isPopular) return "⭐ Popular";
+      return "";
+    }
 
-        if (isOwned) {
-          button = `<button disabled class='w-full mt-3 py-2 bg-purple-700 rounded text-white cursor-not-allowed'>👑 Owner</button>`;
-        } else if (available <= 0) {
-          button = `<button disabled class='w-full mt-3 py-2 bg-gray-600 rounded text-white cursor-not-allowed'>⛔ Out of Stock</button>`;
-        } else {
-          button = `<button id="buy-${api._id}" onclick="buyApi('${api._id}', this)" class='w-full mt-3 py-2 bg-green-600 hover:bg-green-500 rounded text-white'>🛍 Buy</button>`;
-        }
+    function showFullApi(apiId) {
+      const api = allApis.find(a => a._id === apiId);
+      if (!api) return alert("API not found.");
 
-container.innerHTML += `
-  <div class="bg-[#1f1f2e] p-4 rounded-xl shadow-md mb-4 w-full">
-    <!-- Top: API Title + Badge -->
-    <div class="flex items-center justify-between mb-2">
-      <h2 class="text-white text-lg font-bold">😮 ${name}</h2>
-      <span class="text-xs bg-yellow-500 text-black px-2 py-0.5 rounded-full">🔥 Popular</span>
-    </div>
+      const image = api.image || "https://i.ibb.co/JjMphBCP/avatar.jpg";
+      const isOwned = owned.some(o =>
+        o._id === api._id ||
+        (o.name === api.name && o.category === api.category) ||
+        (o.filePath && o.filePath === api.filePath)
+      );
 
-    <!-- Middle: Optional Image + Details -->
-    ${image !== fallback ? `
-    <div class="flex gap-3 mb-3">
-      <img src="${image}" alt="${name}" class="w-16 h-16 rounded-md object-cover border border-gray-600" />
-      <div>
-        <p class="text-gray-300 text-sm mb-1">${api.description || 'No description'}</p>
-        <p class="text-yellow-300 text-sm">🧑‍💻 ${api.createdBy || 'Unknown'}</p>
-        <p class="text-blue-400 text-sm">💰 ${price} Coins</p>
-        <p class="text-pink-400 text-sm">📁 ${api.category}</p>
-        <p class="text-green-400 text-sm">📦 Available: ${available}</p>
-        <p class="text-purple-400 text-sm">⏳ ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
-        ${usageMsg}
-      </div>
-    </div>` : `
-    <div class="mb-3">
-      <p class="text-gray-300 text-sm mb-1">${api.description || 'No description'}</p>
-      <p class="text-yellow-300 text-sm">🧑‍💻 ${api.createdBy || 'Unknown'}</p>
-      <p class="text-blue-400 text-sm">💰 ${price} Coins</p>
-      <p class="text-pink-400 text-sm">📁 ${api.category}</p>
-      <p class="text-green-400 text-sm">📦 Available: ${available}</p>
-      <p class="text-purple-400 text-sm">⏳ ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
-      ${usageMsg}
-    </div>`}
+      let actionBtn = "";
+      if (isOwned) {
+        actionBtn = `<button disabled class='w-full mt-6 py-2 bg-purple-700 rounded text-white cursor-not-allowed text-lg'>👑 Owner</button>`;
+      } else if ((api.available ?? 9999) <= 0) {
+        actionBtn = `<button disabled class='w-full mt-6 py-2 bg-gray-600 rounded text-white cursor-not-allowed text-lg'>⛔ Out of Stock</button>`;
+      } else {
+        actionBtn = `<button onclick="buyApi('${api._id}', this)" class='w-full mt-6 py-2 bg-green-600 hover:bg-green-500 rounded text-white text-lg'>🛍 Buy</button>`;
+      }
 
-    <!-- Footer: Reactions + Buy/Owned Button -->
-    <div class="flex justify-between items-center mt-2 mb-1 text-white text-sm gap-4">
-      <div class="flex gap-4">
-        <button class="hover:text-green-400">👍</button>
-        <button class="hover:text-red-400">👎</button>
-        <button class="hover:text-blue-400">💬</button>
-      </div>
-    </div>
+      document.getElementById('apiFullContent').innerHTML = `
+        <h2 class="text-2xl font-bold mb-4">🧪 ${api.name}</h2>
+        <img src="${image}" onerror="this.src='https://i.ibb.co/JjMphBCP/avatar.jpg'" class="w-40 h-40 rounded border mb-4 object-cover">
+        <p class="text-gray-300 mb-3">${api.description || 'No description provided.'}</p>
 
-    <div class="mt-2">
-      ${button}
-    </div>
-  </div>
-`;      });
+        <div class="grid sm:grid-cols-2 gap-4 text-sm mb-4">
+          <p>🧑‍💻 <span class="text-white font-semibold">${api.createdBy || 'Unknown'}</span></p>
+          <p>💰 Price: <span class="text-yellow-400">${api.price || 0} Coins</span></p>
+          <p>📁 Category: ${api.category || 'None'}</p>
+          <p>📦 Available: ${api.available ?? 9999}</p>
+          <p>⏳ Duration: ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
+        </div>
+
+        ${api.usageMessage ? `<div class="mt-6 bg-yellow-900 text-yellow-100 p-4 rounded-md text-sm whitespace-pre-line">${api.usageMessage}</div>` : ''}
+
+        ${actionBtn}
+      `;
+      document.getElementById("apiFullPopup").classList.remove("hidden");
+    }
+
+    function closeApiFullPopup() {
+      document.getElementById("apiFullPopup").classList.add("hidden");
+    }
+
+    function showPopup(message, callback = null) {
+      const popup = document.getElementById("popup");
+      document.getElementById("popup-message").innerText = message;
+      popup.classList.remove("hidden");
+      popup.dataset.callback = callback ? "yes" : "";
+    }
+
+    function closePopup() {
+      const popup = document.getElementById("popup");
+      popup.classList.add("hidden");
+      if (popup.dataset.callback === "yes") {
+        window.location.href = "index.html";
+      }
     }
 
     async function buyApi(apiId, btn) {
       if (!apiId) return showPopup("Invalid API ID.");
       btn.disabled = true;
       btn.innerText = "⏳ Purchasing...";
+
+      // Block back button
+      window.history.pushState(null, null, window.location.href);
+      window.onpopstate = function () {
+        window.history.go(1);
+      };
 
       try {
         const res = await fetch('/api/marketplace/buy', {
@@ -177,7 +208,15 @@ container.innerHTML += `
 
         const data = await res.json();
         showPopup(data.message);
-        await fetchMarketplaceApis();
+
+        // ✅ Refresh owned APIs only (not full list)
+        const ownedRes = await fetch(`/api/marketplace/user/owned-apis/${userId}`);
+        const ownedData = await ownedRes.json();
+        owned = ownedData.owned || [];
+
+        // ✅ Update modal with new state (👑 Owner)
+        showFullApi(apiId);
+
       } catch (err) {
         showPopup("Something went wrong. Please try again.");
         btn.disabled = false;
@@ -209,35 +248,12 @@ container.innerHTML += `
     function filterByCoins() {
       const maxCoins = document.getElementById("coin-filter").value;
       if (maxCoins === "all") return displayApis(allApis);
-
       const filtered = allApis.filter(api => (api.price || 0) <= parseInt(maxCoins));
-
       if (!filtered.length) {
         showPopup(`😩 No APIs found under ${maxCoins} coins. Try a higher value or reset filter.`);
         return;
       }
-
       displayApis(filtered);
-    }
-
-    function showPopup(message, callback = null) {
-      const popup = document.getElementById("popup");
-      const popupMsg = document.getElementById("popup-message");
-      popupMsg.innerText = message;
-      popup.classList.remove("hidden");
-
-      // Optional callback on close
-      popup.dataset.callback = callback ? "yes" : "";
-      popup.dataset.callbackFunc = callback ? callback.toString() : "";
-    }
-
-    function closePopup() {
-      const popup = document.getElementById("popup");
-      popup.classList.add("hidden");
-
-      if (popup.dataset.callback === "yes") {
-        window.location.href = "index.html";
-      }
     }
 
     fetchMarketplaceApis();
