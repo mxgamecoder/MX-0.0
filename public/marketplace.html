@@ -136,9 +136,9 @@
 <p class="text-xs text-gray-500 italic">🕒 ${api.lastUpdated ? new Date(api.lastUpdated).toLocaleDateString() : 'Last Updated: Unknown'}</p>
             <div class="flex justify-between items-center text-sm text-gray-400 mb-1">
               <div class="flex gap-4">
-                <span>👍 0</span>
-                <span>👎 0</span>
-                <span>💬 0</span>
+<span>👍 ${api.likes?.length || 0}</span>
+<span>👎 ${api.dislikes?.length || 0}</span>
+<span>💬 ${api.comments?.length || 0}</span>
               </div>
               <div class="text-xs text-yellow-400 font-semibold">${getTag(api)}</div>
             </div>
@@ -290,6 +290,44 @@ ${actionBtn}
       displayApis(filtered);
     }
 
+    async function likeApi(event, apiId) {
+  event.stopPropagation();
+  try {
+    const res = await fetch('/api/marketplace/react', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiId, type: 'like', userId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showFullApi(apiId); // Refresh modal
+    } else {
+      showPopup(data.message || "Failed to like.");
+    }
+  } catch (err) {
+    showPopup("Like failed. Try again later.");
+  }
+    }
+
+    async function dislikeApi(event, apiId) {
+  event.stopPropagation();
+  try {
+    const res = await fetch('/api/marketplace/react', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiId, type: 'dislike', userId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showFullApi(apiId); // Refresh modal
+    } else {
+      showPopup(data.message || "Failed to dislike.");
+    }
+  } catch (err) {
+    showPopup("Dislike failed. Try again later.");
+  }
+    }
+    
     function handleUpdate() {
   // Add your update logic or modal
   alert("Opening update UI for this API...");
@@ -305,14 +343,35 @@ ${actionBtn}
       document.getElementById("commentBox").value = "";
     }
 
-    function submitComment() {
+    async function submitComment() {
       const commentText = document.getElementById("commentBox").value.trim();
       const apiId = document.getElementById("commentModal").dataset.api;
+
       if (!commentText) return alert("Please type a comment first.");
-      // 🔧 TODO: Send to backend or store
-      console.log(`💬 Comment submitted for ${apiId}:`, commentText);
-      alert("Thanks! Comment submitted (mock).");
-      closeCommentModal();
+
+      try {
+        const res = await fetch('/api/marketplace/react', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            apiId,
+            type: 'comment',
+            userId,
+            username: localStorage.getItem('mxapi_username'),
+            commentText
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          closeCommentModal();
+          showFullApi(apiId); // Refresh modal to show comment count
+        } else {
+          showPopup(data.message || "Failed to comment.");
+        }
+      } catch (err) {
+        showPopup("Comment failed. Try again later.");
+      }
     }
     fetchMarketplaceApis();
   </script>
