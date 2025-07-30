@@ -7,6 +7,24 @@ const fs = require('fs');
 const path = require('path');
 const freeApis = require('../data/freeApis'); // ✅ Include free APIs
 
+// PATCH: Update API lastUpdated
+router.patch('/update/:apiId', async (req, res) => {
+  const { apiId } = req.params;
+
+  try {
+    const api = await MarketplaceAPI.findById(apiId);
+    if (!api) return res.status(404).json({ success: false, message: "API not found" });
+
+    api.lastUpdated = new Date();
+    await api.save();
+
+    res.json({ success: true, message: "Last updated timestamp refreshed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 // Get user's owned APIs including free ones
 router.get('/user/owned-apis/:userId', async (req, res) => {
   const { userId } = req.params;
