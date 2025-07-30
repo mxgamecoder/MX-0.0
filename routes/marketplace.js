@@ -7,6 +7,54 @@ const fs = require('fs');
 const path = require('path');
 const freeApis = require('../data/freeApis'); // ✅ Include free APIs
 
+// React to an API (like, dislike, comment)
+router.post('/react', async (req, res) => {
+  const { apiId, type, user, commentText, commentId, edit } = req.body;
+
+  try {
+    const api = await MarketplaceAPI.findById(apiId);
+    if (!api) return res.status(404).json({ success: false, message: "API not found" });
+
+    // Add like
+    if (type === 'like') {
+      if (!api.likes.includes(user)) {
+        api.likes.push(user);
+        api.dislikes = api.dislikes.filter(u => u !== user); // remove if previously disliked
+      }
+    }
+
+    // Add dislike
+    if (type === 'dislike') {
+      if (!api.dislikes.includes(user)) {
+        api.dislikes.push(user);
+        api.likes = api.likes.filter(u => u !== user); // remove if previously liked
+      }
+    }
+
+    // Add comment
+    if (type === 'comment') {
+      if (edit) {
+        const target = api.comments.find(c => c.id === commentId && c.user === user);
+        if (target) target.text = commentText;
+      } else {
+        api.comments.push({
+          id: `${user}_${Date.now()}`,
+          user,
+          text: commentText,
+          timestamp: new Date()
+        });
+      }
+    }
+
+    await api.save();
+    res.json({ success: true, message: "Updated reactions/comments", api });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 // PATCH: Update API lastUpdated
 router.patch('/update/:apiId', async (req, res) => {
   const { apiId } = req.params;
