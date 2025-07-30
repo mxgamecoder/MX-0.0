@@ -116,36 +116,51 @@
         }
 
 container.innerHTML += `
-  <div class="bg-[#1e1e2f] p-4 rounded-2xl shadow-lg mb-4 flex flex-col md:flex-row gap-4 items-start">
-    <!-- API Image -->
-    <img src="${image}" alt="${name}" class="w-24 h-24 rounded-xl object-cover border-2 border-gray-700">
-
-    <!-- API Info -->
-    <div class="flex-1">
-      <div class="flex items-center justify-between mb-1">
-        <h2 class="text-white text-xl font-bold">😮 ${name}</h2>
-        <span class="bg-yellow-500 text-black text-xs px-2 py-0.5 rounded-full">🔥 Popular</span>
-      </div>
-
-      <p class="text-gray-300 text-sm mb-1">${api.description || 'No description'}</p>
-      <p class="text-yellow-300 text-sm">🧑‍💻 <span class="text-white">Created By:</span> ${api.createdBy || 'Unknown'}</p>
-      <p class="text-blue-400 text-sm">💰 Price: ${price} Coins</p>
-      <p class="text-pink-400 text-sm">📁 Category: ${api.category}</p>
-      <p class="text-green-300 text-sm">📦 Available: ${available}</p>
-      <p class="text-purple-400 text-sm">⏳ Duration: ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
-      ${usageMsg}
+  <div class="bg-[#1f1f2e] p-4 rounded-xl shadow-md mb-4 w-full">
+    <!-- Top: API Title + Badge -->
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-white text-lg font-bold">😮 ${name}</h2>
+      <span class="text-xs bg-yellow-500 text-black px-2 py-0.5 rounded-full">🔥 Popular</span>
     </div>
 
-    <!-- Reactions -->
-    <div class="flex flex-col items-center gap-2">
-      <button class="text-white hover:text-green-400 text-lg">👍</button>
-      <button class="text-white hover:text-red-400 text-lg">👎</button>
-      <button class="text-white hover:text-blue-400 text-lg">💬</button>
+    <!-- Middle: Optional Image + Details -->
+    ${image !== fallback ? `
+    <div class="flex gap-3 mb-3">
+      <img src="${image}" alt="${name}" class="w-16 h-16 rounded-md object-cover border border-gray-600" />
+      <div>
+        <p class="text-gray-300 text-sm mb-1">${api.description || 'No description'}</p>
+        <p class="text-yellow-300 text-sm">🧑‍💻 ${api.createdBy || 'Unknown'}</p>
+        <p class="text-blue-400 text-sm">💰 ${price} Coins</p>
+        <p class="text-pink-400 text-sm">📁 ${api.category}</p>
+        <p class="text-green-400 text-sm">📦 Available: ${available}</p>
+        <p class="text-purple-400 text-sm">⏳ ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
+        ${usageMsg}
+      </div>
+    </div>` : `
+    <div class="mb-3">
+      <p class="text-gray-300 text-sm mb-1">${api.description || 'No description'}</p>
+      <p class="text-yellow-300 text-sm">🧑‍💻 ${api.createdBy || 'Unknown'}</p>
+      <p class="text-blue-400 text-sm">💰 ${price} Coins</p>
+      <p class="text-pink-400 text-sm">📁 ${api.category}</p>
+      <p class="text-green-400 text-sm">📦 Available: ${available}</p>
+      <p class="text-purple-400 text-sm">⏳ ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
+      ${usageMsg}
+    </div>`}
+
+    <!-- Footer: Reactions + Buy/Owned Button -->
+    <div class="flex justify-between items-center mt-2 mb-1 text-white text-sm gap-4">
+      <div class="flex gap-4">
+        <button class="hover:text-green-400">👍</button>
+        <button class="hover:text-red-400">👎</button>
+        <button class="hover:text-blue-400">💬</button>
+      </div>
+    </div>
+
+    <div class="mt-2">
       ${button}
     </div>
   </div>
-`;
-      });
+`;      });
     }
 
     async function buyApi(apiId, btn) {
