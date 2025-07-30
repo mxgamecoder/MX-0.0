@@ -9,45 +9,103 @@ const freeApis = require('../data/freeApis'); // ✅ Include free APIs
 
 // React to an API (like, dislike, comment)
 router.post('/react', async (req, res) => {
-  const { apiId, type, user, commentText, commentId, edit } = req.body;
+  const { apiId, type, userId, username, commentText, commentId, edit } = req.body;
 
   try {
     const api = await MarketplaceAPI.findById(apiId);
     if (!api) return res.status(404).json({ success: false, message: "API not found" });
 
-    // Add like
+    let updated = false;
+
+    // ✅ Toggle like
     if (type === 'like') {
-      if (!api.likes.includes(user)) {
-        api.likes.push(user);
-        api.dislikes = api.dislikes.filter(u => u !== user); // remove if previously disliked
+      if (api.likes.includes(userId)) {
+        api.likes = api.likes.filter(u => u !== userId); // unlike
+      } else {
+        api.likes.push(userId);
+        api.dislikes = api.dislikes.filter(u => u !== userId); // remove from dislikes if exists
       }
+      updated = true;
     }
 
-    // Add dislike
+    // ✅ Toggle dislike
     if (type === 'dislike') {
-      if (!api.dislikes.includes(user)) {
-        api.dislikes.push(user);
-        api.likes = api.likes.filter(u => u !== user); // remove if previously liked
+      if (api.dislikes.includes(userId)) {
+        api.dislikes = api.dislikes.filter(u => u !== userId); // undislike
+      } else {
+        api.dislikes.push(userId);
+        api.likes = api.likes.filter(u => u !== userId); // remove from likes if exists
       }
+      updated = true;
     }
 
-    // Add comment
+    // ✅ Add/Edit comment
     if (type === 'comment') {
-      if (edit) {
-        const target = api.comments.find(c => c.id === commentId && c.user === user);
-        if (target) target.text = commentText;
+      if (edit && commentId) {
+        const comment = api.comments.id(commentId);
+        if (comment && comment.userId === userId) {
+          comment.text = commentText;
+          comment.edited = true;
+        }
       } else {
         api.comments.push({
-          id: `${user}_${Date.now()}`,
-          user,
-          text: commentText,
-          timestamp: new Date()
+          userId,
+          username,
+          text: commentText
         });
       }
+      updated = true;
     }
 
+    if (updated) {
+      api.lastUpdated = new Date();
+      await api.save();
+    }
+
+    res.json({ success: true, message: "API updated", api });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.get('/comments/:apiId', async (req, res) => {
+  try {
+    const api = await MarketplaceAPI.findById(req.params.apiId);
+    if (!api) return res.status(404).json({ success: false, message: "API not found" });
+
+    res.json({
+      success: true,
+      comments: api.comments.sort((a, b) => b.createdAt - a.createdAt)
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.delete('/comment/:apiId/:commentId', async (req, res) => {
+  const { apiId, commentId } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const api = await MarketplaceAPI.findById(apiId);
+    if (!api) return res.status(404).json({ success: false, message: "API not found" });
+
+    const comment = api.comments.id(commentId);
+    if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
+
+    if (comment.userId !== userId) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    comment.deleteOne(); // remove subdoc
+    api.lastUpdated = new Date();
     await api.save();
-    res.json({ success: true, message: "Updated reactions/comments", api });
+
+    res.json({ success: true, message: "Comment deleted" });
 
   } catch (err) {
     console.error(err);
