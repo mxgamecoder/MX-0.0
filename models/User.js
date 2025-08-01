@@ -31,10 +31,6 @@ const UserSchema = new mongoose.Schema({
   // Newly added
   coins: { type: Number, default: 0 },
   requestCount: { type: Number, default: 0 },
-  storageLimit: {
-  type: Number,
-  default: 512 * 1024 * 1024 // 512 MB in bytes
-},
   monthlyReset: { type: Date }
 }, { timestamps: true });
 
