@@ -83,61 +83,68 @@
 
       const data = await res.json();
 
-if (res.ok) {
-  localStorage.setItem('mxapi_token', data.token);
-  localStorage.setItem('mxapi_id', data.user.publicUserId);
+      if (res.ok) {
+        localStorage.setItem('mxapi_token', data.token);
+        localStorage.setItem('mxapi_id', data.user.publicUserId);
 
-  // 🔐 Step 1: Check if API key already exists
-  let apiKey = '';
-  const keyCheck = await fetch('/api/user/get-api-key', {
-    method: 'GET',
-    headers: { 'Authorization': `Bearer ${data.token}` }
-  });
+        // 🔐 Step 1: Check if API key already exists
+        let apiKey = '';
+        const keyCheck = await fetch('/api/user/get-api-key', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${data.token}` }
+        });
 
-  const keyData = await keyCheck.json();
-  if (keyData.apiKey) {
-    apiKey = keyData.apiKey;
-  } else {
-    // 🔐 Step 2: Create API key if not found
-    const keyCreate = await fetch('/api/user/create-api-key', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${data.token}` }
-    });
-    const newKeyData = await keyCreate.json();
-    if (newKeyData.apiKey) {
-      apiKey = newKeyData.apiKey;
-    }
-  }
+        const keyData = await keyCheck.json();
+        if (keyData.apiKey) {
+          apiKey = keyData.apiKey;
+        } else {
+          // 🔐 Step 2: Create API key if not found
+          const keyCreate = await fetch('/api/user/create-api-key', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${data.token}` }
+          });
+          const newKeyData = await keyCreate.json();
+          if (newKeyData.apiKey) {
+            apiKey = newKeyData.apiKey;
+          }
+        }
 
-  if (apiKey) {
-    localStorage.setItem('mxapi_apikey', apiKey);
-  }
+        if (apiKey) {
+          localStorage.setItem('mxapi_apikey', apiKey);
+        }
 
-  // ✅ Step 3: Assign free APIs (if not already assigned)
-  try {
-    await fetch('/api/user/assign-free-apis', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${data.token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-  } catch (e) {
-    console.warn('Free APIs not assigned:', e.message);
-  }
+        // ✅ Step 3: Assign free APIs (if not already assigned)
+        try {
+          await fetch('/api/user/assign-free-apis', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${data.token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+        } catch (e) {
+          console.warn('Free APIs not assigned:', e.message);
+        }
 
-  messageDiv.textContent = '✅ Login successful! Redirecting...';
-  messageDiv.className = 'text-green-600 text-center mt-4 text-sm font-medium';
+        messageDiv.textContent = '✅ Login successful! Redirecting...';
+        messageDiv.className = 'text-green-600 text-center mt-4 text-sm font-medium';
 
-  setTimeout(() => {
-    if (!localStorage.getItem('seenWelcome')) {
-      localStorage.setItem('seenWelcome', 'true');
-      window.location.href = 'welcome.html';
-    } else {
-      window.location.href = 'dashboard.html';
-    }
-  }, 1500);
-  } else {
+        // ✅ REDIRECT SECTION — added support for redirect param
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get("redirect") || "dashboard.html";
+        const redirectBase = redirectUrl.includes('?') ? '&' : '?';
+        const encodedToken = encodeURIComponent(data.token);
+        const encodedId = encodeURIComponent(data.user.publicUserId);
+
+        setTimeout(() => {
+          if (!localStorage.getItem('seenWelcome')) {
+            localStorage.setItem('seenWelcome', 'true');
+            window.location.href = `welcome.html`;
+          } else {
+            window.location.href = `${redirectUrl}${redirectBase}token=${encodedToken}&id=${encodedId}`;
+          }
+        }, 1500);
+      } else {
         messageDiv.textContent = data.msg || '❌ Login failed.';
         messageDiv.className = 'text-red-600 text-center mt-4 text-sm font-medium';
       }
