@@ -156,22 +156,24 @@ router.post('/login', [
   }
 });
 
-// GET USER BY PUBLIC USER ID
 router.get('/user/:publicId', meka, async (req, res) => {
   try {
     const user = await User.findOne({ publicUserId: req.params.publicId }).select('-password');
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    res.json({ user: {
-      username: user.username,
-      name: user.name,
-      email: user.email,
-      balance: user.balance || 0,
-      dob: user.dob,
-      phone: user.phone,
-      verified: user.isVerified,
-      plan: user.plan || 'Free'
-    }});
+    res.json({
+      user: {
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        balance: user.balance || 0,
+        dob: user.dob,
+        phone: user.phone,
+        verified: user.isVerified,
+        plan: user.plan || 'Free',
+        publicUserId: user.publicUserId // ✅ This was missing
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
