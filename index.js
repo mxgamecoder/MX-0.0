@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 const allowedOrigins = [
   'https://mxgamecoder-klfx.onrender.com',
-  'https://bdc3a77a-4eb3-43a8-9476-15525707da66-00-2xr21j9rmc1dt.kirk.replit.dev',
+  'https://bdc3a77a-4eb3-43a8-9476-15525707da66-00-2xr21j9rmc1dt.kirk.repl.co',
 ];
 
 app.use(cors({
