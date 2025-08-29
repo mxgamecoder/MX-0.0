@@ -19,14 +19,16 @@ const vaultxPlans = {
  * Body: { publicUserId: string, plan: string }
  * Response: { canAfford: boolean, remainingCoins?: number, message: string }
  */
-router.post('/check', authenticate, async (req, res) => {
+// POST /coins/upgrade
+router.post('/upgrade', authenticate, async (req, res) => {
   const { publicUserId, plan } = req.body;
 
   if (!publicUserId || !plan) {
     return res.status(400).json({ message: "Missing publicUserId or plan" });
   }
 
-  if (!vaultxPlans.hasOwnProperty(plan)) {
+  const normalizedPlan = plan.toLowerCase();
+  if (!vaultxPlans.hasOwnProperty(normalizedPlan)) {
     return res.status(400).json({ message: "Invalid plan selected" });
   }
 
@@ -34,24 +36,27 @@ router.post('/check', authenticate, async (req, res) => {
     const user = await User.findOne({ publicUserId });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const requiredCoins = vaultxPlans[plan];
-    const userCoins = user.coins || 0;
-
-    if (userCoins >= requiredCoins) {
+    const requiredCoins = vaultxPlans[normalizedPlan];
+    if (user.coins < requiredCoins) {
       return res.json({
-        canAfford: true,
-        message: `✅ You have enough coins (${userCoins}) for the ${plan} plan`
-      });
-    } else {
-      const remaining = requiredCoins - userCoins;
-      return res.json({
-        canAfford: false,
-        remainingCoins: remaining,
-        message: `❌ You need ${remaining} more coins to purchase the ${plan} plan`
+        success: false,
+        message: `❌ You need ${requiredCoins - user.coins} more coins to upgrade to ${plan}`
       });
     }
+
+    // Deduct coins & update plan
+    user.coins -= requiredCoins;
+    user.vaultxPlan = normalizedPlan;
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: `🎉 Successfully upgraded to ${plan} plan!`,
+      coinsLeft: user.coins,
+      vaultxPlan: user.vaultxPlan
+    });
   } catch (err) {
-    console.error("Error checking coins:", err);
+    console.error("Error upgrading plan:", err);
     return res.status(500).json({ message: "Server error" });
   }
 });
