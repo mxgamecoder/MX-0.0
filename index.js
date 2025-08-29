@@ -65,6 +65,8 @@ const supportRoute = require('./routes/support');
 app.use('/api/support', supportRoute);
 const marketplaceRoutes = require('./routes/marketplace');
 app.use('/api/marketplace', marketplaceRoutes);
+const marketplaceRoutes = require('./routes/coins');
+app.use('/api/coins', marketplaceRoutes);
 // ========== Static Files ==========
 app.use('/jest', express.static(path.join(__dirname, 'jest')));
 app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
