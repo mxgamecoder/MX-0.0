@@ -167,11 +167,12 @@ router.get('/user/:publicId', meka, async (req, res) => {
         name: user.name,
         email: user.email,
         balance: user.balance || 0,
+        coins: user.coins || 0,   // 👈 add this line
         dob: user.dob,
         phone: user.phone,
         verified: user.isVerified,
         plan: user.plan || 'Free',
-        publicUserId: user.publicUserId // ✅ This was missing
+        publicUserId: user.publicUserId
       }
     });
   } catch (err) {
