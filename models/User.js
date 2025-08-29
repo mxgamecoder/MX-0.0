@@ -22,14 +22,13 @@ const UserSchema = new mongoose.Schema({
     filePath: String,
     purchasedAt: Date
   }],
-  apiKeyRegens: {
-    type: Number,
-    default: 0
-  },
+  apiKeyRegens: { type: Number, default: 0 },
   plan: { type: String, default: 'free' },
 
-  // Newly added
+  // VaultX-specific
   coins: { type: Number, default: 0 },
+  vaultxPlan: { type: String, default: 'free' },  // ✅ added field
+
   requestCount: { type: Number, default: 0 },
   monthlyReset: { type: Date }
 }, { timestamps: true });
