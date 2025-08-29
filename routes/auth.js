@@ -172,6 +172,7 @@ router.get('/user/:publicId', meka, async (req, res) => {
         phone: user.phone,
         verified: user.isVerified,
         plan: user.plan || 'Free',
+        vaultxPlan: user.vaultxPlan || 'free',
         publicUserId: user.publicUserId
       }
     });
