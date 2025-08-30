@@ -45,7 +45,7 @@
         box.classList.remove('hidden');
         // Optional: get remaining regen count from backend
         try {
-          const res = await fetch('https://mxgamecoder-klfx.onrender.com/api/user/get-api-key', {
+          const res = await fetch('/api/user/get-api-key', {
             headers: { 'Authorization': `Bearer ${localStorage.getItem("mxapi_token")}` }
           });
           const data = await res.json();
