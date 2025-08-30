@@ -74,9 +74,9 @@
     <p>Welcome to the official documentation of the <strong>MXAPI</strong>, created by <strong>MX-GΔMΞCØDΞR</strong> under the Lumora platform.</p>
 
     <div class="highlight">
-      <strong>🌐 API Base URL:</strong> <code>https://mxgamecoder-klfx.onrender.com</code><br>
+      <strong>🌐 API Base URL:</strong> <code>https://mxapi-lnc.onrender.com</code><br>
       <strong>🏠 Official Site:</strong> <a href="https://mxgamecoder.lovestoblog.com" target="_blank">mxgamecoder.lovestoblog.com</a><br>
-      <strong>💬 Dev Group:</strong> <a href="https://chat.whatsapp.com/DZdp64lIxKMJhh6Dj0znaj" target="_blank">Join on WhatsApp</a>
+      <strong>💬 Dev Group:</strong> <a href="https://chat.whatsapp.com/DXasbP5xOeT77AmzaPykEw?mode=ac_t" target="_blank">Join on WhatsApp</a>
     </div>
 
     <h2>🚀 How to Use This API</h2>
@@ -85,13 +85,13 @@
     <h3>📌 10 Code Examples</h3>
 
     <h3>1. JS Fetch (Browser)</h3>
-    <pre><code>fetch("https://mxgamecoder-klfx.onrender.com/fun/joke?meka=your_api_key_here")
+    <pre><code>fetch("https://mxapi-lnc.onrender.com/fun/joke?meka=your_api_key_here")
   .then(res => res.json())
   .then(data => alert(data.content));</code></pre>
 
     <h3>2. Node.js</h3>
     <pre><code>const https = require("https");
-https.get("https://mxgamecoder-klfx.onrender.com/fun/fact?meka=your_api_key_here", res => {
+https.get("https://mxapi-lnc.onrender.com/fun/fact?meka=your_api_key_here", res => {
   let d = "";
   res.on("data", chunk => d += chunk);
   res.on("end", () => console.log(JSON.parse(d).content));
@@ -102,14 +102,14 @@ https.get("https://mxgamecoder-klfx.onrender.com/fun/fact?meka=your_api_key_here
 
     <h3>4. Python</h3>
     <pre><code>import requests
-res = requests.get("https://mxgamecoder-klfx.onrender.com/fun/riddle?meka=your_api_key_here")
+res = requests.get("https://mxapi-lnc.onrender.com/fun/riddle?meka=your_api_key_here")
 print(res.json()["content"])</code></pre>
 
     <h3>5. HTML Button</h3>
     <pre><code>&lt;button onclick="getJoke()">Get Joke&lt;/button>
 &lt;script>
 function getJoke() {
-  fetch("https://mxgamecoder-klfx.onrender.com/fun/joke?meka=your_api_key_here")
+  fetch("https://mxapi-lnc.onrender.comfun/joke?meka=your_api_key_here")
     .then(res => res.json())
     .then(data => alert(data.content));
 }
@@ -117,7 +117,7 @@ function getJoke() {
 
     <h3>6. React (useEffect)</h3>
     <pre><code>useEffect(() => {
-  fetch("https://mxgamecoder-klfx.onrender.com/fun/quote?meka=your_api_key_here")
+  fetch("https://mxapi-lnc.onrender.com/fun/quote?meka=your_api_key_here")
     .then(res => res.json())
     .then(data => console.log(data.content));
 }, []);</code></pre>
@@ -125,24 +125,24 @@ function getJoke() {
     <h3>7. Discord Bot (Python)</h3>
     <pre><code>@bot.command()
 async def truth(ctx):
-  res = requests.get("https://mxgamecoder-klfx.onrender.com/fun/truth?meka=your_api_key_here").json()
+  res = requests.get("https://mxapi-lnc.onrender.com/fun/truth?meka=your_api_key_here").json()
   await ctx.send(res["content"])</code></pre>
 
     <h3>8. PHP</h3>
     <pre><code>&lt;?php
-$res = file_get_contents("https://mxgamecoder-klfx.onrender.com/fun/quote?meka=your_api_key_here");
+$res = file_get_contents("https://mxapi-lnc.onrender.com/fun/quote?meka=your_api_key_here");
 $data = json_decode($res);
 echo $data-&gt;content;
 ?></code></pre>
 
     <h3>9. jQuery</h3>
-    <pre><code>$.getJSON("https://mxgamecoder-klfx.onrender.com/fun/whatIf?meka=your_api_key_here", function(data) {
+    <pre><code>$.getJSON("https://mxapi-lnc.onrender.com/fun/whatIf?meka=your_api_key_here", function(data) {
   alert(data.content);
 });</code></pre>
 
     <h3>10. Telegram Bot</h3>
     <pre><code>def get_funny():
-  r = requests.get("https://mxgamecoder-klfx.onrender.com/fun/quotesfunny?meka=your_api_key_here")
+  r = requests.get("https://mxapi-lnc.onrender.com/fun/quotesfunny?meka=your_api_key_here")
   return r.json()["content"]</code></pre>
 
     <h2>👨‍💻 What I Learned</h2>
