@@ -41,19 +41,32 @@ router.patch("/update-profile", authenticate, async (req, res) => {
   }
 });
 
-// mxapi/auth.js
 router.get("/public-user/:publicId", async (req, res) => {
   try {
     const user = await User.findOne({ publicUserId: req.params.publicId })
-      .select("username publicUserId plan vaultxPlan");
+      .select("username publicUserId vaultxPlan coins planExpiresAt");
 
     if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // 🔹 Auto-downgrade if plan expired
+    if (user.planExpiresAt && new Date() > user.planExpiresAt) {
+      user.vaultxPlan = "free";
+      user.planExpiresAt = null;
+      await user.save();
+    }
+
+    const daysRemaining = user.planExpiresAt
+      ? Math.ceil((user.planExpiresAt - new Date()) / (1000 * 60 * 60 * 24))
+      : null;
 
     res.json({
       user: {
         publicUserId: user.publicUserId,
-        plan: user.plan,
-        vaultxPlan: user.vaultxPlan
+        username: user.username,
+        coins: user.coins,
+        vaultxPlan: user.vaultxPlan,
+        planExpiresAt: user.planExpiresAt,
+        daysRemaining
       }
     });
   } catch (err) {
