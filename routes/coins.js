@@ -49,14 +49,20 @@ router.post('/upgrade', authenticate, async (req, res) => {
     user.vaultxPlan = normalizedPlan;
 
     // Set expiration date
-    const now = new Date();
-    let expireDate;
-    if (["platinum", "elite"].includes(normalizedPlan)) {
-      expireDate = new Date(now.setDate(now.getDate() + 365)); // yearly
-    } else {
-      expireDate = new Date(now.setDate(now.getDate() + 30)); // monthly
-    }
-    user.planExpiresAt = expireDate;
+// Set expiration date
+const now = new Date();
+let expireDate;
+if (["platinum", "elite"].includes(normalizedPlan)) {
+  expireDate = new Date(now.setDate(now.getDate() + 365)); // yearly
+} else {
+  expireDate = new Date(now.setDate(now.getDate() + 30)); // monthly
+}
+
+// 🔹 For testing only: make it look like 25 days already passed
+expireDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000); // 5 days from now
+
+user.planExpiresAt = expireDate;
+
 
     await user.save();
 
