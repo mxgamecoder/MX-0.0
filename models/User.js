@@ -27,8 +27,8 @@ const UserSchema = new mongoose.Schema({
 
   // VaultX-specific
   coins: { type: Number, default: 0 },
-  vaultxPlan: { type: String, default: 'free' },  // ✅ added field
-
+  vaultxPlan: { type: String, default: 'free' },
+  planExpiresAt: { type: Date },
   requestCount: { type: Number, default: 0 },
   monthlyReset: { type: Date }
 }, { timestamps: true });
