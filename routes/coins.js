@@ -47,13 +47,28 @@ router.post('/upgrade', authenticate, async (req, res) => {
     // Deduct coins & update plan
     user.coins -= requiredCoins;
     user.vaultxPlan = normalizedPlan;
+
+    // Set expiration date
+    const now = new Date();
+    let expireDate;
+    if (["platinum", "elite"].includes(normalizedPlan)) {
+      expireDate = new Date(now.setDate(now.getDate() + 365)); // yearly
+    } else {
+      expireDate = new Date(now.setDate(now.getDate() + 30)); // monthly
+    }
+    user.planExpiresAt = expireDate;
+
     await user.save();
+
+    const daysRemaining = Math.ceil((expireDate - new Date()) / (1000 * 60 * 60 * 24));
 
     return res.json({
       success: true,
       message: `🎉 Successfully upgraded to ${plan} plan!`,
       coinsLeft: user.coins,
-      vaultxPlan: user.vaultxPlan
+      vaultxPlan: user.vaultxPlan,
+      expiresAt: expireDate,
+      daysRemaining
     });
   } catch (err) {
     console.error("Error upgrading plan:", err);
