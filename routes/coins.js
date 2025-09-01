@@ -4,10 +4,10 @@ const router = express.Router();
 const User = require("../models/User");
 const { sedEmail, planEmailTemplate } = require("../utils/VaultX");
 
-router.post("/coins/upgrade", async (req, res) => {
+router.post("/upgrade", async (req, res) => {
   try {
-    const { publicId, plan } = req.body;
-    const user = await User.findOne({ _id: publicId });
+    const { publicUserId, plan } = req.body;  
+    const user = await User.findOne({ publicUserId });
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
