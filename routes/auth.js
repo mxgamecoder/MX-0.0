@@ -44,20 +44,51 @@ router.patch("/update-profile", authenticate, async (req, res) => {
 router.get("/public-user/:publicId", async (req, res) => {
   try {
     const user = await User.findOne({ publicUserId: req.params.publicId })
-      .select("username publicUserId vaultxPlan coins planExpiresAt");
+      .select("username publicUserId vaultxPlan coins vaultxPlanExpire lastNotifiedDays email");
 
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // 🔹 Auto-downgrade if plan expired
-    if (user.planExpiresAt && new Date() > user.planExpiresAt) {
-      user.vaultxPlan = "free";
-      user.planExpiresAt = null;
+    let daysRemaining = null;
+
+    if (user.vaultxPlanExpire) {
+      const diff = user.vaultxPlanExpire - new Date();
+      daysRemaining = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    }
+
+    // ✅ send expiry warnings (5, 3, 1 days left)
+    if ([5, 3, 1].includes(daysRemaining) && user.lastNotifiedDays !== daysRemaining) {
+      await sendEmail(
+        user.email,
+        `VaultX Plan Expiry – ${daysRemaining} days left ⏳`,
+        planEmailTemplate({
+          username: user.username,
+          plan: user.vaultxPlan || "free",
+          daysRemaining,
+          type: "expiry-warning"
+        })
+      );
+      user.lastNotifiedDays = daysRemaining;
       await user.save();
     }
 
-    const daysRemaining = user.planExpiresAt
-      ? Math.ceil((user.planExpiresAt - new Date()) / (1000 * 60 * 60 * 24))
-      : null;
+    // ✅ handle expiration + downgrade
+    if (daysRemaining !== null && daysRemaining <= 0 && user.vaultxPlan !== "free") {
+      await sendEmail(
+        user.email,
+        "VaultX Plan Expired ❌",
+        planEmailTemplate({
+          username: user.username,
+          plan: user.vaultxPlan,
+          daysRemaining: 0,
+          type: "expired"
+        })
+      );
+
+      user.vaultxPlan = "free";
+      user.vaultxPlanExpire = null;
+      user.lastNotifiedDays = null;
+      await user.save();
+    }
 
     res.json({
       user: {
@@ -65,7 +96,7 @@ router.get("/public-user/:publicId", async (req, res) => {
         username: user.username,
         coins: user.coins,
         vaultxPlan: user.vaultxPlan,
-        planExpiresAt: user.planExpiresAt,
+        vaultxPlanExpire: user.vaultxPlanExpire,
         daysRemaining
       }
     });
