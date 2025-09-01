@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const crypto = require('crypto');
-
+const { sendEmail, planEmailTemplate } = require("../utils/VaultX");
 const User = require('../models/User');
 const VerifyToken = require('../models/VerifyToken');
 const generateCode = require('../utils/generateCode');
