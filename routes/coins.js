@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
-const { sendEmail, planEmailTemplate } = require("../utils/VaultX");
+const { sedEmail, planEmailTemplate } = require("../utils/VaultX");
 
 router.post("/coins/upgrade", async (req, res) => {
   try {
@@ -23,11 +23,11 @@ router.post("/coins/upgrade", async (req, res) => {
     const chosenPlan = plans[plan.toLowerCase()];
     if (!chosenPlan) return res.status(400).json({ error: "Invalid plan" });
 
-    if (user.vaultxCoins < chosenPlan.price) {
+    if (user.coins < chosenPlan.price) {
       return res.status(400).json({ error: "Not enough coins" });
     }
 
-    user.vaultxCoins -= chosenPlan.price;
+    user.coins -= chosenPlan.price;
     user.vaultxPlan = plan.toLowerCase();
 
     const expireDate = new Date();
@@ -37,7 +37,7 @@ router.post("/coins/upgrade", async (req, res) => {
     await user.save();
 
     // ✅ send confirmation email
-    await sendEmail(
+    await sedEmail(
       user.email,
       `VaultX Plan Activated – ${plan.toUpperCase()} 🎉`,
       planEmailTemplate({
