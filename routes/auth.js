@@ -57,7 +57,7 @@ router.get("/public-user/:publicId", async (req, res) => {
 
     // ✅ send expiry warnings (5, 3, 1 days left)
     if ([5, 3, 1].includes(daysRemaining) && user.lastNotifiedDays !== daysRemaining) {
-      await sendEmail(
+      await sedEmail(
         user.email,
         `VaultX Plan Expiry – ${daysRemaining} days left ⏳`,
         planEmailTemplate({
@@ -73,7 +73,7 @@ router.get("/public-user/:publicId", async (req, res) => {
 
     // ✅ handle expiration + downgrade
     if (daysRemaining !== null && daysRemaining <= 0 && user.vaultxPlan !== "free") {
-      await sendEmail(
+      await sedEmail(
         user.email,
         "VaultX Plan Expired ❌",
         planEmailTemplate({
