@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 const allowedOrigins = [
   'https://mxapi-lnc.onrender.com',
   'https://f1277a31-82ea-4b2c-9e22-fa1e4197a39d-00-1falu0he0oln1.riker.replit.dev',
+  'https://vaultlite.name.ng',
 ];
 
 app.use(cors({
