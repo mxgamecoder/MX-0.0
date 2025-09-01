@@ -195,19 +195,32 @@ router.get('/user/:publicId', meka, async (req, res) => {
     const user = await User.findOne({ publicUserId: req.params.publicId }).select('-password');
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
+    // 🔹 Auto-downgrade if expired
+    if (user.planExpiresAt && new Date() > user.planExpiresAt) {
+      user.vaultxPlan = "free";
+      user.planExpiresAt = null;
+      await user.save();
+    }
+
+    const daysRemaining = user.planExpiresAt
+      ? Math.ceil((user.planExpiresAt - new Date()) / (1000 * 60 * 60 * 24))
+      : null;
+
     res.json({
       user: {
         username: user.username,
         name: user.name,
         email: user.email,
         balance: user.balance || 0,
-        coins: user.coins || 0,   // 👈 add this line
+        coins: user.coins || 0,
         dob: user.dob,
         phone: user.phone,
         verified: user.isVerified,
         plan: user.plan || 'Free',
         vaultxPlan: user.vaultxPlan || 'free',
-        publicUserId: user.publicUserId
+        publicUserId: user.publicUserId,
+        planExpiresAt: user.planExpiresAt,
+        daysRemaining   // 👈 now frontend will get this
       }
     });
   } catch (err) {
