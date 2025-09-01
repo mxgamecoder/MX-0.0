@@ -1,84 +1,57 @@
 // mxapi/routes/coins.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authenticate = require('../middleware/auth'); // JWT middleware
-const User = require('../models/User');
+const User = require("../models/User");
+const { sendEmail, planEmailTemplate } = require("../utils/VaultX");
 
-// Define VaultX plans and coins required
-const vaultxPlans = {
-  free: 0,
-  bronze: 500,
-  silver: 1500,
-  gold: 3000,
-  platinum: 6000,
-  elite: 12000
-};
-
-/**
- * POST /coins/check
- * Body: { publicUserId: string, plan: string }
- * Response: { canAfford: boolean, remainingCoins?: number, message: string }
- */
-// POST /coins/upgrade
-router.post('/upgrade', authenticate, async (req, res) => {
-  const { publicUserId, plan } = req.body;
-
-  if (!publicUserId || !plan) {
-    return res.status(400).json({ message: "Missing publicUserId or plan" });
-  }
-
-  const normalizedPlan = plan.toLowerCase();
-  if (!vaultxPlans.hasOwnProperty(normalizedPlan)) {
-    return res.status(400).json({ message: "Invalid plan selected" });
-  }
-
+router.post("/coins/upgrade", async (req, res) => {
   try {
-    const user = await User.findOne({ publicUserId });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const { publicId, plan } = req.body;
+    const user = await User.findOne({ _id: publicId });
 
-    const requiredCoins = vaultxPlans[normalizedPlan];
-    if (user.coins < requiredCoins) {
-      return res.json({
-        success: false,
-        message: `❌ You need ${requiredCoins - user.coins} more coins to upgrade to ${plan}`
-      });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const plans = {
+      free: { price: 0, days: 0 },
+      silver: { price: 100, days: 30 },
+      gold: { price: 200, days: 30 },
+      platinum: { price: 400, days: 30 },
+      diamond: { price: 700, days: 30 },
+      elite: { price: 1000, days: 30 }
+    };
+
+    const chosenPlan = plans[plan.toLowerCase()];
+    if (!chosenPlan) return res.status(400).json({ error: "Invalid plan" });
+
+    if (user.vaultxCoins < chosenPlan.price) {
+      return res.status(400).json({ error: "Not enough coins" });
     }
 
-    // Deduct coins & update plan
-    user.coins -= requiredCoins;
-    user.vaultxPlan = normalizedPlan;
+    user.vaultxCoins -= chosenPlan.price;
+    user.vaultxPlan = plan.toLowerCase();
 
-    // Set expiration date
-// Set expiration date
-const now = new Date();
-let expireDate;
-if (["platinum", "elite"].includes(normalizedPlan)) {
-  expireDate = new Date(now.setDate(now.getDate() + 365)); // yearly
-} else {
-  expireDate = new Date(now.setDate(now.getDate() + 30)); // monthly
-}
-
-// 🔹 For testing only: make it look like 25 days already passed
-expireDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000); // 5 days from now
-
-user.planExpiresAt = expireDate;
-
+    const expireDate = new Date();
+    expireDate.setDate(expireDate.getDate() + chosenPlan.days);
+    user.vaultxPlanExpire = expireDate;
 
     await user.save();
 
-    const daysRemaining = Math.ceil((expireDate - new Date()) / (1000 * 60 * 60 * 24));
+    // ✅ send confirmation email
+    await sendEmail(
+      user.email,
+      `VaultX Plan Activated – ${plan.toUpperCase()} 🎉`,
+      planEmailTemplate({
+        username: user.username,
+        plan,
+        daysRemaining: chosenPlan.days,
+        type: "purchase"
+      })
+    );
 
-    return res.json({
-      success: true,
-      message: `🎉 Successfully upgraded to ${plan} plan!`,
-      coinsLeft: user.coins,
-      vaultxPlan: user.vaultxPlan,
-      expiresAt: expireDate,
-      daysRemaining
-    });
+    res.json({ message: "Plan upgraded successfully", plan: user.vaultxPlan });
   } catch (err) {
-    console.error("Error upgrading plan:", err);
-    return res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
