@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-async function sendEmail(to, subject, html) {
+async function sedEmail(to, subject, html) {
   await transporter.sendMail({
     from: `"VaultX 🔐" <${process.env.EMAIL_USER}>`,
     to,
@@ -67,4 +67,4 @@ function planEmailTemplate({ username, plan, daysRemaining, type }) {
   }
 }
 
-module.exports = { sendEmail, planEmailTemplate };
+module.exports = { sedEmail, planEmailTemplate };
