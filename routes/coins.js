@@ -11,9 +11,9 @@ router.post("/upgrade", async (req, res) => {
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
- const plans = {
+const plans = {
   free: { price: 0, days: 0 },
-  bronze: { price: 50, days: 5 },
+  bronze: { price: 50, minutes: 5 }, // ⬅️ test expire in 5 minutes
   silver: { price: 100, days: 30 },
   gold: { price: 200, days: 30 },
   platinum: { price: 400, days: 30 },
@@ -30,9 +30,13 @@ router.post("/upgrade", async (req, res) => {
     user.coins -= chosenPlan.price;
     user.vaultxPlan = plan.toLowerCase();
 
-    const expireDate = new Date();
-    expireDate.setDate(expireDate.getDate() + chosenPlan.days);
-    user.vaultxPlanExpire = expireDate;
+const expireDate = new Date();
+if (chosenPlan.minutes) {
+  expireDate.setMinutes(expireDate.getMinutes() + chosenPlan.minutes);
+} else {
+  expireDate.setDate(expireDate.getDate() + chosenPlan.days);
+}
+user.vaultxPlanExpire = expireDate;
 
     await user.save();
 
