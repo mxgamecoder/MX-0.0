@@ -11,14 +11,14 @@ router.post("/upgrade", async (req, res) => {
 
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const plans = {
-      free: { price: 0, days: 0 },
-      silver: { price: 100, days: 30 },
-      gold: { price: 200, days: 30 },
-      platinum: { price: 400, days: 30 },
-      diamond: { price: 700, days: 30 },
-      elite: { price: 1000, days: 30 }
-    };
+ const plans = {
+  free: { price: 0, days: 0 },
+  bronze: { price: 50, days: 5 },
+  silver: { price: 100, days: 30 },
+  gold: { price: 200, days: 30 },
+  platinum: { price: 400, days: 30 },
+  elite: { price: 1000, days: 30 }
+};
 
     const chosenPlan = plans[plan.toLowerCase()];
     if (!chosenPlan) return res.status(400).json({ error: "Invalid plan" });
