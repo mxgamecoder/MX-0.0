@@ -1,10 +1,12 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: process.env.EMAIL_SECURE === 'true',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    pass: process.env.EMAIL_PASS,
   }
 });
 
@@ -38,8 +40,7 @@ function planEmailTemplate({ username, plan, daysRemaining, type }) {
         <h2 style="color:#facc15;">VaultX Expiry Notice ⚠️</h2>
         <p>Hi <b>@${username}</b>,</p>
         <p>Your <b>${plan.toUpperCase()}</b> plan will expire in <b>${daysRemaining} days</b>.</p>
-        <p>Please renew soon to avoid losing premium features and storage capacity.</p>
-        <a href="https://vaultx.com/billing" 
+        <a href="https://vaultlite.name.ng/dashboard" 
            style="display:inline-block; margin-top:10px; padding:10px 20px; background:#4f46e5; color:#fff; border-radius:8px; text-decoration:none;">
           🔄 Renew Plan
         </a>
@@ -55,8 +56,7 @@ function planEmailTemplate({ username, plan, daysRemaining, type }) {
         <h2 style="color:#dc2626;">VaultX Plan Expired ❌</h2>
         <p>Hi <b>@${username}</b>,</p>
         <p>Your <b>${plan.toUpperCase()}</b> plan has expired. You’ve been downgraded to the <b>FREE</b> tier.</p>
-        <p>Upgrade again anytime to continue enjoying premium storage & speed.</p>
-        <a href="https://vaultx.com/billing" 
+        <a href="https://vaultlite.name.ng/dashboard" 
            style="display:inline-block; margin-top:10px; padding:10px 20px; background:#facc15; color:#000; border-radius:8px; text-decoration:none;">
           🚀 Upgrade Now
         </a>
