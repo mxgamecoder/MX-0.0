@@ -291,7 +291,7 @@ router.post('/request-reset', async (req, res) => {
 
   // TODO: Send via email in future
   await sendEmail(
-    email,
+    user.email,
     'MXAPI Verification Code 🔁',
     `Here’s your new MXAPI verification code: ${code}\n\nNeed for speed? Welcome to the fastest API service on the planet.`
   );
