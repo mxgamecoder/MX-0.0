@@ -330,17 +330,24 @@ router.post('/reset-password', async (req, res) => {
   const token = await VerifyToken.findOne({ userId: user._id, code });
   if (!token) return res.status(400).json({ msg: 'Invalid or expired code' });
 
+  // 🚨 Check if new password is same as old
+  const isSame = await bcrypt.compare(newPassword, user.password);
+  if (isSame) {
+    return res.status(400).json({ msg: 'New password cannot be the same as your old password' });
+  }
+
   const hashed = await bcrypt.hash(newPassword, 10);
   user.password = hashed;
   await user.save();
   await VerifyToken.deleteMany({ userId: user._id });
 
   res.json({ msg: 'Password reset successful. You can now log in.' });
+
   await sendEmail(
-  user.email,
-  'MXAPI Password Reset ✔️',
-  `Your MXAPI password has been reset successfully.\n\nIf you didn’t do this, reset it again or contact support immediately.`
-);
+    user.email,
+    'MXAPI Password Reset ✔️',
+    `Your MXAPI password has been reset successfully.\n\nIf you didn’t do this, reset it again or contact support immediately.`
+  );
 });
 
 router.post('/send-code', async (req, res) => {
