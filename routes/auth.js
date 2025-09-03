@@ -299,7 +299,10 @@ router.post('/request-reset', async (req, res) => {
     $or: [{ email: identifier }, { username: identifier }]
   });
 
-  if (!user) return res.status(404).json({ msg: 'User not found' });
+  // 🚨 Only allow verified users
+  if (!user || !user.isVerified) {
+    return res.status(404).json({ msg: 'User not found' });
+  }
 
   const code = generateCode();
   await VerifyToken.deleteMany({ userId: user._id });
@@ -307,15 +310,13 @@ router.post('/request-reset', async (req, res) => {
   const token = new VerifyToken({ userId: user._id, code });
   await token.save();
 
-  // TODO: Send via email in future
   await sendEmail(
     user.email,
-    'MXAPI Verification Code 🔁',
-    `Here’s your new MXAPI verification code: ${code}\n\nNeed for speed? Welcome to the fastest API service on the planet.`
+    'MXAPI Password Reset Code 🔐',
+    `Here’s your MXAPI reset code: ${code}\n\nIf you didn’t request this, ignore this message.`
   );
-  console.log(`🔐 Reset code for ${identifier}: ${code}`);
 
-  res.json({ msg: 'Password reset code sent to your email or phone (demo)' });
+  res.json({ msg: 'Password reset code sent to your email' });
 });
 
 router.post('/reset-password', async (req, res) => {
@@ -325,12 +326,15 @@ router.post('/reset-password', async (req, res) => {
     $or: [{ email: identifier }, { username: identifier }]
   });
 
-  if (!user) return res.status(404).json({ msg: 'User not found' });
+  // 🚨 Block if not found or not verified
+  if (!user || !user.isVerified) {
+    return res.status(404).json({ msg: 'User not found' });
+  }
 
   const token = await VerifyToken.findOne({ userId: user._id, code });
   if (!token) return res.status(400).json({ msg: 'Invalid or expired code' });
 
-  // 🚨 Check if new password is same as old
+  // Prevent same password reuse
   const isSame = await bcrypt.compare(newPassword, user.password);
   if (isSame) {
     return res.status(400).json({ msg: 'New password cannot be the same as your old password' });
@@ -346,7 +350,7 @@ router.post('/reset-password', async (req, res) => {
   await sendEmail(
     user.email,
     'MXAPI Password Reset ✔️',
-    `Your MXAPI password has been reset successfully.\n\nIf you didn’t do this, reset it again or contact support immediately.`
+    `Your MXAPI password has been reset successfully.\n\nIf this wasn’t you, reset again or contact support immediately.`
   );
 });
 
