@@ -101,52 +101,83 @@
     closeButton.addEventListener('click', closeSidebar);
     bodyOverlay.addEventListener('click', closeSidebar);
 
-    // Dynamic greeting
-const greetingEl = document.getElementById('greeting');
-const hour = new Date().getHours();
-let greeting = "Welcome";
-if (hour < 12) greeting = "🌅 Good morning";
-else if (hour < 17) greeting = "🌞 Good afternoon";
-else greeting = "🌙 Good evening";
+    // ✅ Universal session handling
+    function initSession() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenFromUrl = urlParams.get("token");
+      const idFromUrl = urlParams.get("id");
+      const apiKeyFromUrl = urlParams.get("apikey");
 
-// Check auth
-const publicId = localStorage.getItem('mxapi_id');
-const token = localStorage.getItem('mxapi_token');
+      if (tokenFromUrl && idFromUrl) {
+        localStorage.setItem("mxapi_token", tokenFromUrl);
+        localStorage.setItem("mxapi_id", idFromUrl);
 
-if (!publicId || !token) {
-  // Redirect to login
-  window.location.href = "index.html";
-}
-async function fetchUser() {
-  try {
-    const res = await fetch(`/api/auth/user/${publicId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+        // ✅ remove query params from URL (no reload)
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
       }
+
+      if (apiKeyFromUrl) {
+        localStorage.setItem("mxapi_apikey", apiKeyFromUrl);
+
+        // ✅ also clean URL if only apikey was passed
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+
+      const token = localStorage.getItem("mxapi_token");
+      const publicId = localStorage.getItem("mxapi_id");
+
+      if (!token || !publicId) {
+        window.location.href = "index.html";
+        return null;
+      }
+
+      return { token, publicId };
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const session = initSession();
+      if (!session) return; // ✅ Now valid inside this function
+      let { token, publicId } = session;
+
+      // Dynamic greeting
+      const greetingEl = document.getElementById('greeting');
+      const hour = new Date().getHours();
+      let greeting = "Welcome";
+      if (hour < 12) greeting = "🌅 Good morning";
+      else if (hour < 17) greeting = "🌞 Good afternoon";
+      else greeting = "🌙 Good evening";
+
+      async function fetchUser() {
+        try {
+          const res = await fetch(`/api/auth/user/${publicId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          const data = await res.json();
+          if (res.ok && data.user) {
+            greetingEl.textContent = `${greeting} @${data.user.username}!`;
+            localStorage.setItem('mxapi_username', data.user.username);
+          } else {
+            greetingEl.textContent = `${greeting} 👤 User`;
+          }
+        } catch (err) {
+          console.error("Error fetching user:", err);
+          greetingEl.textContent = `${greeting} 👤 Error`;
+        }
+      }
+
+      fetchUser();
     });
 
-    const data = await res.json();
-    if (res.ok && data.user) {
-      greetingEl.textContent = `${greeting} @${data.user.username}!`;
-      localStorage.setItem('mxapi_username', data.user.username);
-    } else {
-      greetingEl.textContent = `${greeting} 👤 User`;
-    }
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    greetingEl.textContent = `${greeting} 👤 Error`;
-  }
-}
-
-fetchUser();
-
     function logout() {
-  localStorage.removeItem('mxapi_token');
-  localStorage.removeItem('mxapi_id');
-  localStorage.removeItem('mxapi_apikey');
-  localStorage.removeItem('mxapi_username');
-  localStorage.removeItem('seenWelcome');
-  window.location.href = 'index.html';
+      localStorage.removeItem('mxapi_token');
+      localStorage.removeItem('mxapi_id');
+      localStorage.removeItem('mxapi_apikey');
+      localStorage.removeItem('mxapi_username');
+      localStorage.removeItem('seenWelcome');
+      window.location.href = 'index.html';
     }
   </script>
 
