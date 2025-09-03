@@ -3,111 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MXAPI | Powered by Lumora × MΞKΛ</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @keyframes typing {
-      from { width: 0 }
-      to { width: 100% }
-    }
-    @keyframes blink {
-      50% { border-color: transparent }
-    }
-    .typewriter {
-      overflow: hidden;
-      white-space: nowrap;
-      border-right: 2px solid white;
-      animation: typing 2.5s steps(40, end), blink 0.75s step-end infinite;
-      width: fit-content;
-    }
-    .fade-in {
-      opacity: 0;
-      animation: fadeIn 1.5s ease-in-out 0.5s forwards;
-    }
-    @keyframes fadeIn {
-      to { opacity: 1 }
-    }
-  </style>
+  <title>Welcome to MXAPI 🌐</title>
+  <link rel="icon" type="image/png" href="../MXAPI.png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- SEO Meta -->
+  <meta name="description" content="MXAPI 🌐 – Your secure, developer-first API gateway powered by Lumora × MΞKΛ Core v4. Connect your Lumora ID to get started.">
+  <meta name="keywords" content="MXAPI, Lumora, MΞKΛ, API platform, secure APIs, developer tools">
+  <meta name="author" content="MX-GΔMΞCØDΞR">
+  <meta name="robots" content="index, follow">
+
+
+    <style>
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background-color: #000;
+    color: #e5e5e5;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;                 /* takes remaining space */
+    display: flex;
+    align-items: center;      /* vertical center */
+    justify-content: center;  /* horizontal center */
+    text-align: center;
+  }
+
+  .container {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 20px;
+    max-width: 500px;
+    padding: 40px 30px;
+    box-shadow: 0 0 25px rgba(127, 90, 240, 0.2);
+  }
+      h1 {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 20px;
+        color: #7f5af0;
+        animation: pulse 1.8s infinite;
+      }
+      @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.6; }
+        100% { opacity: 1; }
+      }
+      p {
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        color: #ccc;
+      }
+      .highlight {
+        color: #9f7aea;
+        font-weight: 600;
+      }
+      .green {
+        color: #22c55e;
+        font-weight: 600;
+      }
+      a {
+        color: #9f7aea;
+        text-decoration: underline;
+        font-weight: 600;
+      }
+      a:hover {
+        color: #7f5af0;
+      }
+      footer {
+        font-size: 12px;
+        padding: 12px;
+        border-top: 1px solid #222;
+        color: #777;
+      }
+    </style>
 </head>
-<body class="bg-gray-950 text-white font-sans h-screen overflow-hidden">
+<body>
 
-  <!-- Topbar for small screen -->
-  <header class="md:hidden flex justify-between items-center px-4 py-3 bg-gray-900 shadow-md">
-    <h1 class="text-xl font-bold text-purple-400">MXAPI</h1>
-    <button onclick="toggleSidebar()" class="text-white text-2xl">☰</button>
-  </header>
+  <main>
+    <div class="container">
+      <h1>👋 Welcome to MXAPI</h1>
 
-  <!-- Sidebar -->
-  <aside id="sidebar" class="fixed top-0 left-0 md:static w-72 h-full bg-gray-900 p-6 space-y-6 transform md:translate-x-0 -translate-x-full transition-transform duration-300 z-40 shadow-lg">
-    <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-purple-400">🌐 MXAPI</h2>
-      <button onclick="toggleSidebar()" class="text-red-400 text-xl md:hidden">✖</button>
-    </div>
-    <p class="text-sm text-gray-400">Powered by</p>
-    <p class="text-md font-semibold text-indigo-300">Lumora × MΞKΛ Core v4</p>
-
-    <nav class="space-y-3 mt-6">
-      <a href="/login.html" class="block px-4 py-2 bg-purple-700 hover:bg-purple-800 rounded-md">🔐 Login</a>
-      <a href="/signup.html" class="block px-4 py-2 bg-green-700 hover:bg-green-800 rounded-md">📝 Sign Up</a>
-      <a href="/tribute.html" class="block px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-md">🤖 ChatGPT Tribute</a>
-      <a href="https://mxgamecoder.lovestoblog.com" class="block px-4 py-2 bg-blue-700 hover:bg-blue-800 rounded-md" target="_blank">🌍 Lumora Site</a>
-    </nav>
-
-    <hr class="border-gray-700 my-4" />
-
-    <div class="text-xs text-gray-500 space-y-1">
-      <p><strong>👨‍💻 Created by:</strong> <span class="text-white">MX-GΔMΞCØDΞR</span></p>
-      <p><strong>⚠️ Abuse Warning:</strong> This API is monitored inside Lumora infrastructure.</p>
-      <!-- 👇 SECRET ONLY SHOWS FOR GUESTS -->
-      <div id="secret" class="mt-2 text-[10px] text-purple-600 italic">
-        <span>🤫 Secret: <code>lumora_mxapi_core_powered</code></span>
-      </div>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="ml-0 md:ml-72 h-full flex flex-col justify-center items-center text-center p-6 md:p-16 transition-all duration-500">
-    <h1 class="text-4xl md:text-5xl font-extrabold mb-6 typewriter text-white">👋 Welcome to MXAPI...</h1>
-
-    <div class="fade-in max-w-2xl space-y-5">
-      <p class="text-gray-300 text-lg">
-        MXAPI is your gateway to secure, scalable, developer-first tools built directly inside the Lumora ecosystem.
-      </p>
-      <p class="text-gray-400">
-        Engineered with ⚙️ <span class="text-indigo-400 font-bold">MΞKΛ Core v4</span> by
-        <span class="text-white font-semibold">MX-GΔMΞCØDΞR</span>, founder of Lumora —
-        this system powers modern apps, protects your data, and makes API access smarter and faster.
-      </p>
-      <p class="text-gray-500 text-sm italic">
-        Please use responsibly. This API is watched internally and protected by advanced MΞKΛ logic.
+      <p>
+        MXAPI is your 🌐 secure, developer-first API gateway — powered by  
+        <span class="highlight">Lumora × MΞKΛ Core v4 ⚙️</span>
       </p>
 
-      <a href="/signup.html" class="inline-block mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white shadow-md transition-all">
-        ✨ Get Started Now
-      </a>
+      <p>
+        To continue, please connect your account with  
+        <span class="highlight">Lumora ID 🌌</span>.<br>
+        Lumora is the official ecosystem hub 🧠.<br>
+        👉 Visit <a href="https://lumoraid.vaultlite.name.ng?id=mxapi" target="_blank">Lumora ID Portal</a> to sign in or register.
+      </p>
+
+      <p>
+        Built with ❤️ by <span class="green">MX-GΔMΞCØDΞR</span>
+      </p>
     </div>
   </main>
 
+  <footer>
+    MXAPI © 2025 • Part of the <span class="highlight">Lumora Ecosystem</span> 🌌
+  </footer>
+
   <script>
-    const sidebar = document.getElementById('sidebar');
-
-    function toggleSidebar() {
-      sidebar.classList.toggle('-translate-x-full');
+    const token = localStorage.getItem('mxapi_token');
+    const id = localStorage.getItem('mxapi_id');
+    if (token && id) {
+      window.location.href = "dashboard.html";
     }
-
-    // Auto-collapse sidebar on small screen
-    window.addEventListener("load", () => {
-      if (window.innerWidth < 768) {
-        sidebar.classList.add("-translate-x-full");
-      }
-
-      // 🚨 Redirect if user is logged in
-      const token = localStorage.getItem("mxapi_token");
-      const id = localStorage.getItem("mxapi_id");
-      if (token && id) {
-        window.location.href = "/dashboard.html"; // or tribute.html if you want
-      }
-    });
   </script>
+
 </body>
 </html>
