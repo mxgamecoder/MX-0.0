@@ -41,6 +41,24 @@ router.patch("/update-profile", authenticate, async (req, res) => {
   }
 });
 
+// check username
+router.get('/check-username/:username', async (req, res) => {
+  const user = await User.findOne({ username: req.params.username });
+  res.json({ available: !user });
+});
+
+// check email
+router.get('/check-email/:email', async (req, res) => {
+  const user = await User.findOne({ email: req.params.email });
+  res.json({ available: !user });
+});
+
+// check phone
+router.get('/check-phone/:phone', async (req, res) => {
+  const user = await User.findOne({ phone: req.params.phone });
+  res.json({ available: !user });
+});
+
 router.get("/public-user/:publicId", async (req, res) => {
   try {
     const user = await User.findOne({ publicUserId: req.params.publicId })
