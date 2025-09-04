@@ -11,6 +11,10 @@ const UserSchema = new mongoose.Schema({
   publicUserId: { type: String, unique: true, required: true },
   isVerified: { type: Boolean, default: false },
   balance: { type: Number, default: 0 },
+
+  // ✅ Add profile image
+  avatarUrl: { type: String, default: "" },
+
   apiKey: {
     type: String,
     unique: true,
@@ -25,7 +29,6 @@ const UserSchema = new mongoose.Schema({
   apiKeyRegens: { type: Number, default: 0 },
   plan: { type: String, default: 'free' },
 
-  // VaultX-specific
   coins: { type: Number, default: 0 },
   vaultxPlan: { type: String, default: 'free' },
   vaultxPlanExpire: { type: Date, default: null },
