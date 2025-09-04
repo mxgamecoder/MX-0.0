@@ -16,6 +16,7 @@ const allowedOrigins = [
   'https://mxapi-lnc.onrender.com',
   'https://f1277a31-82ea-4b2c-9e22-fa1e4197a39d-00-1falu0he0oln1.riker.replit.dev',
   'https://92054906-4aec-4bf1-81a2-978c8fcf9d4a-00-31lj014u8i07e.picard.replit.dev',
+  'https://lumoraid.vaultlite.name.ng',
   'https://vaultlite.name.ng',
 ];
 
