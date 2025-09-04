@@ -11,9 +11,10 @@ const UserSchema = new mongoose.Schema({
   publicUserId: { type: String, unique: true, required: true },
   isVerified: { type: Boolean, default: false },
   balance: { type: Number, default: 0 },
-
-  // ✅ Add profile image
-  avatarUrl: { type: String, default: "" },
+  avatarUrl: { 
+  type: String, 
+  default: "https://i.ibb.co/JjMphBCP/avatar.jpg" 
+},
 
   apiKey: {
     type: String,
