@@ -269,7 +269,8 @@ router.get('/user/:publicId', meka, async (req, res) => {
         vaultxPlan: user.vaultxPlan || 'free',
         publicUserId: user.publicUserId,
         planExpiresAt: user.planExpiresAt,
-        daysRemaining   // 👈 now frontend will get this
+        daysRemaining,   // 👈 now frontend will get this
+        avatarUrl: user.avatarUrl || ""
       }
     });
   } catch (err) {
