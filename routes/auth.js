@@ -27,6 +27,13 @@ router.patch("/update-profile", [
     if (age < 12) throw new Error('You must be at least 12 years old');
     return true;
   }),
+  body('email').optional().isEmail().custom((value) => {
+  const allowedDomains = ['@gmail.com', '@yahoo.com', '@outlook.com'];
+  if (!allowedDomains.some(domain => value.endsWith(domain))) {
+    throw new Error('Email must be Gmail, Yahoo, or Outlook');
+  }
+  return true;
+}),
   body('phone').optional({ checkFalsy: true }).matches(/^\+?\d{7,15}$/).withMessage('Phone must be valid (with or without +), 7–15 digits')
 ], authenticate, async (req, res) => {
   const errors = validationResult(req);
@@ -40,7 +47,6 @@ router.patch("/update-profile", [
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     // 🚫 Prevent editing sensitive fields
-    delete updates.email;
     delete updates.verified;
     delete updates.plan;
     delete updates.balance;
