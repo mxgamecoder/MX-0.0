@@ -14,26 +14,46 @@ const authenticate = require("../middleware/auth"); // JWT middleware to protect
 const plans = require("./plan");
 
 // PATCH /auth/update-profile
-router.patch("/update-profile", authenticate, async (req, res) => {
-  const userId = req.user.id; // From decoded JWT token
+router.patch("/update-profile", [
+  body('name').optional().matches(/^[A-Za-z\s]+$/).withMessage('Name must contain only letters'),
+  body('username').optional().isLength({ max: 33 }).withMessage('Username must not be more than 33 characters'),
+  body('password').optional().isLength({ min: 10 }).withMessage('Password must be at least 10 characters long'),
+  body('dob').optional().custom((value) => {
+    const dob = new Date(value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    if (age < 12) throw new Error('You must be at least 12 years old');
+    return true;
+  }),
+  body('phone').optional({ checkFalsy: true }).matches(/^\+?\d{7,15}$/).withMessage('Phone must be valid (with or without +), 7–15 digits')
+], authenticate, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const userId = req.user.id;
   const updates = req.body;
 
-  if (updates.password) {
-  const user = await User.findById(userId);
-  const isSame = await bcrypt.compare(updates.password, user.password);
-  if (isSame) {
-    return res.status(400).json({ message: "❌ New password cannot be same as old password" });
-  }
-  updates.password = await bcrypt.hash(updates.password, 10);
-}
-
-  // Prevent sensitive fields from being edited
-  delete updates.email;
-  delete updates.verified;
-  delete updates.plan;
-  delete updates.balance;
-
   try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // 🚫 Prevent editing sensitive fields
+    delete updates.email;
+    delete updates.verified;
+    delete updates.plan;
+    delete updates.balance;
+
+    // ✅ Password handling
+    if (updates.password) {
+      const isSame = await bcrypt.compare(updates.password, user.password);
+      if (isSame) {
+        return res.status(400).json({ msg: "❌ New password cannot be same as old password" });
+      }
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updates },
