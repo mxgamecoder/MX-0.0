@@ -264,12 +264,13 @@ router.get('/user/:publicId', meka, async (req, res) => {
         coins: user.coins || 0,
         dob: user.dob,
         phone: user.phone,
-        verified: user.isVerified,
+        isVerified: user.isVerified,
         plan: user.plan || 'Free',
         vaultxPlan: user.vaultxPlan || 'free',
         publicUserId: user.publicUserId,
         planExpiresAt: user.planExpiresAt,
-        daysRemaining,   // 👈 now frontend will get this
+        createdAt: user.createdAt, 
+        daysRemaining,
         avatarUrl: user.avatarUrl || ""
       }
     });
