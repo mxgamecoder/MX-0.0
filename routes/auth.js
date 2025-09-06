@@ -18,6 +18,15 @@ router.patch("/update-profile", authenticate, async (req, res) => {
   const userId = req.user.id; // From decoded JWT token
   const updates = req.body;
 
+  if (updates.password) {
+  const user = await User.findById(userId);
+  const isSame = await bcrypt.compare(updates.password, user.password);
+  if (isSame) {
+    return res.status(400).json({ message: "❌ New password cannot be same as old password" });
+  }
+  updates.password = await bcrypt.hash(updates.password, 10);
+}
+
   // Prevent sensitive fields from being edited
   delete updates.email;
   delete updates.verified;
