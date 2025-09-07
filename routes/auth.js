@@ -430,4 +430,17 @@ router.post('/send-code', async (req, res) => {
   res.json({ msg: 'Verification code sent to email' });
 });
 
+router.post('/send-update-code', async (req, res) => {
+  const { publicUserId, email } = req.body;
+  const user = await User.findOne({ publicUserId });
+  if (!user) return res.status(404).json({ msg: 'User not found' });
+
+  const code = generateCode();
+  await VerifyToken.deleteMany({ userId: user._id });
+  await new VerifyToken({ userId: user._id, code }).save();
+
+  await sendEmail(user.email, 'MXAPI Update Verification Code 🔁', `Code: ${code}`);
+  res.json({ msg: 'Verification code sent' });
+});
+
 module.exports = router;
