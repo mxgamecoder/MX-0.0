@@ -439,30 +439,62 @@ router.post("/check-old-password", authenticate, async (req, res) => {
   res.json({ isDifferent: !isSame });
 });
 
-router.post('/send-update-code', async (req, res) => {
-  const { publicUserId, email } = req.body;
-  const user = await User.findOne({ publicUserId });
-  if (!user) return res.status(404).json({ msg: 'User not found' });
+// POST /auth/send-update-code
+router.post("/send-update-code", async (req, res) => {
+  try {
+    const { publicUserId } = req.body;
+    const user = await User.findOne({ publicUserId });
+    if (!user) return res.status(404).json({ msg: "User not found" });
 
-  const code = generateCode();
-  await VerifyToken.deleteMany({ userId: user._id });
-  await new VerifyToken({ userId: user._id, code }).save();
+    const code = generateCode();
 
-  await sendEmail(user.email, 'MXAPI Update Verification Code 🔁', `Code: ${code}`);
-  res.json({ msg: 'Verification code sent' });
+    // save code in VerifyToken collection
+    await VerifyToken.findOneAndUpdate(
+      { userId: user._id, type: "update" },
+      { code, expiresAt: Date.now() + 10 * 60 * 1000 }, // 10 min expiry
+      { upsert: true, new: true }
+    );
+
+    // send via email
+    await sendEmail(
+      user.email,
+      "🔑 Verification Code",
+      `Your mxapi update verification code is: ${code}`
+    );
+
+    res.json({ msg: "✅ Code sent to email" });
+  } catch (err) {
+    console.error("send-update-code error:", err);
+    res.status(500).json({ msg: "Failed to send code" });
+  }
 });
 
+
+// POST /auth/verify-update
 router.post("/verify-update", async (req, res) => {
-  const { publicUserId, code } = req.body;
+  try {
+    const { publicUserId, code } = req.body;
+    const user = await User.findOne({ publicUserId });
+    if (!user) return res.status(404).json({ msg: "User not found" });
 
-  const user = await User.findOne({ publicUserId });
-  if (!user) return res.status(404).json({ msg: "User not found" });
+    const token = await VerifyToken.findOne({
+      userId: user._id,
+      type: "update",
+      code
+    });
 
-  const tokenDoc = await VerifyToken.findOne({ userId: user._id, token: code });
-  if (!tokenDoc) return res.status(400).json({ msg: "❌ Invalid or expired code" });
+    if (!token || token.expiresAt < Date.now()) {
+      return res.status(400).json({ msg: "❌ Invalid or expired code" });
+    }
 
-  await tokenDoc.deleteOne();
-  res.json({ msg: "✅ Code verified" });
+    // delete token after successful verification
+    await VerifyToken.deleteOne({ _id: token._id });
+
+    res.json({ msg: "✅ Code verified" });
+  } catch (err) {
+    console.error("verify-update error:", err);
+    res.status(500).json({ msg: "Failed to verify code" });
+  }
 });
 
 module.exports = router;
