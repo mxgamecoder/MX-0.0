@@ -430,8 +430,7 @@ router.post('/send-code', async (req, res) => {
   res.json({ msg: 'Verification code sent to email' });
 });
 
-// Example with Express + bcrypt
-router.post("/check-old-password", async (req, res) => {
+router.post("/check-old-password", authMiddleware, async (req, res) => {
   const { oldPassword } = req.body;
   const user = await User.findById(req.user.id);
   if (!user) return res.status(404).json({ msg: "User not found" });
