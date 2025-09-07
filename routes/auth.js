@@ -439,56 +439,17 @@ router.post("/check-old-password", authenticate, async (req, res) => {
   res.json({ isDifferent: !isSame });
 });
 
-// POST /api/auth/send-update-code
-router.post("/send-update-code", async (req, res) => {
-  try {
-    const { publicUserId } = req.body;
-    const user = await User.findOne({ publicUserId });
-    if (!user) return res.status(404).json({ msg: "User not found" });
+router.post('/send-update-code', async (req, res) => {
+  const { publicUserId, email } = req.body;
+  const user = await User.findOne({ publicUserId });
+  if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
+  const code = generateCode();
+  await VerifyToken.deleteMany({ userId: user._id });
+  await new VerifyToken({ userId: user._id, code }).save();
 
-    // save / overwrite old token
-    await VerifyToken.findOneAndUpdate(
-      { publicUserId },
-      { code, expiresAt: Date.now() + 10 * 60 * 1000 }, // 10 mins
-      { upsert: true, new: true }
-    );
-
-    // send via email (reuse your email sender)
-    await sendEmail(
-      user.email,
-      "🔑 Verification Code",
-      `Your verification code is: ${code}`
-    );
-
-    res.json({ msg: "✅ Code sent" });
-  } catch (err) {
-    console.error("send-update-code error:", err);
-    res.status(500).json({ msg: "Failed to send code" });
-  }
-});
-
-// POST /api/auth/verify-update
-router.post("/verify-update", async (req, res) => {
-  try {
-    const { publicUserId, code } = req.body;
-    const user = await User.findOne({ publicUserId });
-    if (!user) return res.status(404).json({ msg: "User not found" });
-
-    const tokenDoc = await VerifyToken.findOne({ publicUserId, code });
-    if (!tokenDoc || tokenDoc.expiresAt < Date.now()) {
-      return res.status(400).json({ msg: "❌ Invalid or expired code" });
-    }
-
-    // remove token once used
-    await VerifyToken.deleteOne({ _id: tokenDoc._id });
-
-    res.json({ msg: "✅ Code verified" });
-  } catch (err) {
-    console.error("verify-update error:", err);
-    res.status(500).json({ msg: "Failed to verify code" });
-  }
+  await sendEmail(user.email, 'MXAPI Update Verification Code 🔁', `Code: ${code}`);
+  res.json({ msg: 'Verification code sent' });
 });
 
 module.exports = router;
