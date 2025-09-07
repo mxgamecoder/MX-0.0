@@ -391,28 +391,23 @@ router.post('/reset-password', async (req, res) => {
   );
 });
 
+// POST /auth/send-code
 router.post('/send-code', async (req, res) => {
-  const { userId, email } = req.body;
+  const { publicUserId, email } = req.body;
 
-let user;
-if (userId) {
-  user = await User.findById(userId);
-} else if (email) {
-  user = await User.findOne({ email });
-}
-if (!user) return res.status(404).json({ msg: 'User not found' });
+  let user;
+  if (publicUserId) {
+    user = await User.findOne({ publicUserId });
+  } else if (email) {
+    user = await User.findOne({ email });
+  }
 
+  if (!user) return res.status(404).json({ msg: 'User not found' });
   if (user.isVerified) return res.status(400).json({ msg: 'User already verified' });
 
   let existing = await VerifyToken.findOne({ userId: user._id });
-
-  if (existing && existing.resendAttempts >= 2) {
-    return res.status(429).json({ msg: 'You have reached the resend limit. Please wait or contact support.' });
-  }
-
   const code = generateCode();
 
-  // Remove old token if it's outdated
   await VerifyToken.deleteMany({ userId: user._id });
 
   const token = new VerifyToken({
@@ -422,12 +417,15 @@ if (!user) return res.status(404).json({ msg: 'User not found' });
   });
 
   await token.save();
+  
+  // Make sure to send to the correct email
   await sendEmail(
-    email,
+    user.email,
     'MXAPI Verification Code 🔁',
-    `Here’s your new MXAPI verification code: ${code}\n\nNeed for speed? Welcome to the fastest API service on the planet.`
+    `Here’s your new MXAPI verification code: ${code}`
   );
-  console.log(`📨 New verification code for ${email}: ${code}`);
+
+  console.log(`📨 New verification code for ${user.email}: ${code}`);
 
   res.json({ msg: 'Verification code sent to email' });
 });
