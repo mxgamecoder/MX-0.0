@@ -392,10 +392,15 @@ router.post('/reset-password', async (req, res) => {
 });
 
 router.post('/send-code', async (req, res) => {
-  const { email } = req.body;
+  const { userId, email } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ msg: 'User not found' });
+let user;
+if (userId) {
+  user = await User.findById(userId);
+} else if (email) {
+  user = await User.findOne({ email });
+}
+if (!user) return res.status(404).json({ msg: 'User not found' });
 
   if (user.isVerified) return res.status(400).json({ msg: 'User already verified' });
 
