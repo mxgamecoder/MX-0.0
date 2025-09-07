@@ -452,19 +452,4 @@ router.post('/send-update-code', async (req, res) => {
   res.json({ msg: 'Verification code sent' });
 });
 
-router.post("/verify-email", async (req, res) => {
-  const { email, code } = req.body;
-  const tokenDoc = await VerifyToken.findOne({ email, code });
-  if (!tokenDoc) return res.status(400).json({ msg: "Invalid or expired code" });
-
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ msg: "User not found" });
-
-  user.isVerified = true;
-  await user.save();
-  await tokenDoc.deleteOne();
-
-  res.json({ msg: "✅ Email verified successfully" });
-});
-
 module.exports = router;
