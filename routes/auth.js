@@ -439,17 +439,69 @@ router.post("/check-old-password", authenticate, async (req, res) => {
   res.json({ isDifferent: !isSame });
 });
 
-router.post('/send-update-code', async (req, res) => {
-  const { publicUserId, email } = req.body;
-  const user = await User.findOne({ publicUserId });
-  if (!user) return res.status(404).json({ msg: 'User not found' });
+// Send code for sensitive updates
+router.post("/update/send-code", authenticate, async (req, res) => {
+  const { field, newValue } = req.body;
+  const userId = req.user.id;
 
-  const code = generateCode();
-  await VerifyToken.deleteMany({ userId: user._id });
-  await new VerifyToken({ userId: user._id, code }).save();
+  if (!["email", "phone", "password"].includes(field)) {
+    return res.status(400).json({ msg: "Invalid field" });
+  }
 
-  await sendEmail(user.email, 'MXAPI Update Verification Code 🔁', `Code: ${code}`);
-  res.json({ msg: 'Verification code sent' });
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const code = generateCode();
+    await VerifyToken.deleteMany({ userId, purpose: `update-${field}` });
+
+    await new VerifyToken({
+      userId,
+      code,
+      purpose: `update-${field}`,
+      newValue
+    }).save();
+
+    // Send code via email (or SMS later if phone)
+    await sendEmail(
+      user.email,
+      `MXAPI ${field} update verification`,
+      `Your verification code is: ${code}\n\nIf you didn’t request this change, ignore this message.`
+    );
+
+    res.json({ msg: `Code sent to ${user.email}` });
+  } catch (err) {
+    console.error("Send code failed:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// Verify code + apply update
+router.post("/update/verify", authenticate, async (req, res) => {
+  const { field, code } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const record = await VerifyToken.findOne({ userId, purpose: `update-${field}` });
+    if (!record) return res.status(400).json({ msg: "No verification request found" });
+    if (record.code !== code) return res.status(400).json({ msg: "Invalid code" });
+
+    const updates = {};
+    if (field === "password") {
+      updates.password = await bcrypt.hash(record.newValue, 10);
+    } else {
+      updates[field] = record.newValue;
+    }
+
+    const user = await User.findByIdAndUpdate(userId, { $set: updates }, { new: true });
+
+    await VerifyToken.deleteMany({ userId, purpose: `update-${field}` });
+
+    res.json({ msg: `✅ ${field} updated successfully`, user });
+  } catch (err) {
+    console.error("Verify failed:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
 });
 
 module.exports = router;
