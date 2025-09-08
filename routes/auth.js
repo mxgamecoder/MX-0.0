@@ -473,10 +473,10 @@ router.post("/verify-update-code", authenticate, async (req, res) => {
 
   try {
     const record = await VerifyToken.findOne({
-      userId: req.user.id,
-      token: code,
-      purpose: "update"
-    });
+  userId: req.user.id,
+  code,             // ✅ match on "code"
+  purpose: "update"
+});
     if (!record) return res.status(400).json({ msg: "❌ Invalid or expired code" });
 
     // delete after use
