@@ -446,11 +446,11 @@ router.post("/send-update-code", authenticate, async (req, res) => {
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     const code = generateCode(); // 6-digit OTP
-    const token = new VerifyToken({
-      userId: user._id,
-      token: code,
-      purpose: "update"
-    });
+const token = new VerifyToken({
+  userId: user._id,
+  code,          // ✅ correct key
+  purpose: "update"
+});
     await token.save();
 
     await sendEmail(
