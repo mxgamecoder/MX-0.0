@@ -430,13 +430,25 @@ router.post('/send-code', async (req, res) => {
   res.json({ msg: 'Verification code sent to email' });
 });
 
-router.post("/check-old-password", authenticate, async (req, res) => {
-  const { oldPassword } = req.body;
-  const user = await User.findById(req.user.id);
-  if (!user) return res.status(404).json({ msg: "User not found" });
+// check password (new vs old)
+router.post("/check-password", authenticate, async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ msg: "Password required" });
 
-  const isSame = await bcrypt.compare(oldPassword, user.password);
-  res.json({ isDifferent: !isSame });
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const isSame = await bcrypt.compare(password, user.password);
+    if (isSame) {
+      return res.json({ available: false, msg: "❌ New password cannot be same as old one" });
+    }
+
+    res.json({ available: true });
+  } catch (err) {
+    console.error("Password check failed:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
 });
 
 // Send code before sensitive update
