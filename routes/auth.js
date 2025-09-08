@@ -439,68 +439,53 @@ router.post("/check-old-password", authenticate, async (req, res) => {
   res.json({ isDifferent: !isSame });
 });
 
-// Send code for sensitive updates
-router.post("/update/send-code", authenticate, async (req, res) => {
-  const { field, newValue } = req.body;
-  const userId = req.user.id;
-
-  if (!["email", "phone", "password"].includes(field)) {
-    return res.status(400).json({ msg: "Invalid field" });
-  }
-
+// Send code before sensitive update
+router.post("/send-update-code", authenticate, async (req, res) => {
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    const code = generateCode();
-    await VerifyToken.deleteMany({ userId, purpose: `update-${field}` });
+    const code = generateCode(); // 6-digit OTP
+    const token = new VerifyToken({
+      userId: user._id,
+      token: code,
+      purpose: "update"
+    });
+    await token.save();
 
-    await new VerifyToken({
-      userId,
-      code,
-      purpose: `update-${field}`,
-      newValue
-    }).save();
-
-    // Send code via email (or SMS later if phone)
     await sendEmail(
       user.email,
-      `MXAPI ${field} update verification`,
-      `Your verification code is: ${code}\n\nIf you didn’t request this change, ignore this message.`
+      "Confirm Your Profile Update",
+      `Your Lumora ID update code is: ${code}`
     );
 
-    res.json({ msg: `Code sent to ${user.email}` });
+    res.json({ msg: "✅ Code sent to your email." });
   } catch (err) {
-    console.error("Send code failed:", err);
-    res.status(500).json({ msg: "Server error" });
+    console.error("Send update code error:", err);
+    res.status(500).json({ msg: "Server error sending code." });
   }
 });
 
-// Verify code + apply update
-router.post("/update/verify", authenticate, async (req, res) => {
-  const { field, code } = req.body;
-  const userId = req.user.id;
+// Verify code before applying update
+router.post("/verify-update-code", authenticate, async (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ msg: "Code is required" });
 
   try {
-    const record = await VerifyToken.findOne({ userId, purpose: `update-${field}` });
-    if (!record) return res.status(400).json({ msg: "No verification request found" });
-    if (record.code !== code) return res.status(400).json({ msg: "Invalid code" });
+    const record = await VerifyToken.findOne({
+      userId: req.user.id,
+      token: code,
+      purpose: "update"
+    });
+    if (!record) return res.status(400).json({ msg: "❌ Invalid or expired code" });
 
-    const updates = {};
-    if (field === "password") {
-      updates.password = await bcrypt.hash(record.newValue, 10);
-    } else {
-      updates[field] = record.newValue;
-    }
+    // delete after use
+    await VerifyToken.findByIdAndDelete(record._id);
 
-    const user = await User.findByIdAndUpdate(userId, { $set: updates }, { new: true });
-
-    await VerifyToken.deleteMany({ userId, purpose: `update-${field}` });
-
-    res.json({ msg: `✅ ${field} updated successfully`, user });
+    res.json({ msg: "✅ Code verified. You may now update profile." });
   } catch (err) {
-    console.error("Verify failed:", err);
-    res.status(500).json({ msg: "Server error" });
+    console.error("Verify update code error:", err);
+    res.status(500).json({ msg: "Server error verifying code." });
   }
 });
 
