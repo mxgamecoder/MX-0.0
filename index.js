@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 const allowedOrigins = [
   'https://mxapi-lnc.onrender.com',
   'https://af21bb36-7ce6-4516-82bd-b9b53a09d0f7-00-86ifz7hqq14x.spock.replit.dev',
+  'https://b52e9d68-e351-483c-8013-80de7e0f729e-00-28lhz9v2xdk5j.kirk.replit.dev',
   'https://lumoraid.vaultlite.name.ng',
   'https://vaultlite.name.ng',
 ];
