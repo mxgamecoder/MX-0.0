@@ -419,10 +419,10 @@ router.post('/send-code', async (req, res) => {
   await token.save();
   
   // Make sure to send to the correct email
-  await sendEmail(
+    await sendEmail(
     user.email,
-    'MXAPI Verification Code 🔁',
-    `Here’s your new MXAPI verification code: ${code}`
+    'Lumora ID Verification Code 🔁',
+    verificationEmail(user.username, code) // ✅ use branded template
   );
 
   res.json({ msg: 'Verification code sent to email' });
@@ -465,8 +465,15 @@ const token = new VerifyToken({
 
     await sendEmail(
       user.email,
-      "Confirm Your Profile Update",
-      `Your Lumora ID update code is: ${code}`
+      "Lumora ID Profile Update Verification 🔐",
+      `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h2 style="color: #6C5CE7;">🔑 Confirm Your Profile Update, ${user.username}</h2>
+        <p>Use the code below to confirm your profile changes:</p>
+        <p><strong style="color:#00b894; font-size:1.5em; font-weight:bold;">${code}</strong></p>
+        <p>If you didn’t request this, ignore this email.</p>
+        <hr>
+        <p style="font-size:0.9em; color:#636e72;">Lumora ID – Secure & trusted account management</p>
+      </div>`
     );
 
     res.json({ msg: "✅ Code sent to your email." });
