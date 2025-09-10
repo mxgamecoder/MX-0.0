@@ -11,20 +11,25 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
- * Send email
+ * Send HTML email
  * @param {string} to - Receiver email
  * @param {string} subject - Email subject
- * @param {string} text - Email body text
+ * @param {string} html - HTML content
  */
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, html) => {
   const mailOptions = {
     from: `"MXAPI 👑" <${process.env.EMAIL_USER}>`,
     to,
     subject,
-    text,
+    html, // send HTML for styling
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`📨 Email sent to ${to} | Subject: ${subject}`);
+  } catch (err) {
+    console.error('❌ Failed to send email:', err);
+  }
 };
 
 module.exports = sendEmail;
