@@ -249,7 +249,15 @@ router.post('/login', [
 
   try {
     const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] });
+
     if (!user) return res.status(400).json({ msg: 'User not found' });
+
+    // ❌ Block login if not verified
+    if (!user.isVerified) {
+      return res.status(403).json({ 
+        msg: 'Account not verified' 
+      });
+    }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ msg: 'Invalid password' });
