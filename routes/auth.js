@@ -12,6 +12,7 @@ const sendEmail = require('../utils/sendEmail');
 const meka = require('../middleware/auth');
 const authenticate = require("../middleware/auth"); // JWT middleware to protect route
 const plans = require("./plan");
+const { verificationEmail, passwordResetEmail, loginAlertEmail } = require('../utils/templates');
 
 // PATCH /auth/update-profile
 router.patch("/update-profile", [
@@ -217,9 +218,7 @@ router.post('/register', [
     await new VerifyToken({ userId: user._id, code }).save();
 
    // await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
-    await sendEmail(email, 'MXAPI Account Created 🎉',
-      `Welcome to MXAPI! Your verification code is: ${code}\n\nIf you didn’t request this code, just ignore this message.\n\n🚀 MXAPI – The best & most affordable API in the world, 10x faster than Flash.`);
-
+await sendEmail(user.email, 'Lumora ID Account Created 🎉', verificationEmail(user.username, code));
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({
@@ -264,9 +263,7 @@ router.post('/login', [
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    await sendEmail(user.email, 'MXAPI Login Alert 🔐',
-      `You just logged in to your MXAPI account.\n\nIf this wasn't you, reset your password immediately.`);
-
+    await sendEmail(user.email, 'Lumora ID Login Alert 🔐', loginAlertEmail(user.username));
     res.json({
       msg: 'Login successful',
       token,
@@ -355,12 +352,7 @@ router.post('/request-reset', async (req, res) => {
   const token = new VerifyToken({ userId: user._id, code });
   await token.save();
 
-  await sendEmail(
-    user.email,
-    'MXAPI Password Reset Code 🔐',
-    `Here’s your MXAPI reset code: ${code}\n\nIf you didn’t request this, ignore this message.`
-  );
-
+  await sendEmail(user.email, 'Lumora ID Password Reset 🔐', passwordResetEmail(user.username, code));
   res.json({ msg: 'Password reset code sent to your email' });
 });
 
