@@ -12,7 +12,7 @@ const sendEmail = require('../utils/sendEmail');
 const meka = require('../middleware/auth');
 const authenticate = require("../middleware/auth"); // JWT middleware to protect route
 const plans = require("./plan");
-const { verificationEmail, passwordResetEmail, loginAlertEmail } = require('../utils/templates');
+const { verificationEmail, passwordResetEmail, loginAlertEmail, passwordResetEmailOwn } = require('../utils/templates');
 
 // PATCH /auth/update-profile
 router.patch("/update-profile", [
@@ -384,11 +384,11 @@ router.post('/reset-password', async (req, res) => {
 
   res.json({ msg: 'Password reset successful. You can now log in.' });
 
-  await sendEmail(
-    user.email,
-    'MXAPI Password Reset ✔️',
-    `Your MXAPI password has been reset successfully.\n\nIf this wasn’t you, reset again or contact support immediately.`
-  );
+   await sendEmail(
+      user.email,
+      "Lumora ID Password Updated 🔐",
+      passwordResetEmailOwn(user.username)
+    );
 });
 
 // POST /auth/send-code
@@ -424,8 +424,6 @@ router.post('/send-code', async (req, res) => {
     'MXAPI Verification Code 🔁',
     `Here’s your new MXAPI verification code: ${code}`
   );
-
-  console.log(`📨 New verification code for ${user.email}: ${code}`);
 
   res.json({ msg: 'Verification code sent to email' });
 });
