@@ -23,9 +23,10 @@
     "mongoose": "^8.16.4",
     "nodemailer": "^7.0.5",
     "stream": "^0.0.3",
-    "vaultx-sdk": "^1.0.3"
+    "vaultx-sdk": "^1.0.4"
   }
 }
+
 
 
 
