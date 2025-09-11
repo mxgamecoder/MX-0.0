@@ -31,29 +31,27 @@ router.post("/upload-avatar", authenticate, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-  // 🗑️ Delete old avatar if exists
-if (user.avatarUrl) {
-  try {
-    const parts = user.avatarUrl.split("/");
-    const oldFileName = parts[parts.length - 1];
-    const relativePath = `${process.env.VAULTX_FOLDER}/${oldFileName}`;
+    // 🗑️ Delete old avatar if exists (use filename, not UUID)
+    if (user.avatarUrl) {
+      try {
+        const parts = user.avatarUrl.split("/");
+        const oldFileName = parts[parts.length - 1]; // e.g. avatar(3).png
+        await vaultx.delete(process.env.VAULTX_FOLDER, [oldFileName]);
+        console.log("Old avatar deleted:", oldFileName);
+      } catch (err) {
+        console.warn("⚠️ Failed to delete old avatar:", err.message);
+      }
+    }
 
-    await vaultx.delete(process.env.VAULTX_FOLDER, [relativePath]);
-    console.log("Old avatar deleted:", relativePath);
-  } catch (err) {
-    console.warn("⚠️ Failed to delete old avatar:", err.message);
-  }
-}
-
-    // ✅ upload new avatar
+    // ✅ Upload new avatar
     const result = await vaultx.upload(
       process.env.VAULTX_FOLDER,
       file.data,
       { filename: file.name, contentType: file.mimetype }
     );
 
-    // ✅ update DB with new avatar URL
-    user.avatarUrl = result.file.fileUrl;
+    // ✅ Update DB with new avatar URL
+    user.avatarUrl = result.file.fileUrl; // SDK response always has fileUrl
     await user.save();
 
     res.json({
