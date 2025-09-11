@@ -3,6 +3,7 @@ const router = express.Router();
 const Ticket = require("../models/Ticket");
 const authenticate = require("../middleware/auth");
 const VaultX = require("vaultx-sdk");
+const User = require("../models/User");
 
 const vaultx = new VaultX({
   publicUserId: process.env.VAULTX_PUBLIC_USERID || "mxapi_xsot4s1w",
@@ -17,9 +18,16 @@ router.post("/", authenticate, async (req, res) => {
       return res.status(400).json({ msg: "Subject and message are required" });
     }
 
+    // Fetch user info
+    const user = await User.findById(req.user.id).select("username");
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
     let attachments = [];
     if (req.files && req.files.attachments) {
-      const files = Array.isArray(req.files.attachments) ? req.files.attachments : [req.files.attachments];
+      const files = Array.isArray(req.files.attachments)
+        ? req.files.attachments
+        : [req.files.attachments];
+
       if (files.length > 5) return res.status(400).json({ msg: "Max 5 files allowed" });
 
       for (const file of files) {
@@ -33,7 +41,7 @@ router.post("/", authenticate, async (req, res) => {
 
     const ticket = new Ticket({
       userId: req.user.id,
-      username: req.user.username,
+      username: user.username, // ✅ now we set it properly
       subject,
       message,
       attachments,
