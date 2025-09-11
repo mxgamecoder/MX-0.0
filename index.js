@@ -8,6 +8,9 @@ const fileUpload = require('express-fileupload');
 const requireApiKey = require('./middleware/apiKey');
 const checkUsage = require('./middleware/checkUsage');
 const Usage = require('./models/Usage');
+const ticketRoute = require('./routes/ticket');
+const marketplaceRoutes = require('./routes/marketplace');
+const coinsRoutes = require('./routes/coins');
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -71,13 +74,8 @@ app.get('/status-check/:type/:category', async (req, res) => {
 // ========== Auth Routes ==========
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
-const supportRoute = require('./routes/support');
-app.use('/api/support', supportRoute);
-const ticketRoute = require('./routes/ticket');
 app.use('/api/tickets', ticketRoute);
-const marketplaceRoutes = require('./routes/marketplace');
 app.use('/api/marketplace', marketplaceRoutes);
-const coinsRoutes = require('./routes/coins');
 app.use('/api/coins', coinsRoutes);
 // ========== Static Files ==========
 app.use('/jest', express.static(path.join(__dirname, 'jest')));
