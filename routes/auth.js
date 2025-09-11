@@ -29,27 +29,23 @@ router.post("/upload-avatar", authenticate, async (req, res) => {
 
     const file = req.files.avatar;
 
-    // Convert express-fileupload file to a stream
-    const stream = require("stream");
-    const bufferStream = new stream.PassThrough();
-    bufferStream.end(file.data);
+    // ✅ Convert buffer to readable stream
+    const { Readable } = require("stream");
+    const stream = Readable.from(file.data);
 
     // Upload to VaultX
-    const result = await vaultx.upload(bufferStream, {
-      folder: process.env.VAULTX_FOLDER,
-      overwrite: true
-    });
+    const result = await vaultx.upload(process.env.VAULTX_FOLDER, stream);
 
     // Save to user
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { avatarUrl: result.fileUrl },
+      { avatarUrl: result.file.fileUrl },
       { new: true }
     );
 
     res.json({
       msg: "✅ Avatar uploaded successfully",
-      fileUrl: result.fileUrl,
+      fileUrl: result.file.fileUrl,
       user: { avatarUrl: user.avatarUrl }
     });
 
