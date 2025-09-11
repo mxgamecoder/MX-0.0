@@ -506,4 +506,58 @@ router.post("/verify-update-code", authenticate, async (req, res) => {
   }
 });
 
+// LOGIN for UNVERIFIED ACCOUNTS (trigger code if correct)
+router.post('/unverified-login', [
+  body('identifier').notEmpty(),
+  body('password').notEmpty()
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) 
+    return res.status(400).json({ errors: errors.array() });
+
+  const { identifier, password } = req.body;
+
+  try {
+    // 🔎 Find by email or username
+    const user = await User.findOne({ 
+      $or: [{ email: identifier }, { username: identifier }] 
+    });
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // 🔑 Compare password
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ msg: "Invalid password" });
+
+    // ✅ If already verified, don't send code
+    if (user.isVerified) {
+      return res.status(200).json({ 
+        msg: "Account already verified. Please log in normally." 
+      });
+    }
+
+    // 🚀 Generate new verification code
+    const code = generateCode();
+    await VerifyToken.deleteMany({ userId: user._id });
+
+    const token = new VerifyToken({ userId: user._id, code });
+    await token.save();
+
+    // 📧 Send code via email
+    await sendEmail(
+      user.email,
+      "Lumora ID Verification Code 🔑",
+      verificationEmail(user.username, code)
+    );
+
+    return res.status(200).json({
+      msg: "Account not verified. A verification code has been sent.",
+      email: user.email
+    });
+
+  } catch (err) {
+    console.error("Unverified login failed:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 module.exports = router;
