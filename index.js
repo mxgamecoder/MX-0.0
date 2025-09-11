@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const fileUpload = require('express-fileupload');
 const requireApiKey = require('./middleware/apiKey');
 const checkUsage = require('./middleware/checkUsage');
 const Usage = require('./models/Usage');
@@ -30,6 +31,12 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+app.use(fileUpload({
+  createParentPath: true,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  abortOnLimit: true
+}));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
