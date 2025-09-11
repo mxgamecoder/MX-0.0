@@ -13,6 +13,45 @@ const meka = require('../middleware/auth');
 const authenticate = require("../middleware/auth"); // JWT middleware to protect route
 const plans = require("./plan");
 const { verificationEmail, passwordResetEmail, loginAlertEmail, passwordResetEmailOwn } = require('../utils/templates');
+const VaultX = require("vaultx-sdk");
+
+const vaultx = new VaultX({
+  publicUserId: process.env.VAULTX_PUBLIC_USERID, // e.g. mxapi_xsot4s1w
+  folder: process.env.VAULTX_FOLDER,              // e.g. profile-images
+});
+
+// POST /auth/upload-avatar
+router.post("/upload-avatar", authenticate, async (req, res) => {
+  try {
+    if (!req.files || !req.files.avatar) {
+      return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    const file = req.files.avatar;
+
+    // 🔹 Upload to VaultX
+    const result = await vaultx.upload(file, {
+      folder: process.env.VAULTX_FOLDER,
+      overwrite: true
+    });
+
+    // 🔹 Save only fileUrl in DB
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatarUrl: result.fileUrl },
+      { new: true }
+    );
+
+    res.json({
+      msg: "✅ Avatar uploaded successfully",
+      fileUrl: result.fileUrl,
+      user: { avatarUrl: user.avatarUrl }
+    });
+  } catch (err) {
+    console.error("Avatar upload error:", err);
+    res.status(500).json({ msg: "❌ Upload failed" });
+  }
+});
 
 // PATCH /auth/update-profile
 router.patch("/update-profile", [
