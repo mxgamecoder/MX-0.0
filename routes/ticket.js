@@ -31,7 +31,7 @@ router.post("/", authenticate, async (req, res) => {
       if (files.length > 5) return res.status(400).json({ msg: "Max 5 files allowed" });
 
       for (const file of files) {
-        const uploaded = await vaultx.upload(process.env.VAULTX_FOLDER, file.data, {
+        const uploaded = await vaultx.upload(process.env.VAULTX_FOLDERr, file.data, {
           filename: file.name,
           contentType: file.mimetype,
         });
