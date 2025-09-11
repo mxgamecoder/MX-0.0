@@ -31,19 +31,19 @@ router.post("/upload-avatar", authenticate, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // ✅ if user already has an avatar, delete the old one first
-    if (user.avatarUrl) {
-      try {
-        // extract fileName from the old avatarUrl
-        const parts = user.avatarUrl.split("/");
-        const oldFileName = parts[parts.length - 1];
+  // 🗑️ Delete old avatar if exists
+if (user.avatarUrl) {
+  try {
+    const parts = user.avatarUrl.split("/");
+    const oldFileName = parts[parts.length - 1];
+    const relativePath = `${process.env.VAULTX_FOLDER}/${oldFileName}`;
 
-        await vaultx.delete(process.env.VAULTX_FOLDER, [oldFileName]);
-        console.log("Old avatar deleted:", oldFileName);
-      } catch (err) {
-        console.warn("Failed to delete old avatar:", err.message);
-      }
-    }
+    await vaultx.delete(process.env.VAULTX_FOLDER, [relativePath]);
+    console.log("Old avatar deleted:", relativePath);
+  } catch (err) {
+    console.warn("⚠️ Failed to delete old avatar:", err.message);
+  }
+}
 
     // ✅ upload new avatar
     const result = await vaultx.upload(
