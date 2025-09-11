@@ -33,12 +33,12 @@ router.post("/upload-avatar", authenticate, async (req, res) => {
     const fileStream = Readable.from(file.data);
 
     const uploadFile = {
-      value: fileStream,
-      options: {
-        filename: file.name,
-        contentType: file.mimetype
-      }
-    };
+  value: file.data, // buffer, no need to stream
+  options: {
+    filename: file.name,
+    contentType: file.mimetype,
+  },
+};
 
     const result = await vaultx.upload(process.env.VAULTX_FOLDER, uploadFile);
 
