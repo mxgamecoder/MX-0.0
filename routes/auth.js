@@ -23,26 +23,24 @@ const vaultx = new VaultX({
 // POST /auth/upload-avatar
 router.post("/upload-avatar", authenticate, async (req, res) => {
   try {
-    // Check if file is sent
     if (!req.files || !req.files.avatar) {
       return res.status(400).json({ msg: "No file uploaded" });
     }
 
     const file = req.files.avatar;
 
-    // Validate file type (optional, just PNG/JPG)
-    const allowedTypes = ["image/png", "image/jpeg"];
-    if (!allowedTypes.includes(file.mimetype)) {
-      return res.status(400).json({ msg: "Only PNG or JPG allowed" });
-    }
+    // Convert express-fileupload file to a stream
+    const stream = require("stream");
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(file.data);
 
-    // 🔹 Upload to VaultX
-    const result = await vaultx.upload(file, {
+    // Upload to VaultX
+    const result = await vaultx.upload(bufferStream, {
       folder: process.env.VAULTX_FOLDER,
       overwrite: true
     });
 
-    // 🔹 Save file URL to user
+    // Save to user
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { avatarUrl: result.fileUrl },
