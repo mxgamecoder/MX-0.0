@@ -28,21 +28,13 @@ router.post("/upload-avatar", authenticate, async (req, res) => {
     }
 
     const file = req.files.avatar;
-    const { Readable } = require("stream");
 
-    const fileStream = Readable.from(file.data);
+    const result = await vaultx.upload(
+      process.env.VAULTX_FOLDER,
+      file.data,
+      { filename: file.name, contentType: file.mimetype }
+    );
 
-    const uploadFile = {
-  value: file.data, // buffer, no need to stream
-  options: {
-    filename: file.name,
-    contentType: file.mimetype,
-  },
-};
-
-    const result = await vaultx.upload(process.env.VAULTX_FOLDER, uploadFile);
-
-    // Save URL to user
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { avatarUrl: result.file.fileUrl },
