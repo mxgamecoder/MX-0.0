@@ -5,8 +5,8 @@ const authenticate = require("../middleware/auth");
 const VaultX = require("vaultx-sdk");
 
 const vaultx = new VaultX({
-  publicUserId: process.env.VAULTX_PUBLIC_USERID,
-  folder: process.env.VAULTX_FOLDER || "tickets",
+  publicUserId: process.env.VAULTX_PUBLIC_USERID || "mxapi_xsot4s1w",
+  folder: process.env.VAULTX_FOLDERr || "tickets",
 });
 
 // Create Ticket
