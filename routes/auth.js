@@ -23,11 +23,18 @@ const vaultx = new VaultX({
 // POST /auth/upload-avatar
 router.post("/upload-avatar", authenticate, async (req, res) => {
   try {
+    // Check if file is sent
     if (!req.files || !req.files.avatar) {
       return res.status(400).json({ msg: "No file uploaded" });
     }
 
     const file = req.files.avatar;
+
+    // Validate file type (optional, just PNG/JPG)
+    const allowedTypes = ["image/png", "image/jpeg"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return res.status(400).json({ msg: "Only PNG or JPG allowed" });
+    }
 
     // 🔹 Upload to VaultX
     const result = await vaultx.upload(file, {
@@ -35,7 +42,7 @@ router.post("/upload-avatar", authenticate, async (req, res) => {
       overwrite: true
     });
 
-    // 🔹 Save only fileUrl in DB
+    // 🔹 Save file URL to user
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { avatarUrl: result.fileUrl },
@@ -47,6 +54,7 @@ router.post("/upload-avatar", authenticate, async (req, res) => {
       fileUrl: result.fileUrl,
       user: { avatarUrl: user.avatarUrl }
     });
+
   } catch (err) {
     console.error("Avatar upload error:", err);
     res.status(500).json({ msg: "❌ Upload failed" });
