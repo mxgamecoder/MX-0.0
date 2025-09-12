@@ -5,7 +5,9 @@ const TicketSchema = new mongoose.Schema({
   username: { type: String, required: true },
   subject: { type: String, required: true },
   message: { type: String, required: true },
-  status: { type: String, enum: ["pending", "resolved"], default: "pending" },
+  type: { type: String, required: true }, // New type field
+  reason: { type: String }, // Optional common reason
+  status: { type: String, enum: ["pending", "checking", "resolved"], default: "pending" },
   attachments: [{ type: String }], // VaultX file URLs
 }, { timestamps: true });
 
