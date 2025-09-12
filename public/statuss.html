@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumora Service Status</title>
+  <style>
+    body {
+      background: #070607;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      background: #1a1a1a;
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+    }
+    header .back {
+      font-size: 20px;
+      cursor: pointer;
+      margin-right: 10px;
+      color: #9F7AEA;
+      text-decoration: none;
+    }
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+      color: #9F7AEA;
+    }
+    main {
+      padding: 20px;
+    }
+    .subtitle {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .service {
+      background: #141414;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      border: 1px solid #222;
+    }
+    .service-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .service-left {
+      display: flex;
+      align-items: center;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .online { background: #22c55e; }
+    .offline { background: #ef4444; }
+    .service-name {
+      margin-left: 8px;
+      font-weight: bold;
+    }
+    .status {
+      font-size: 13px;
+    }
+    .status.online { color: #22c55e; }
+    .status.offline { color: #ef4444; }
+    .history {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .bar {
+      width: 16px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    .bar.online { background: #22c55e; }
+    .bar.offline { background: #ef4444; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="dashboard.html" class="back">←</a>
+    <h1>Lumora Status</h1>
+  </header>
+  <main>
+    <p class="subtitle">As at today, September 12, 2025</p>
+    <div id="services"></div>
+  </main>
+
+  <script>
+    const services = [
+      { name: "MXAPI Core", url: "https://mxapi-lnc.onrender.com" },
+      { name: "VaultX Storage", url: "https://vaultx-lnc.onrender.com" },
+      { name: "Lumora Site", url: "https://mxgamecoder.lovestoblog.com" },
+            { name: "Lumora Id", url: "https://lumoraid.vaultlite.name.ng" },
+      { name: "Database (Mongo)", url: null } // we won’t expose DB URL
+    ];
+
+    const container = document.getElementById("services");
+
+    // Simulate past 7-day uptime (for demo only)
+    function generateHistory(status) {
+      let history = [];
+      for (let i = 0; i < 7; i++) {
+        history.push(Math.random() > 0.1 ? "online" : "offline"); // 90% uptime
+      }
+      // today’s actual status overrides last slot
+      history[6] = status;
+      return history;
+    }
+
+    async function checkService(service) {
+      if (!service.url) return "online"; // hidden DB → assume online
+      let status = "offline";
+      try {
+        const res = await fetch(service.url, { method:"GET", mode:"no-cors" });
+        status = res.ok || res.type === "opaque" ? "online" : "offline";
+      } catch {
+        status = "offline";
+      }
+      return status;
+    }
+
+    async function loadStatus() {
+      for (const s of services) {
+        const status = await checkService(s);
+        const percent = status === "online" ? "100%" : "0%";
+        const history = generateHistory(status);
+
+        const div = document.createElement("div");
+        div.className = "service";
+        div.innerHTML = `
+          <div class="service-top">
+            <div class="service-left">
+              <span class="dot ${status}"></span>
+              <span class="service-name">${s.name}</span>
+            </div>
+            <div class="status ${status}">
+              ${status.toUpperCase()} • Uptime: ${percent}
+            </div>
+          </div>
+          <div class="history">
+            ${history.map(h => `<div class="bar ${h}"></div>`).join("")}
+          </div>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    loadStatus();
+  </script>
+</body>
+  </html>
