@@ -4,7 +4,8 @@ const Ticket = require("../models/Ticket");
 const authenticate = require("../middleware/auth");
 const VaultX = require("vaultx-sdk");
 const User = require("../models/User");
-const sendEmail = require('../utils/sendEmail');
+const sendTicketEmail = require("../utils/endTicketEmail");
+const ticketEmailTemplate = require("../utils/ticketEmailTemplate");
 const vaultx = new VaultX({
   publicUserId: process.env.VAULTX_PUBLIC_USERID || "mxapi_xsot4s1w",
   folder: process.env.VAULTX_FOLDERr || "tickets",
@@ -50,10 +51,10 @@ router.post("/", authenticate, async (req, res) => {
     await ticket.save();
 
     // Send email notification
-    await sendEmail({
+    await sendTicketEmail({
       to: user.email,
-      subject: `We received your ticket: ${subject}`,
-      text: `Hello ${user.username},\n\nWe have received your complaint regarding: "${subject}". Our team will start reviewing it immediately.\n\nThank you.`,
+      subject: `🎫 We received your ticket: ${subject}`,
+      html: ticketEmailTemplate(user.username, subject, message, ticket._id.toString()),
     });
 
     // Update status to checking
