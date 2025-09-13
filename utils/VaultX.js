@@ -1,13 +1,13 @@
 // utils/VaultX.js
 const nodemailer = require("nodemailer");
-require('dotenv').config(); // make sure env is loaded
+require('dotenv').config(); // ensure env is loaded
 
 // ----------------------
 // Create transporter
 // ----------------------
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT) || 465, // fallback to 465
+  port: Number(process.env.EMAIL_PORT) || 465, // fallback
   secure: process.env.EMAIL_SECURE === 'true', // SSL true/false
   auth: {
     user: process.env.EMAIL_USER,
@@ -21,12 +21,6 @@ transporter.verify((error, success) => {
     console.error("❌ VaultX SMTP config error:", error);
   } else {
     console.log("✅ VaultX SMTP server is ready to take messages");
-    console.log("VaultX transporter config:", {
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
-      secure: process.env.EMAIL_SECURE,
-      user: process.env.EMAIL_USER,
-    });
   }
 });
 
@@ -69,7 +63,7 @@ function planEmailTemplate({ username, plan, daysRemaining, type }) {
         <p>Hi <b>@${username}</b>,</p>
         <p>Your upgrade to <b style="color:#facc15;">${plan.toUpperCase()}</b> plan was successful.</p>
         <p>Your encrypted storage space is now active for <b>${daysRemaining} days</b>.</p>
-        <p>Visit your VaultX dashboard at <a href="https://vaultlite.name.ng/dashboard" style="color:#9F7AEA;">vaultlite.name.ng/dashboard</a>.</p>
+        <p>Enjoy the enhanced security and storage! 😊</p>
         <br/>
         <p>Stay secured,<br/>The VaultX Team 🚀</p>
       </div>
@@ -82,7 +76,7 @@ function planEmailTemplate({ username, plan, daysRemaining, type }) {
         <h2 style="color:#facc15;">VaultX Expiry Notice ⚠️</h2>
         <p>Hi <b>@${username}</b>,</p>
         <p>Your <b>${plan.toUpperCase()}</b> plan will expire in <b>${daysRemaining} days</b>.</p>
-        <p>Renew your plan at <a href="https://vaultlite.name.ng/dashboard" style="color:#9F7AEA;">vaultlite.name.ng/dashboard</a>.</p>
+        <p>Don't worry, you can renew soon to continue enjoying full features! ✨</p>
         <br/>
         <p>Thanks for choosing VaultX!</p>
       </div>
@@ -95,7 +89,7 @@ function planEmailTemplate({ username, plan, daysRemaining, type }) {
         <h2 style="color:#dc2626;">VaultX Plan Expired ❌</h2>
         <p>Hi <b>@${username}</b>,</p>
         <p>Your <b>${plan.toUpperCase()}</b> plan has expired. You are now on the FREE tier.</p>
-        <p>Reactivate your plan at <a href="https://vaultlite.name.ng/dashboard" style="color:#9F7AEA;">vaultlite.name.ng/dashboard</a>.</p>
+        <p>Consider upgrading again to unlock premium features! 🌟</p>
         <br/>
         <p>Stay secured,<br/>The VaultX Team 🔐</p>
       </div>
