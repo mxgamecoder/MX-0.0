@@ -270,7 +270,11 @@ router.post('/register', [
     await new VerifyToken({ userId: user._id, code }).save();
 
    // await sendEmail(email, 'Your MXAPI verification code', `Your code is: ${code}`);
-await sendEmail(user.email, 'Lumora ID Account Created 🎉', verificationEmail(user.username, code));
+await sendEmail({
+  to: user.email,
+  subject: 'Lumora ID Account Created 🎉',
+  html: verificationEmail(user.username, code)
+});
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({
@@ -315,7 +319,11 @@ router.post('/login', [
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    await sendEmail(user.email, 'Lumora ID Login Alert 🔐', loginAlertEmail(user.username));
+    await sendEmail({
+  to: user.email,
+  subject: 'Lumora ID Login Alert 🔐',
+  html: loginAlertEmail(user.username)
+});
     res.json({
       msg: 'Login successful',
       token,
@@ -404,7 +412,11 @@ router.post('/request-reset', async (req, res) => {
   const token = new VerifyToken({ userId: user._id, code });
   await token.save();
 
-  await sendEmail(user.email, 'Lumora ID Password Reset 🔐', passwordResetEmail(user.username, code));
+  await sendEmail({
+  to: user.email,
+  subject: 'Lumora ID Password Reset 🔐',
+  html: passwordResetEmail(user.username, code)
+});
   res.json({ msg: 'Password reset code sent to your email' });
 });
 
@@ -436,11 +448,11 @@ router.post('/reset-password', async (req, res) => {
 
   res.json({ msg: 'Password reset successful. You can now log in.' });
 
-   await sendEmail(
-      user.email,
-      "Lumora ID Password Updated 🔐",
-      passwordResetEmailOwn(user.username)
-    );
+  await sendEmail({
+  to: user.email,
+  subject: 'Lumora ID Password Updated 🔐',
+  html: passwordResetEmailOwn(user.username)
+});
 });
 
 // POST /auth/send-code
@@ -471,12 +483,11 @@ router.post('/send-code', async (req, res) => {
   await token.save();
   
   // Make sure to send to the correct email
-    await sendEmail(
-    user.email,
-    'Lumora ID Verification Code 🔁',
-    verificationEmail(user.username, code) // ✅ use branded template
-  );
-
+    await sendEmail({
+  to: user.email,
+  subject: 'Lumora ID Verification Code 🔑',
+  html: verificationEmail(user.username, code)
+});
   res.json({ msg: 'Verification code sent to email' });
 });
 
@@ -514,11 +525,10 @@ const token = new VerifyToken({
   purpose: "update"
 });
     await token.save();
-
-    await sendEmail(
-      user.email,
-      "Lumora ID Profile Update Verification 🔐",
-      `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    await sendEmail({
+  to: user.email,
+  subject: 'Lumora ID Profile Update Verification 🔐',
+  html: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
         <h2 style="color: #6C5CE7;">🔑 Confirm Your Profile Update, ${user.username}</h2>
         <p>Use the code below to confirm your profile changes:</p>
         <p><strong style="color:#00b894; font-size:1.5em; font-weight:bold;">${code}</strong></p>
@@ -526,8 +536,7 @@ const token = new VerifyToken({
         <hr>
         <p style="font-size:0.9em; color:#636e72;">Lumora ID – Secure & trusted account management</p>
       </div>`
-    );
-
+});
     res.json({ msg: "✅ Code sent to your email." });
   } catch (err) {
     console.error("Send update code error:", err);
