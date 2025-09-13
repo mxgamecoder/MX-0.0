@@ -1,7 +1,11 @@
 const nodemailer = require("nodemailer");
 
+// Debug: check if Render is loading env variables
+console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Loaded" : "❌ Missing");
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
+
 const transporter = nodemailer.createTransport({
-  service: "gmail", // use Gmail service directly
+  service: "gmail", // Gmail handles host/port automatically
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -33,7 +37,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
   }
 };
 
-// verify Gmail connection on server start
+// Verify Gmail connection on server start
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ SMTP config error:", error);
