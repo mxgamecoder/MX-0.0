@@ -1,9 +1,7 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_SECURE === 'true',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -11,12 +9,17 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sedEmail(to, subject, html) {
-  await transporter.sendMail({
-    from: `"VaultX 🔐" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html
-  });
+  try {
+    await transporter.sendMail({
+      from: `"VaultX 🔐" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html
+    });
+    console.log(`📨 VaultX email sent to ${to} | Subject: ${subject}`);
+  } catch (err) {
+    console.error("❌ VaultX email failed:", err);
+  }
 }
 
 function planEmailTemplate({ username, plan, daysRemaining, type }) {
