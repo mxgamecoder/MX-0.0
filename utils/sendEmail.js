@@ -1,11 +1,9 @@
 const nodemailer = require("nodemailer");
 
-// Debug: check if Render is loading env variables
-console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Loaded" : "❌ Missing");
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
-
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Gmail handles host/port automatically
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: process.env.EMAIL_SECURE === "true", // true for 465, false for 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -25,8 +23,8 @@ const sendEmail = async ({ to, subject, text, html }) => {
     from: `"MXAPI 👑" <${process.env.EMAIL_USER}>`,
     to,
     subject,
-    text,
-    html,
+    text, // plain text (fallback)
+    html, // optional (for styled emails)
   };
 
   try {
@@ -37,12 +35,12 @@ const sendEmail = async ({ to, subject, text, html }) => {
   }
 };
 
-// Verify Gmail connection on server start
+// verify connection on server start
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ SMTP config error:", error);
   } else {
-    console.log("✅ Gmail SMTP is ready to send messages");
+    console.log("✅ SMTP server is ready to take messages");
   }
 });
 
