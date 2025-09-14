@@ -14,9 +14,9 @@ const vaultx = new VaultX({
 // Create Ticket
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { subject, message, type, reason } = req.body;
-    if (!subject || !message || !type) {
-      return res.status(400).json({ msg: "Subject, message, and type are required" });
+    const { subject, message, type, category } = req.body;
+    if (!subject || !message || !type || !category) {
+      return res.status(400).json({ msg: "Subject, message, category, and type are required" });
     }
 
     // Fetch user info
@@ -44,7 +44,7 @@ router.post("/", authenticate, async (req, res) => {
       subject,
       message,
       type,
-      reason,
+      category,
       attachments,
     });
 
@@ -54,7 +54,7 @@ router.post("/", authenticate, async (req, res) => {
     await sendTicketEmail({
       to: user.email,
       subject: `🎫 We received your ticket: ${subject}`,
-      html: ticketEmailTemplate(user.username, subject, message, ticket._id.toString()),
+      html: ticketEmailTemplate(user.username, subject, category, message, ticket._id.toString()),
     });
 
     // Update status to checking
