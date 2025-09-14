@@ -81,7 +81,10 @@ router.get("/", authenticate, async (req, res) => {
 // Get single ticket detail
 router.get("/:id", authenticate, async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id);
+const tickets = await Ticket.find({ userId: req.user.id })
+  .select("subject message type category attachments username status createdAt")
+  .sort({ createdAt: -1 });
+res.json({ tickets });
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
     if (ticket.userId.toString() !== req.user.id) return res.status(403).json({ msg: "Forbidden" });
     res.json({ ticket });
