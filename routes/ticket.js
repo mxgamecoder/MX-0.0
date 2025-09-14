@@ -81,14 +81,12 @@ router.get("/", authenticate, async (req, res) => {
 // Get single ticket detail
 router.get("/:id", authenticate, async (req, res) => {
   try {
-const tickets = await Ticket.find({ userId: req.user.id })
-  .select("subject message type category attachments username status createdAt")
-  .sort({ createdAt: -1 });
-res.json({ tickets });
+    const ticket = await Ticket.findOne({ _id: req.params.id, userId: req.user.id })
+      .select("subject message type category attachments username status createdAt");
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
-    if (ticket.userId.toString() !== req.user.id) return res.status(403).json({ msg: "Forbidden" });
     res.json({ ticket });
   } catch (err) {
+    console.error("Ticket fetch error:", err);
     res.status(500).json({ msg: "Server error" });
   }
 });
