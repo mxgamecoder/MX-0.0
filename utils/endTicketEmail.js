@@ -16,14 +16,14 @@ const sendTicketEmail = async ({ to, subject, html }) => {
     });
 
     const mailOptions = {
-      from: `"VaultX Support 🎫" <${process.env.EMAIL_USER}>`,
+      from: `"Lumora Support 🎫" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`📨 Ticket email sent to ${to} | Subject: ${subject}`);
+   //console.log(`📨 Ticket email sent to ${to} | Subject: ${subject}`);
   } catch (err) {
     console.error("❌ Ticket email error:", err.message);
   }
