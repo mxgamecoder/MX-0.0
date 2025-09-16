@@ -5,7 +5,7 @@ const authenticate = require("../middleware/auth");
 const VaultX = require("vaultx-sdk");
 const User = require("../models/User");
 const sendTicketEmail = require("../utils/endTicketEmail");
-const ticketEmailTemplate = require("../utils/ticketEmailTemplate");
+const { ticketEmailTemplate, ticketDeletedTemplate } = require("../utils/ticketEmailTemplate");
 const vaultx = new VaultX({
   publicUserId: process.env.VAULTX_PUBLIC_USERID || "mxapi_xsot4s1w",
   folder: process.env.VAULTX_FOLDERr || "tickets",
@@ -94,10 +94,25 @@ router.get("/:id", authenticate, async (req, res) => {
 // 🗑️ Delete ticket
 router.delete("/:id", authenticate, async (req, res) => {
   try {
-    const ticket = await Ticket.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    // Find the ticket first
+    const ticket = await Ticket.findOne({ _id: req.params.id, userId: req.user.id });
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
 
-    res.json({ msg: "🗑️ Ticket deleted successfully" });
+    // Fetch user info
+    const user = await User.findById(req.user.id).select("username email");
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // Delete the ticket
+    await ticket.deleteOne();
+
+    // Send deletion email
+    await sendTicketEmail({
+      to: user.email,
+      subject: `🗑️ Ticket Deleted: ${ticket.subject}`,
+      html: ticketDeletedTemplate(user.username, ticket.subject, ticket.category, ticket.type, ticket._id.toString()),
+    });
+
+    res.json({ msg: "🗑️ Ticket deleted and email sent" });
   } catch (err) {
     console.error("Ticket delete error:", err);
     res.status(500).json({ msg: "Server error" });
