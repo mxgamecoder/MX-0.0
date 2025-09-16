@@ -131,6 +131,10 @@ router.post("/reply", authenticate, async (req, res) => {
     const ticket = await Ticket.findOne({ _id: ticketId, userId: req.user.id });
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
 
+    // Fetch user info FIRST ✅
+    const user = await User.findById(req.user.id).select("username email");
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
     // Handle attachments
     let attachments = [];
     if (req.files && req.files.attachments) {
@@ -145,21 +149,19 @@ router.post("/reply", authenticate, async (req, res) => {
         attachments.push(uploaded.file.fileUrl);
       }
     }
-    
-ticket.replies.push({
-  userId: req.user.id,
-  username: user.username,   // ✅ correct source
-  message,
-  attachments,
-  createdAt: new Date()
-});
+
+    // Push reply with user.username ✅
+    ticket.replies.push({
+      userId: req.user.id,
+      username: user.username,
+      message,
+      attachments,
+      createdAt: new Date()
+    });
 
     // Update ticket status
     ticket.status = "answered";
     await ticket.save();
-
-    // Fetch user info
-    const user = await User.findById(req.user.id).select("username email");
 
     // Send email
     await sendTicketEmail({
