@@ -91,4 +91,17 @@ router.get("/:id", authenticate, async (req, res) => {
   }
 });
 
+// 🗑️ Delete ticket
+router.delete("/:id", authenticate, async (req, res) => {
+  try {
+    const ticket = await Ticket.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
+
+    res.json({ msg: "🗑️ Ticket deleted successfully" });
+  } catch (err) {
+    console.error("Ticket delete error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 module.exports = router;
