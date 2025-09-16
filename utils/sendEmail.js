@@ -20,7 +20,7 @@ const transporter = nodemailer.createTransport({
  */
 const sendEmail = async ({ to, subject, text, html }) => {
   const mailOptions = {
-    from: `"MXAPI 👑" <${process.env.EMAIL_USER}>`,
+    from: `"Lumora 👑" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     text, // plain text (fallback)
