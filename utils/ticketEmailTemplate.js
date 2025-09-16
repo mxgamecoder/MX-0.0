@@ -42,4 +42,39 @@ const ticketEmailTemplate = (username, subject, category, type, ticketId) => {
   `;
 };
 
-module.exports = ticketEmailTemplate;
+const ticketDeletedTemplate = (username, subject, category, type, ticketId) => {
+  return `
+  <div style="font-family: Arial, sans-serif; color:#f1f1f1; background:#070607; line-height:1.6; padding:20px;">
+    
+    <div style="border:3px solid #E53E3E; border-radius:8px; padding:20px;">
+      <h2 style="color:#E53E3E; margin-top:0;">🗑️ Ticket Deleted</h2>
+      <p>Hello <strong>${username}</strong>,</p>
+      <p>Your ticket has been successfully <span style="color:#E53E3E;">deleted</span> from our system.</p>
+
+      <div style="background:#111; padding:15px; border-radius:6px; margin:15px 0; border:1px solid #E53E3E;">
+        <p><strong>📌 Subject:</strong> ${subject}</p>
+        <p><strong>📂 Category:</strong> ${category}</p>
+        <p><strong>🧾 Priority:</strong> ${type}</p>
+        <p><strong>🔑 Ticket ID:</strong> ${ticketId}</p>
+        <p><strong>Status:</strong> <span style="color:#E53E3E;">Deleted ❌</span></p>
+      </div>
+
+      <p>If this was a mistake, please feel free to open a new ticket anytime 🙏💬📩</p>
+
+      <div style="margin-top:20px; text-align:center;">
+        <a href="https://lumoraid.vaultlite.name.ng/contact" 
+           style="background:#E53E3E; color:#fff; padding:10px 20px; border-radius:6px; text-decoration:none; font-weight:bold;">
+           📩 Open New Ticket
+        </a>
+      </div>
+    </div>
+
+    <p style="font-size:0.9em; color:#bbb; margin-top:20px; text-align:center;">
+      Lumora Support Team <br/>
+      <span style="color:#E53E3E;">Lumora × MΞKΛ Core</span>
+    </p>
+  </div>
+  `;
+};
+
+module.exports = { ticketEmailTemplate, ticketDeletedTemplate };
