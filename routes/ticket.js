@@ -145,9 +145,7 @@ router.post("/reply", authenticate, async (req, res) => {
         attachments.push(uploaded.file.fileUrl);
       }
     }
-
-const user = await User.findById(req.user.id).select("username email");
-
+    
 ticket.replies.push({
   userId: req.user.id,
   username: user.username,   // ✅ correct source
