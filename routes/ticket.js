@@ -146,14 +146,15 @@ router.post("/reply", authenticate, async (req, res) => {
       }
     }
 
-    // Add reply
-    ticket.replies.push({
-      userId: req.user.id,
-      username: req.user.username,
-      message,
-      attachments,
-      createdAt: new Date()
-    });
+const user = await User.findById(req.user.id).select("username email");
+
+ticket.replies.push({
+  userId: req.user.id,
+  username: user.username,   // ✅ correct source
+  message,
+  attachments,
+  createdAt: new Date()
+});
 
     // Update ticket status
     ticket.status = "answered";
