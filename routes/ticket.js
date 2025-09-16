@@ -119,4 +119,61 @@ router.delete("/:id", authenticate, async (req, res) => {
   }
 });
 
+// Reply to a ticket
+router.post("/reply", authenticate, async (req, res) => {
+  try {
+    const { ticketId, message } = req.body;
+    if (!ticketId || !message) {
+      return res.status(400).json({ msg: "Ticket ID and message are required" });
+    }
+
+    // Find ticket
+    const ticket = await Ticket.findOne({ _id: ticketId, userId: req.user.id });
+    if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
+
+    // Handle attachments
+    let attachments = [];
+    if (req.files && req.files.attachments) {
+      const files = Array.isArray(req.files.attachments) ? req.files.attachments : [req.files.attachments];
+      if (files.length > 3) return res.status(400).json({ msg: "Max 3 files allowed" });
+
+      for (const file of files) {
+        const uploaded = await vaultx.upload(process.env.VAULTX_FOLDERr, file.data, {
+          filename: file.name,
+          contentType: file.mimetype,
+        });
+        attachments.push(uploaded.file.fileUrl);
+      }
+    }
+
+    // Add reply
+    ticket.replies.push({
+      userId: req.user.id,
+      username: req.user.username,
+      message,
+      attachments,
+      createdAt: new Date()
+    });
+
+    // Update ticket status
+    ticket.status = "answered";
+    await ticket.save();
+
+    // Fetch user info
+    const user = await User.findById(req.user.id).select("username email");
+
+    // Send email
+    await sendTicketEmail({
+      to: user.email,
+      subject: `💬 Reply added to your ticket: ${ticket.subject}`,
+      html: ticketReplyTemplate(user.username, ticket.subject, message, ticket._id.toString()),
+    });
+
+    res.json({ msg: "✅ Reply added", ticket });
+  } catch (err) {
+    console.error("Ticket reply error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 module.exports = router;
