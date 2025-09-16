@@ -77,4 +77,34 @@ const ticketDeletedTemplate = (username, subject, category, type, ticketId) => {
   `;
 };
 
-module.exports = { ticketEmailTemplate, ticketDeletedTemplate };
+const ticketReplyTemplate = (username, subject, replyMessage, ticketId) => {
+  return `
+  <div style="font-family: Arial, sans-serif; color:#f1f1f1; background:#070607; line-height:1.6; padding:20px;">
+    <div style="border:3px solid #9F7AEA; border-radius:8px; padding:20px;">
+      <h2 style="color:#9F7AEA; margin-top:0;">💬 Ticket Replied</h2>
+      <p>Hello <strong>${username}</strong>,</p>
+      <p>A new reply was added to your ticket.</p>
+
+      <div style="background:#111; padding:15px; border-radius:6px; margin:15px 0; border:1px solid #9F7AEA;">
+        <p><strong>📌 Subject:</strong> ${subject}</p>
+        <p><strong>🔑 Ticket ID:</strong> ${ticketId}</p>
+        <p><strong>💬 Reply:</strong></p>
+        <blockquote style="color:#ddd; margin:10px 0; padding:10px; background:#1a1a1a; border-left:4px solid #9F7AEA;">
+          ${replyMessage}
+        </blockquote>
+        <p><strong>Status:</strong> <span style="color:#9F7AEA;">Answered ✅</span></p>
+      </div>
+
+      <p>You can view your ticket here:</p>
+      <a href="https://lumoraid.vaultlite.name.ng/contact" style="color:#9F7AEA;">View Ticket</a>
+    </div>
+
+    <p style="font-size:0.9em; color:#bbb; margin-top:20px; text-align:center;">
+      Lumora Support Team <br/>
+      <span style="color:#9F7AEA;">Lumora × MΞKΛ Core</span>
+    </p>
+  </div>
+  `;
+};
+
+module.exports = { ticketEmailTemplate, ticketDeletedTemplate, ticketReplyTemplate };
