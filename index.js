@@ -24,7 +24,7 @@ const allowedOrigins = [
   'https://lumoraid.vaultlite.name.ng',
   'https://vaultlite.name.ng',
 ];
-console.log("ENV LOADED:", process.env.EMAIL_HOST);
+
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl)
