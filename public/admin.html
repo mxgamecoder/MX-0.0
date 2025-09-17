@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Ticket System</title>
+  <style>
+    body { background:#111; color:#fff; font-family:sans-serif; }
+    .filter { margin:10px; }
+    .ticket { padding:10px; border:1px solid #444; margin:10px; cursor:pointer; }
+    .reply-box { display:none; margin-top:10px; }
+  </style>
+</head>
+<body>
+  <h1>🎫 Admin Panel</h1>
+
+  <!-- Filters -->
+  <div class="filter">
+    <label>Status:</label>
+    <select id="statusFilter">
+      <option value="">All</option>
+      <option value="open">Open</option>
+      <option value="checking">Checking</option>
+      <option value="answered">Answered</option>
+      <option value="closed">Closed</option>
+    </select>
+    <button onclick="fetchTickets()">Filter</button>
+  </div>
+
+  <!-- Ticket List -->
+  <div id="tickets"></div>
+
+  <!-- Ticket Detail -->
+  <div id="ticketDetail"></div>
+
+  <script>
+    async function fetchTickets() {
+      let status = document.getElementById("statusFilter").value;
+      let res = await fetch(`/admin/tickets?status=${status}`);
+      let data = await res.json();
+      let ticketsDiv = document.getElementById("tickets");
+      ticketsDiv.innerHTML = "";
+      data.tickets.forEach(t => {
+        let div = document.createElement("div");
+        div.className = "ticket";
+        div.innerHTML = `<b>${t.subject}</b> - ${t.status} <br> ${t.message}`;
+        div.onclick = () => viewTicket(t._id);
+        ticketsDiv.appendChild(div);
+      });
+    }
+
+    async function viewTicket(id) {
+      let res = await fetch(`/admin/tickets/${id}`);
+      let data = await res.json();
+      let t = data.ticket;
+      let detail = document.getElementById("ticketDetail");
+      detail.innerHTML = `
+        <h2>${t.subject}</h2>
+        <p>${t.message}</p>
+        <p>Status: ${t.status}</p>
+        <div class="replies">
+          <h3>Replies</h3>
+          ${t.replies.map(r => `<p><b>${r.username}</b>: ${r.message}</p>`).join("")}
+        </div>
+        <div class="reply-box">
+  <input id="adminName" placeholder="Your name (Admin)" /><br>
+  <textarea id="replyMessage" placeholder="Write reply"></textarea><br>
+  <button onclick="sendReply('${t._id}')">Send Reply</button>
+</div>
+      `;
+      document.querySelector(".reply-box").style.display = "block";
+    }
+
+    async function sendReply(ticketId) {
+      let msg = document.getElementById("replyMessage").value;
+      let adminName = document.getElementById("adminName").value;
+      let res = await fetch(`/admin/tickets/${ticketId}/reply`, {
+        method:"POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({ message: msg, adminName })
+      });
+      let data = await res.json();
+      alert(data.msg);
+      viewTicket(ticketId);
+    }
+
+    fetchTickets();
+  </script>
+</body>
+</html>
