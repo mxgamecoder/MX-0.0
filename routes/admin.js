@@ -77,25 +77,25 @@ router.post("/tickets/:id/reply", async (req, res) => {
       ),
     });
 
-    // 🕒 Auto resolve after 20s (change later to 3 days)
-    setTimeout(async () => {
-      const t = await Ticket.findById(ticket._id).populate("userId", "username email");
-      if (t && t.status === "answered") {
-        t.status = "resolved";
-        await t.save();
+// 🕒 Auto resolve after 3 days
+setTimeout(async () => {
+  const t = await Ticket.findById(ticket._id).populate("userId", "username email");
+  if (t && t.status === "answered") {
+    t.status = "resolved";
+    await t.save();
 
-        // Send resolved email
-        await sendAdminTicketEmail({
-          to: t.userId.email,
-          subject: `✅ Your ticket has been resolved: ${t.subject}`,
-          html: ticketResolvedTemplate(
-            t.userId.username,
-            t.subject,
-            t._id.toString()
-          ),
-        });
-      }
-    }, 20000); // 🟢 20s for testing, later 3 days => 3 * 24 * 60 * 60 * 1000
+    // Send resolved email
+    await sendAdminTicketEmail({
+      to: t.userId.email,
+      subject: `✅ Your ticket has been resolved: ${t.subject}`,
+      html: ticketResolvedTemplate(
+        t.userId.username,
+        t.subject,
+        t._id.toString()
+      ),
+    });
+  }
+}, 3 * 24 * 60 * 60 * 1000); // 🟢 3 days
 
     res.json({ msg: "✅ Reply sent (auto-resolve scheduled)", ticket });
   } catch (err) {
