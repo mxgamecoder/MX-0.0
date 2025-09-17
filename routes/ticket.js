@@ -134,6 +134,9 @@ router.post("/reply", authenticate, async (req, res) => {
     // Fetch user info FIRST ✅
     const user = await User.findById(req.user.id).select("username email");
     if (!user) return res.status(404).json({ msg: "User not found" });
+    if (ticket.status === "resolved") {
+  return res.status(400).json({ msg: "❌ This ticket is resolved and can’t be replied to." });
+}
 
     // Handle attachments
     let attachments = [];
