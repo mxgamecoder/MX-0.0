@@ -4,7 +4,7 @@ const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const VaultX = require("vaultx-sdk");
 const sendTicketEmail = require("../utils/endTicketEmail");
-const { ticketReplyTemplate } = require("../utils/ticketEmailTemplate");
+const { ticketReplyTemplatee } = require("../utils/ticketEmailTemplate");
 
 // You can add authentication middleware for admin (role-based check)
 // e.g., require("../middleware/adminAuth");
@@ -68,7 +68,7 @@ router.post("/tickets/:id/reply", async (req, res) => {
     await sendTicketEmail({
       to: ticket.userId.email,
       subject: `💬 ${adminName} replied to your ticket: ${ticket.subject}`,
-      html: ticketReplyTemplate(ticket.userId.username, ticket.subject, message, ticket._id.toString(), adminName),
+      html: ticketReplyTemplatee(ticket.userId.username, ticket.subject, message, ticket._id.toString(), adminName),
     });
 
     res.json({ msg: "✅ Reply sent", ticket });
