@@ -30,4 +30,13 @@ const sendAdminTicketEmail = async ({ to, subject, html }) => {
   }
 };
 
+// verify connection on server start
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ SMTP config error:", error);
+  } else {
+    console.log("✅ Admin server is ready to take messages");
+  }
+});
+
 module.exports = sendAdminTicketEmail;
