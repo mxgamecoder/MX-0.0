@@ -11,6 +11,7 @@ const Usage = require('./models/Usage');
 const ticketRoute = require('./routes/ticket');
 const marketplaceRoutes = require('./routes/marketplace');
 const coinsRoutes = require('./routes/coins');
+const adminRoutes = require("./routes/admin");
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,6 +75,7 @@ app.get('/status-check/:type/:category', async (req, res) => {
 // ========== Auth Routes ==========
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
+app.use("/admin", adminRoutes);
 app.use('/api/tickets', ticketRoute);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/coins', coinsRoutes);
