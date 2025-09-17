@@ -4,7 +4,7 @@ const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const VaultX = require("vaultx-sdk");
 const sendAdminTicketEmail = require("../utils/adminTicketEmail");
-const { ticketReplyTemplatee } = require("../utils/ticketEmailTemplate");
+const { ticketReplyTemplatee, ticketResolvedTemplate } = require("../utils/ticketEmailTemplate");
 
 // You can add authentication middleware for admin (role-based check)
 // e.g., require("../middleware/adminAuth");
@@ -64,20 +64,40 @@ router.post("/tickets/:id/reply", async (req, res) => {
     ticket.status = "answered";
     await ticket.save();
 
-    // Send email with admin name
-await sendAdminTicketEmail({
-  to: ticket.userId.email,
-  subject: `💬 ${adminName} replied to your ticket: ${ticket.subject}`,
-  html: ticketReplyTemplatee(
-    ticket.userId.username,
-    ticket.subject,
-    message,
-    ticket._id.toString(),
-    adminName
-  ),
-});
+    // Send reply email
+    await sendAdminTicketEmail({
+      to: ticket.userId.email,
+      subject: `💬 ${adminName} replied to your ticket: ${ticket.subject}`,
+      html: ticketReplyTemplatee(
+        ticket.userId.username,
+        ticket.subject,
+        message,
+        ticket._id.toString(),
+        adminName
+      ),
+    });
 
-    res.json({ msg: "✅ Reply sent", ticket });
+    // 🕒 Auto resolve after 20s (change later to 3 days)
+    setTimeout(async () => {
+      const t = await Ticket.findById(ticket._id).populate("userId", "username email");
+      if (t && t.status === "answered") {
+        t.status = "resolved";
+        await t.save();
+
+        // Send resolved email
+        await sendAdminTicketEmail({
+          to: t.userId.email,
+          subject: `✅ Your ticket has been resolved: ${t.subject}`,
+          html: ticketResolvedTemplate(
+            t.userId.username,
+            t.subject,
+            t._id.toString()
+          ),
+        });
+      }
+    }, 20000); // 🟢 20s for testing, later 3 days => 3 * 24 * 60 * 60 * 1000
+
+    res.json({ msg: "✅ Reply sent (auto-resolve scheduled)", ticket });
   } catch (err) {
     console.error("Admin reply error:", err);
     res.status(500).json({ msg: "Server error" });
