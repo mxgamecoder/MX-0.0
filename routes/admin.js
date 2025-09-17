@@ -47,44 +47,28 @@ router.get("/tickets/:id", async (req, res) => {
 // Reply to a ticket (admin)
 router.post("/tickets/:id/reply", async (req, res) => {
   try {
-    const { message } = req.body;
-    if (!message) return res.status(400).json({ msg: "Message is required" });
+    const { message, adminName } = req.body;
+    if (!message || !adminName) return res.status(400).json({ msg: "Message and admin name are required" });
 
     const ticket = await Ticket.findById(req.params.id).populate("userId", "username email");
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
 
-    // Handle attachments (optional)
-    let attachments = [];
-    if (req.files && req.files.attachments) {
-      const files = Array.isArray(req.files.attachments) ? req.files.attachments : [req.files.attachments];
-      if (files.length > 3) return res.status(400).json({ msg: "Max 3 files allowed" });
-
-      for (const file of files) {
-        const uploaded = await vaultx.upload(process.env.VAULTX_FOLDERr, file.data, {
-          filename: file.name,
-          contentType: file.mimetype,
-        });
-        attachments.push(uploaded.file.fileUrl);
-      }
-    }
-
-    // Push admin reply
+    // Save reply
     ticket.replies.push({
       userId: "admin",
-      username: "Support Team",
+      username: adminName,
       message,
-      attachments,
       createdAt: new Date()
     });
 
     ticket.status = "answered";
     await ticket.save();
 
-    // Send email to user
+    // Send email with admin name
     await sendTicketEmail({
       to: ticket.userId.email,
-      subject: `💬 Support replied to your ticket: ${ticket.subject}`,
-      html: ticketReplyTemplate(ticket.userId.username, ticket.subject, message, ticket._id.toString()),
+      subject: `💬 ${adminName} replied to your ticket: ${ticket.subject}`,
+      html: ticketReplyTemplate(ticket.userId.username, ticket.subject, message, ticket._id.toString(), adminName),
     });
 
     res.json({ msg: "✅ Reply sent", ticket });
@@ -93,5 +77,6 @@ router.post("/tickets/:id/reply", async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 });
+
 
 module.exports = router;
