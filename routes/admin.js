@@ -58,7 +58,8 @@ router.post("/tickets/:id/reply", async (req, res) => {
       userId: "admin",
       username: adminName,
       message,
-      createdAt: new Date()
+      createdAt: new Date(),
+      isAdmin: true
     });
 
     ticket.status = "answered";
