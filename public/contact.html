@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lumora Support – Tickets</title>
+  <link rel="icon" type="image/png" href="VaultX.png">
+  <link rel="stylesheet" href="css/contatct.css?v=3">
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <span class="back" id="backToggle">← Back</span>
+    <h1 class="greeting"><i data-icon="help-circle"></i> Support Tickets</h1>
+    <img id="profileImage" src="lumora.png" alt="Profile" class="profile-img">
+  </header>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Ticket Overlay -->
+  <div class="overlay" id="ticketOverlay">
+    <div class="overlay-header">
+      <div class="left">
+        <button onclick="closeOverlay()">← Back</button>
+        <span id="overlayTitle">Create Ticket</span>
+      </div>
+      <span id="overlayStatus" class="status" style="display:none;"></span>
+    </div>
+
+    <div class="overlay-content">
+      <!-- Create Ticket -->
+      <form id="ticketForm" class="ticket-form">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" maxlength="200" required placeholder="Subject (required)">
+        <div class="char-count" id="subjectCount">0/200</div>
+
+        <label for="type">Priority</label>
+        <select id="type" required>
+          <option value="">Select type</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+
+        <label for="category">Category</label>
+        <select id="category">
+          <option value="">Select category</option>
+          <option value="Payment Issue">Payment Issue</option>
+          <option value="Cannot login">Cannot login</option>
+          <option value="Bug Report">Bug Report</option>
+          <option value="Feature Request">Feature Request</option>
+          <option value="Cannot access feature">Cannot access feature</option>
+          <option value="Error message appears">Error message appears</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <label for="message">Message</label>
+        <textarea id="message" maxlength="1000" required placeholder="Message (required)"></textarea>
+        <div class="char-count" id="messageCount">0/1000</div>
+
+        <label for="attachments">Attachments (optional, max 5)</label>
+        <input type="file" id="attachments" multiple accept="image/*">
+
+        <button type="submit" class="btn-primary">Create Ticket</button>
+      </form>
+
+      <!-- Ticket View -->
+      <div id="ticketView" class="ticket-view" style="display:none;">
+        <div class="ticket-card">
+          <h2 id="viewSubject"></h2>
+
+          <div class="meta">
+            <p><span class="label">👤 Owner:</span> <span id="viewUser"></span></p>
+            <p><span class="label">⚡ Priority:</span> <span id="viewType"></span></p>
+            <p><span class="label">📂 Category:</span> <span id="viewCategory"></span></p>
+            <p><span class="label">📅 Created:</span> <span id="viewDate"></span></p>
+            <p><span class="label">💬 Message:</span></p>
+            <div id="viewMessage" class="message-box"></div>
+          </div>
+
+          <div id="viewImages" class="image-grid"></div>
+        </div>
+      </div>
+      <div id="repliesSection" class="replies-section">
+        <h3>Replies</h3>
+        <div id="repliesList"></div>
+      </div>
+    </div>
+
+    <div id="replyBox" class="reply-box" style="margin-top:20px; display:none;">
+      <div class="reply-header">
+        <span>↩️ Reply to <span id="replyUser"></span></span>
+        <button onclick="closeReply()" class="close-reply">✖</button>
+      </div>
+
+      <label for="replyMessage">Message</label>
+      <textarea id="replyMessage" maxlength="1000" required placeholder="Write your reply..."></textarea>
+      <div class="char-count" id="replyCount">0/1000</div>
+
+      <label for="replyAttachments">Attachments (optional)</label>
+      <input type="file" id="replyAttachments" multiple accept="image/*">
+
+      <button id="replyBtn" onclick="submitReply()" class="btn-primary">Submit Reply</button>
+    </div>
+
+  </div>
+
+  <!-- Main -->
+  <main class="container">
+    <div class="flex-row">
+      <div class="filter-row">
+        <input type="text" id="search" placeholder="Search tickets...">
+        <select id="statusFilter">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="checking">Checking</option>
+          <option value="answered">Answered</option>
+          <option value="resolved">Resolved</option>
+        </select>
+      </div>
+      <button class="create-btn" onclick="openCreate()">+ Create Ticket</button>
+    </div>
+
+    <div class="ticket-list" id="ticketList"></div>
+  </main>
+
+  <script src="js/ticket.js?v=3"></script>
+</body>
+</html>
