@@ -159,7 +159,8 @@ router.post("/reply", authenticate, async (req, res) => {
       username: user.username,
       message,
       attachments,
-      createdAt: new Date()
+      createdAt: new Date(),
+      isAdmin: true
     });
 
     // Update ticket status
