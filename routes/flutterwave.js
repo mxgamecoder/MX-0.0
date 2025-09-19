@@ -54,36 +54,51 @@ router.post("/pay", async (req, res) => {
     });
     await payment.save();
 
-    // 🔹 Initialize Flutterwave payment
-    const response = await axios.post(
-      `${FLW_BASE_URL}/payments`,
-      {
-        tx_ref: txRef,
-        amount,
-        currency: currency || "NGN",
-        redirect_url: `${process.env.FLW_REDIRECT_URL}?paymentId=${paymentId}&userid=${publicUserId}&platform=${platform}&price=${amount}&currency=${currency || 'NGN'}`,
-        customer: { email: user.email, name: user.username || publicUserId },
-        customizations: {
-          title: "Lumora Billing",
-          description: "Top-up payment",
-          logo: "http://lumoraid.vaultlite.name.ng/lumora.png"
-        }
-      },
-      { headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` } }
-    );
+// 🔹 Initialize Flutterwave payment
+const response = await axios.post(
+  `${FLW_BASE_URL}/payments`,
+  {
+    tx_ref: txRef,
+    amount,
+    currency: currency || "NGN",
+    redirect_url: `${process.env.FLW_REDIRECT_URL}?paymentId=${paymentId}&userid=${publicUserId}&platform=${platform}&price=${amount}&currency=${currency || 'NGN'}`,
+    customer: { email: user.email, name: user.username || publicUserId },
+    customizations: {
+      title: "Lumora Billing",
+      description: "Top-up payment",
+      logo: "http://lumoraid.vaultlite.name.ng/lumora.png"
+    }
+  },
+  { headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` } }
+);
 
-    const flwId = response.data.data.id;
+if (!response.data?.data?.id) {
+  console.error("❌ Missing Flutterwave ID in response:", response.data);
+  return res.status(500).json({ msg: "Failed to get Flutterwave transaction ID" });
+}
 
-    // 🔹 Update payment with Flutterwave transaction ID
-    payment.flwId = flwId;
-    await payment.save();
+const flwId = response.data.data.id;
 
-    // Send back payment link + internal ID
-    res.json({
-      status: "success",
-      link: response.data.data.link,
-      paymentId
-    });
+// 🔹 Save payment with flwId immediately
+const payment = new Payment({
+  paymentId,
+  publicUserId,
+  platform,
+  amount,
+  currency: currency || "NGN",
+  status: "pending",
+  tx_ref: txRef,
+  flwId   // ✅ already included
+});
+
+await payment.save();
+
+// Send back payment link + internal ID
+res.json({
+  status: "success",
+  link: response.data.data.link,
+  paymentId
+});
 
   } catch (err) {
     console.error("❌ Flutterwave init error:", err.response?.data || err.message);
