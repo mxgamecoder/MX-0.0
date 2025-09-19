@@ -5,67 +5,91 @@ const sendEmail = require("../utils/sendEmail");
 const User = require("../models/User");
 const { paymentSuccessEmail } = require("../utils/templates");
 
-// Flutterwave base
-const FLW_VERIFY_URL = "https://api.flutterwave.com/v3/transactions/verify";
-
-// Conversion rates (example)
+const FLW_BASE_URL = "https://api.flutterwave.com/v3";
 const currencyRates = { NGN: 100, USD: 0.25, EUR: 0.23 };
 
-// ===== Verify payment =====
+// Initialize payment
+router.post("/pay", async (req, res) => {
+  const { amount, currency, publicUserId, platform } = req.body;
+  if (!amount || !publicUserId || !platform) {
+    return res.status(400).json({ msg: "Missing required fields" });
+  }
+
+  try {
+    const user = await User.findOne({ publicUserId });
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const txRef = `lumora-${publicUserId}-${platform}-${Date.now()}`;
+    const response = await axios.post(
+      `${FLW_BASE_URL}/payments`,
+      {
+        tx_ref: txRef,
+        amount,
+        currency: currency || "NGN",
+        redirect_url: `${process.env.FLW_REDIRECT_URL}?tx_ref=${txRef}&userid=${publicUserId}&platform=${platform}&price=${amount}&currency=${currency || 'NGN'}`,
+        customer: { email: user.email, name: user.username || publicUserId },
+        customizations: { title: "Lumora Billing", description: "Top-up payment", logo: "http://lumoraid.vaultlite.name.ng/lumora.png" },
+      },
+      { headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` } }
+    );
+
+    res.json(response.data);
+  } catch (err) {
+    console.error("❌ Flutterwave init error:", err.response?.data || err.message);
+    res.status(500).json({ msg: "Payment initialization failed" });
+  }
+});
+
+// Verify payment
 router.post("/verify", async (req, res) => {
   const { tx_ref } = req.body;
   if (!tx_ref) return res.status(400).json({ msg: "Missing tx_ref" });
 
   try {
-    // Call Flutterwave verify endpoint
-    const verifyRes = await axios.get(`${FLW_VERIFY_URL}/${tx_ref}`, {
+    const verifyRes = await axios.get(`${FLW_BASE_URL}/transactions/verify/${tx_ref}`, {
       headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` }
     });
 
-    const payload = verifyRes.data?.data;
-
-    if (!payload) {
-      console.error("❌ Flutterwave response missing data:", verifyRes.data);
-      return res.status(400).json({ msg: "Invalid transaction reference" });
+    // Safety check
+    if (!verifyRes.data || !verifyRes.data.data) {
+      console.error("❌ Flutterwave verification response missing data:", verifyRes.data);
+      return res.status(400).json({ msg: "Invalid transaction reference or payment not found" });
     }
 
-    // Check if payment was successful
-    if (payload.status === "successful") {
-      const [prefix, publicUserId, platform, timestamp] = tx_ref.split("-");
+    const payload = verifyRes.data.data;
 
-      const user = await User.findOne({ publicUserId });
-      if (!user) return res.status(404).json({ msg: "User not found" });
+    if (payload.status !== "successful") {
+      return res.status(400).json({ msg: `Payment not successful. Status: ${payload.status || "unknown"}` });
+    }
 
-      const rate = currencyRates[payload.currency] || currencyRates["NGN"];
-      const coinsPurchased = Math.round((payload.amount / rate) * 10);
-      user.coins += coinsPurchased;
-      await user.save();
+    // Parse user info from tx_ref
+    const txParts = tx_ref.split("-");
+    const publicUserId = txParts[1];
+    const platform = txParts[2];
 
-      // Send success email (non-blocking)
-      sendEmail({
+    const user = await User.findOne({ publicUserId });
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const rate = currencyRates[payload.currency] || currencyRates["NGN"];
+    const coinsPurchased = Math.round(payload.amount / rate * 10);
+    user.coins += coinsPurchased;
+    await user.save();
+
+    // Send email
+    try {
+      await sendEmail({
         to: user.email,
         subject: "💰 Payment Successful – Lumora Billing",
-        html: paymentSuccessEmail(
-          user.username || publicUserId,
-          platform,
-          payload.amount,
-          payload.currency,
-          coinsPurchased
-        ),
-      }).catch(err => console.error("❌ Email sending failed:", err.message));
-
-      return res.json({ status: "success", coinsPurchased });
+        html: paymentSuccessEmail(user.username || publicUserId, platform, payload.amount, payload.currency, coinsPurchased),
+      });
+    } catch (err) {
+      console.error("❌ Failed to send email:", err.message);
     }
 
-    // Pending / failed payment
-    return res.json({
-      status: payload.status || "failed",
-      msg: `Payment status: ${payload.status || "failed"}`
-    });
-
+    res.json({ msg: "Payment verified successfully", coinsPurchased });
   } catch (err) {
     console.error("❌ Payment verification error:", err.response?.data || err.message);
-    return res.status(500).json({ msg: "Payment verification failed" });
+    res.status(500).json({ msg: "Payment verification failed" });
   }
 });
 
