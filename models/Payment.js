@@ -8,6 +8,7 @@ const paymentSchema = new mongoose.Schema({
   currency: { type: String, default: "NGN" },
   status: { type: String, default: "pending" },
   tx_ref: { type: String, required: true },
+  flwId: { type: Number },   // 🔹 Flutterwave transaction ID
   coins: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
