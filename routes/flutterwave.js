@@ -3,7 +3,7 @@ const router = express.Router();
 const axios = require("axios");
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/User");
-const Payment = require("../models/Payment"); // updated Payment model
+const Payment = require("../models/Payment");
 const { paymentSuccessEmail } = require("../utils/templates");
 
 const FLW_BASE_URL = "https://api.flutterwave.com/v3";
@@ -57,14 +57,15 @@ router.post("/pay", async (req, res) => {
       { headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` } }
     );
 
-    if (!response.data?.data?.id) {
-      console.error("❌ Missing Flutterwave ID in response:", response.data);
-      return res.status(500).json({ msg: "Failed to get Flutterwave transaction ID" });
+    const hostedLink = response.data?.data?.link;
+    const flwId = response.data?.data?.id || null;
+
+    if (!hostedLink) {
+      console.error("❌ Missing Hosted Link in response:", response.data);
+      return res.status(500).json({ msg: "Failed to generate Flutterwave link" });
     }
 
-    const flwId = response.data.data.id;
-
-    // 🔹 Save payment only once, with flwId
+    // 🔹 Save payment
     const payment = new Payment({
       paymentId,
       publicUserId,
@@ -80,8 +81,9 @@ router.post("/pay", async (req, res) => {
 
     res.json({
       status: "success",
-      link: response.data.data.link,
-      paymentId
+      link: hostedLink,
+      paymentId,
+      tx_ref: txRef
     });
 
   } catch (err) {
@@ -91,7 +93,7 @@ router.post("/pay", async (req, res) => {
 });
 
 /**
- * Verify Payment (handles both API & manual payments)
+ * Verify Payment
  */
 router.post("/verify", async (req, res) => {
   const { paymentId, manual, amount, currency, publicUserId, platform } = req.body;
@@ -142,14 +144,21 @@ router.post("/verify", async (req, res) => {
     payment = await Payment.findOne({ paymentId });
     if (!payment) return res.status(404).json({ msg: "Payment record not found" });
 
-    if (!payment.flwId) {
-      return res.status(400).json({ msg: "Missing Flutterwave transaction ID" });
-    }
+    let verifyRes;
 
-    const verifyRes = await axios.get(`${FLW_BASE_URL}/transactions/${payment.flwId}/verify`, {
-      headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` },
-      validateStatus: false
-    });
+    if (payment.flwId) {
+      // ✅ Verify using transaction ID
+      verifyRes = await axios.get(`${FLW_BASE_URL}/transactions/${payment.flwId}/verify`, {
+        headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` },
+        validateStatus: false
+      });
+    } else {
+      // ✅ Fallback: verify by tx_ref
+      verifyRes = await axios.get(`${FLW_BASE_URL}/transactions/verify_by_reference?tx_ref=${payment.tx_ref}`, {
+        headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` },
+        validateStatus: false
+      });
+    }
 
     if (!verifyRes.data?.data) {
       console.warn("❌ Flutterwave verification invalid:", verifyRes.data);
