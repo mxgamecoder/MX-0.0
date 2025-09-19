@@ -12,6 +12,7 @@ const ticketRoute = require('./routes/ticket');
 const marketplaceRoutes = require('./routes/marketplace');
 const coinsRoutes = require('./routes/coins');
 const adminRoutes = require("./routes/admin");
+const flutterwaveRoutes = require("./routes/flutterwave");
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -79,6 +80,7 @@ app.use("/admin", adminRoutes);
 app.use('/api/tickets', ticketRoute);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/coins', coinsRoutes);
+app.use('/api/flutter', flutterwaveRoutes);
 // ========== Static Files ==========
 app.use('/jest', express.static(path.join(__dirname, 'jest')));
 app.use('/nsfw', express.static(path.join(__dirname, 'nsfw')));
