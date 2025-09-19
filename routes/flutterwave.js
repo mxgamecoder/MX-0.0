@@ -8,11 +8,18 @@ const { paymentSuccessEmail } = require("../utils/templates");
 const FLW_BASE_URL = "https://api.flutterwave.com/v3";
 const currencyRates = { NGN: 100, USD: 0.25, EUR: 0.23 };
 
-// Initialize payment
+/**
+ * Initialize Payment
+ * Expects: { amount, currency, publicUserId, platform }
+ */
 router.post("/pay", async (req, res) => {
   const { amount, currency, publicUserId, platform } = req.body;
   if (!amount || !publicUserId || !platform) {
     return res.status(400).json({ msg: "Missing required fields" });
+  }
+
+  if (!process.env.FLW_SECRET_KEY || !process.env.FLW_REDIRECT_URL) {
+    return res.status(500).json({ msg: "Server not configured properly" });
   }
 
   try {
@@ -20,6 +27,7 @@ router.post("/pay", async (req, res) => {
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     const txRef = `lumora-${publicUserId}-${platform}-${Date.now()}`;
+
     const response = await axios.post(
       `${FLW_BASE_URL}/payments`,
       {
@@ -33,45 +41,42 @@ router.post("/pay", async (req, res) => {
       { headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` } }
     );
 
-    res.json(response.data);
+    // Send back the payment link for frontend redirection
+    res.json({ status: "success", link: response.data.data.link, tx_ref: txRef });
   } catch (err) {
     console.error("❌ Flutterwave init error:", err.response?.data || err.message);
     res.status(500).json({ msg: "Payment initialization failed" });
   }
 });
 
-// Verify payment
+/**
+ * Verify Payment
+ * Expects: { tx_ref } from frontend after redirect
+ */
 router.post("/verify", async (req, res) => {
   const { tx_ref } = req.body;
   if (!tx_ref) return res.status(400).json({ msg: "Missing tx_ref" });
 
-  // Check if secret key exists
   if (!process.env.FLW_SECRET_KEY) {
-    console.error("❌ FLW_SECRET_KEY not set in environment");
     return res.status(500).json({ msg: "Server not configured properly" });
   }
 
   try {
-    // Use POST verification (safer for Render)
-    const verifyRes = await axios.post(
-      `${FLW_BASE_URL}/transactions/verify`,
-      { tx_ref },
-      {
-        headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` },
-        validateStatus: false, // Prevent axios from throwing on non-200
-      }
-    );
+    // ✅ Correct GET verification for Flutterwave V3
+    const verifyRes = await axios.get(`${FLW_BASE_URL}/transactions/verify/${tx_ref}`, {
+      headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` },
+      validateStatus: false,
+    });
 
-    // Check if Flutterwave returned JSON
     if (!verifyRes.data || !verifyRes.data.data) {
       console.error("❌ Flutterwave verification response invalid:", verifyRes.data);
-      return res.status(400).json({ msg: "Invalid transaction reference or payment not found" });
+      return res.status(400).json({ msg: "Payment not found" });
     }
 
     const payload = verifyRes.data.data;
 
     if (payload.status !== "successful") {
-      return res.status(400).json({ msg: `Payment not successful. Status: ${payload.status || "unknown"}` });
+      return res.status(400).json({ msg: `Payment not successful. Status: ${payload.status}` });
     }
 
     // Extract user info from tx_ref
@@ -84,16 +89,15 @@ router.post("/verify", async (req, res) => {
 
     const rate = currencyRates[payload.currency] || currencyRates["NGN"];
     const coinsPurchased = Math.round((payload.amount / rate) * 10);
-
     user.coins += coinsPurchased;
     await user.save();
 
-    // Send payment success email (non-blocking)
+    // Non-blocking email
     sendEmail({
       to: user.email,
       subject: "💰 Payment Successful – Lumora Billing",
       html: paymentSuccessEmail(user.username || publicUserId, platform, payload.amount, payload.currency, coinsPurchased),
-    }).catch(err => console.error("❌ Failed to send email:", err.message));
+    }).catch(console.error);
 
     res.json({ msg: "Payment verified successfully", coinsPurchased });
   } catch (err) {
