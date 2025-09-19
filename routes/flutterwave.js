@@ -50,49 +50,59 @@ router.post("/pay", async (req, res) => {
 });
 
 /**
- * Verify Payment
- * Expects: { tx_ref } from frontend after redirect
+ * Verify Payment (handles both API & manual payments)
+ * Expects: { tx_ref, manual = false, amount, currency, publicUserId, platform }
  */
 router.post("/verify", async (req, res) => {
-  const { tx_ref } = req.body;
-  if (!tx_ref) return res.status(400).json({ msg: "Missing tx_ref" });
+  const { tx_ref, manual, amount, currency, publicUserId, platform } = req.body;
 
-  if (!process.env.FLW_SECRET_KEY) {
-    return res.status(500).json({ msg: "Server not configured properly" });
-  }
+  if (!tx_ref && !manual) return res.status(400).json({ msg: "Missing tx_ref" });
+  if (!process.env.FLW_SECRET_KEY) return res.status(500).json({ msg: "Server not configured properly" });
 
   try {
-    // ✅ Correct GET verification for Flutterwave V3
+    let payload;
+    const user = await User.findOne({ publicUserId });
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // ===== Manual settlement =====
+    if (manual) {
+      if (!amount || !currency || !platform) return res.status(400).json({ msg: "Missing manual payment data" });
+
+      const rate = { NGN: 100, USD: 0.25, EUR: 0.23 }[currency] || 100;
+      const coinsPurchased = Math.round((amount / rate) * 10);
+      user.coins += coinsPurchased;
+      await user.save();
+
+      // Send email
+      sendEmail({
+        to: user.email,
+        subject: "💰 Payment Successful – Lumora Billing",
+        html: paymentSuccessEmail(user.username || publicUserId, platform, amount, currency, coinsPurchased),
+      }).catch(console.error);
+
+      return res.json({ msg: "Manual payment credited successfully", coinsPurchased });
+    }
+
+    // ===== API payment verification =====
     const verifyRes = await axios.get(`${FLW_BASE_URL}/transactions/verify/${tx_ref}`, {
       headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` },
       validateStatus: false,
     });
 
     if (!verifyRes.data || !verifyRes.data.data) {
-      console.error("❌ Flutterwave verification response invalid:", verifyRes.data);
-      return res.status(400).json({ msg: "Payment not found" });
+      console.warn("❌ Flutterwave verification response invalid:", verifyRes.data);
+      return res.status(400).json({ msg: "Payment not found via API" });
     }
 
-    const payload = verifyRes.data.data;
+    payload = verifyRes.data.data;
+    if (payload.status !== "successful") return res.status(400).json({ msg: `Payment not successful. Status: ${payload.status}` });
 
-    if (payload.status !== "successful") {
-      return res.status(400).json({ msg: `Payment not successful. Status: ${payload.status}` });
-    }
-
-    // Extract user info from tx_ref
-    const txParts = tx_ref.split("-");
-    const publicUserId = txParts[1];
-    const platform = txParts[2];
-
-    const user = await User.findOne({ publicUserId });
-    if (!user) return res.status(404).json({ msg: "User not found" });
-
-    const rate = currencyRates[payload.currency] || currencyRates["NGN"];
+    const rate = { NGN: 100, USD: 0.25, EUR: 0.23 }[payload.currency] || 100;
     const coinsPurchased = Math.round((payload.amount / rate) * 10);
     user.coins += coinsPurchased;
     await user.save();
 
-    // Non-blocking email
+    // Send email
     sendEmail({
       to: user.email,
       subject: "💰 Payment Successful – Lumora Billing",
@@ -100,6 +110,7 @@ router.post("/verify", async (req, res) => {
     }).catch(console.error);
 
     res.json({ msg: "Payment verified successfully", coinsPurchased });
+
   } catch (err) {
     console.error("❌ Payment verification error:", err.response?.data || err.message);
     res.status(500).json({ msg: "Payment verification failed" });
