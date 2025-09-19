@@ -24,6 +24,7 @@ const allowedOrigins = [
   'https://b52e9d68-e351-483c-8013-80de7e0f729e-00-28lhz9v2xdk5j.kirk.replit.dev',
   'https://lumoraid.vaultlite.name.ng',
   'https://vaultlite.name.ng',
+  'https://api.flutterwave.com',
 ];
 
 app.use(cors({
