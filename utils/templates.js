@@ -76,4 +76,23 @@ const loginAlertEmail = (username) => `
 </div>
 `;
 
-module.exports = { verificationEmail, passwordResetEmail, passwordResetEmailOwn, loginAlertEmail };
+// Payment Success Email
+const paymentSuccessEmail = (username, platform, amount, currency, coins) => `
+<div style="font-family: Arial, sans-serif; color:#f1f1f1; background:#070607; line-height:1.6; padding:20px;">
+  <div style="border:3px solid #9F7AEA; border-radius:8px; padding:20px;">
+    <h2 style="color:#4CAF50;">💰 Payment Successful, ${username}!</h2>
+    <p>Thanks for topping up your account 🎉</p>
+    <p><strong>Amount Paid:</strong> <span style="color:#ffcc00;">${currency} ${amount}</span></p>
+    <p><strong>Coins Received:</strong> <span style="color:#00b894; font-weight:bold;">${coins} coins</span> 💎</p>
+    <p><strong>Platform:</strong> <span style="color:#9F7AEA; font-weight:bold;">${platform} 🚀</span></p>
+    <p>We appreciate your support and hope you enjoy your new coins! 🎮</p>
+    <p>Keep exploring and stay awesome 💜</p>
+  </div>
+  <p style="font-size:0.9em; color:#bbb; margin-top:20px; text-align:center;">
+    Lumora Billing – Secure, fast & reliable top-ups 🌎 <br/>
+    <span style="color:#9F7AEA;">Lumora × MΞKΛ Core</span>
+  </p>
+</div>
+`;
+
+module.exports = { verificationEmail, passwordResetEmail, passwordResetEmailOwn, loginAlertEmail, paymentSuccessEmail };
