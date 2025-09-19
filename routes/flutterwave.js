@@ -80,10 +80,21 @@ router.post("/verify", async (req, res) => {
 
       const rate = currencyRates[currency] || 100;
       coinsPurchased = Math.round((amount / rate) * 10);
-      coinsPurchased += getBonus(coinsPurchased); // Add boss bonus
+      coinsPurchased += getBonus(coinsPurchased);
 
       user.coins += coinsPurchased;
       await user.save();
+
+      // Save transaction history
+      const manualTx = new Transaction({
+        publicUserId,
+        amount,
+        coins: coinsPurchased,
+        currency,
+        platform,
+        tx_ref: `manual-${Date.now()}`,
+      });
+      await manualTx.save();
 
       // Send email
       sendEmail({
@@ -111,10 +122,21 @@ router.post("/verify", async (req, res) => {
 
     const rate = currencyRates[payload.currency] || 100;
     coinsPurchased = Math.round((payload.amount / rate) * 10);
-    coinsPurchased += getBonus(coinsPurchased); // Add boss bonus
+    coinsPurchased += getBonus(coinsPurchased);
 
     user.coins += coinsPurchased;
     await user.save();
+
+    // Save transaction history
+    const apiTx = new Transaction({
+      publicUserId,
+      amount: payload.amount,
+      coins: coinsPurchased,
+      currency: payload.currency,
+      platform,
+      tx_ref,
+    });
+    await apiTx.save();
 
     // Send email
     sendEmail({
