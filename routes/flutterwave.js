@@ -8,32 +8,30 @@ const User = require("../models/User");
 const FLW_BASE_URL = "https://api.flutterwave.com/v3";
 
 // ✅ Initialize payment
-// routes/flutterwave.js
 router.post("/pay", async (req, res) => {
-  const { amount, currency, publicUserId } = req.body;
+  const { amount, currency, publicUserId, platform } = req.body;
 
-  if (!amount || !publicUserId) {
+  if (!amount || !publicUserId || !platform) {
     return res.status(400).json({ msg: "Missing required fields" });
   }
 
   try {
-    // 🔎 Find user in DB
+    // 🔎 Find user
     const user = await User.findOne({ publicUserId });
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
+    if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // ✅ Use user's stored email
+    // ✅ Embed user + platform in tx_ref for webhook tracking
+    const txRef = `lumora-${publicUserId}-${platform}-${Date.now()}`;
+
     const response = await axios.post(
       `${FLW_BASE_URL}/payments`,
       {
-        tx_ref: `lumora-${Date.now()}`,
+        tx_ref: txRef,
         amount,
         currency: currency || "NGN",
-        redirect_url: process.env.FLW_REDIRECT_URL, // billing-success.html
+        redirect_url: `${process.env.FLW_REDIRECT_URL}?userid=${publicUserId}&platform=${platform}`,
         customer: {
           email: user.email,
-          phonenumber: "N/A",
           name: publicUserId,
         },
         customizations: {
@@ -56,9 +54,9 @@ router.post("/pay", async (req, res) => {
   }
 });
 
-// ✅ Webhook (Flutterwave will call this after payment)
+// ✅ Webhook (Flutterwave calls this after payment)
 router.post("/webhook", async (req, res) => {
-  const secretHash = process.env.FLW_SECRET_HASH; // configure in .env & Flutterwave dashboard
+  const secretHash = process.env.FLW_SECRET_HASH;
   const signature = req.headers["verif-hash"];
 
   if (!signature || signature !== secretHash) {
@@ -70,9 +68,14 @@ router.post("/webhook", async (req, res) => {
 
   if (payload.status === "successful") {
     try {
-      const user = await User.findOne({ publicUserId: payload.customer.name });
+      // Extract user + platform from tx_ref
+      const txParts = payload.tx_ref.split("-");
+      const publicUserId = txParts[1];
+      const platform = txParts[2];
+
+      const user = await User.findOne({ publicUserId });
       if (user) {
-        user.coins += Number(payload.amount); // example: add coins = amount paid
+        user.coins += Number(payload.amount);
         await user.save();
 
         // 📧 Send success email
