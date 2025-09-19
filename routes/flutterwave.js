@@ -45,14 +45,26 @@ router.post("/verify", async (req, res) => {
   const { tx_ref } = req.body;
   if (!tx_ref) return res.status(400).json({ msg: "Missing tx_ref" });
 
-  try {
-    const verifyRes = await axios.get(`${FLW_BASE_URL}/transactions/verify/${tx_ref}`, {
-      headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` }
-    });
+  // Check if secret key exists
+  if (!process.env.FLW_SECRET_KEY) {
+    console.error("❌ FLW_SECRET_KEY not set in environment");
+    return res.status(500).json({ msg: "Server not configured properly" });
+  }
 
-    // Safety check
+  try {
+    // Use POST verification (safer for Render)
+    const verifyRes = await axios.post(
+      `${FLW_BASE_URL}/transactions/verify`,
+      { tx_ref },
+      {
+        headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` },
+        validateStatus: false, // Prevent axios from throwing on non-200
+      }
+    );
+
+    // Check if Flutterwave returned JSON
     if (!verifyRes.data || !verifyRes.data.data) {
-      console.error("❌ Flutterwave verification response missing data:", verifyRes.data);
+      console.error("❌ Flutterwave verification response invalid:", verifyRes.data);
       return res.status(400).json({ msg: "Invalid transaction reference or payment not found" });
     }
 
@@ -62,7 +74,7 @@ router.post("/verify", async (req, res) => {
       return res.status(400).json({ msg: `Payment not successful. Status: ${payload.status || "unknown"}` });
     }
 
-    // Parse user info from tx_ref
+    // Extract user info from tx_ref
     const txParts = tx_ref.split("-");
     const publicUserId = txParts[1];
     const platform = txParts[2];
@@ -71,20 +83,17 @@ router.post("/verify", async (req, res) => {
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     const rate = currencyRates[payload.currency] || currencyRates["NGN"];
-    const coinsPurchased = Math.round(payload.amount / rate * 10);
+    const coinsPurchased = Math.round((payload.amount / rate) * 10);
+
     user.coins += coinsPurchased;
     await user.save();
 
-    // Send email
-    try {
-      await sendEmail({
-        to: user.email,
-        subject: "💰 Payment Successful – Lumora Billing",
-        html: paymentSuccessEmail(user.username || publicUserId, platform, payload.amount, payload.currency, coinsPurchased),
-      });
-    } catch (err) {
-      console.error("❌ Failed to send email:", err.message);
-    }
+    // Send payment success email (non-blocking)
+    sendEmail({
+      to: user.email,
+      subject: "💰 Payment Successful – Lumora Billing",
+      html: paymentSuccessEmail(user.username || publicUserId, platform, payload.amount, payload.currency, coinsPurchased),
+    }).catch(err => console.error("❌ Failed to send email:", err.message));
 
     res.json({ msg: "Payment verified successfully", coinsPurchased });
   } catch (err) {
