@@ -29,7 +29,7 @@ router.post("/pay", async (req, res) => {
         tx_ref: txRef,
         amount,
         currency: currency || "NGN",
-        redirect_url: `${process.env.FLW_REDIRECT_URL}?userid=${publicUserId}&platform=${platform}`,
+        redirect_url: `${process.env.FLW_REDIRECT_URL}?userid=${publicUserId}&platform=${platform}&price=${amount}&currency=${currency || 'NGN'}`,
         customer: {
           email: user.email,
           name: publicUserId,
