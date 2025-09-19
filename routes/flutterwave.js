@@ -8,23 +8,31 @@ const User = require("../models/User");
 const FLW_BASE_URL = "https://api.flutterwave.com/v3";
 
 // ✅ Initialize payment
+// routes/flutterwave.js
 router.post("/pay", async (req, res) => {
-  const { amount, currency, email, publicUserId } = req.body;
+  const { amount, currency, publicUserId } = req.body;
 
-  if (!amount || !email || !publicUserId) {
+  if (!amount || !publicUserId) {
     return res.status(400).json({ msg: "Missing required fields" });
   }
 
   try {
+    // 🔎 Find user in DB
+    const user = await User.findOne({ publicUserId });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    // ✅ Use user's stored email
     const response = await axios.post(
       `${FLW_BASE_URL}/payments`,
       {
         tx_ref: `lumora-${Date.now()}`,
         amount,
         currency: currency || "NGN",
-        redirect_url: process.env.FLW_REDIRECT_URL, // e.g. https://lumoraid.vaultlite.name.ng/billing-success.html
+        redirect_url: process.env.FLW_REDIRECT_URL, // billing-success.html
         customer: {
-          email,
+          email: user.email,
           phonenumber: "N/A",
           name: publicUserId,
         },
