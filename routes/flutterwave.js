@@ -6,6 +6,15 @@ const User = require("../models/User");
 const { paymentSuccessEmail } = require("../utils/templates");
 
 const FLW_BASE_URL = "https://api.flutterwave.com/v3";
+// Bonus logic
+function getBonus(coins) {
+  if (coins < 100) return 10;
+  if (coins < 1000) return 100;
+  if (coins < 100000) return 1000;
+  return 10000;
+}
+
+// Currency rates
 const currencyRates = { NGN: 100, USD: 0.25, EUR: 0.23 };
 
 /**
@@ -60,16 +69,19 @@ router.post("/verify", async (req, res) => {
   if (!process.env.FLW_SECRET_KEY) return res.status(500).json({ msg: "Server not configured properly" });
 
   try {
-    let payload;
     const user = await User.findOne({ publicUserId });
     if (!user) return res.status(404).json({ msg: "User not found" });
+
+    let coinsPurchased;
 
     // ===== Manual settlement =====
     if (manual) {
       if (!amount || !currency || !platform) return res.status(400).json({ msg: "Missing manual payment data" });
 
-      const rate = { NGN: 100, USD: 0.25, EUR: 0.23 }[currency] || 100;
-      const coinsPurchased = Math.round((amount / rate) * 10);
+      const rate = currencyRates[currency] || 100;
+      coinsPurchased = Math.round((amount / rate) * 10);
+      coinsPurchased += getBonus(coinsPurchased); // Add boss bonus
+
       user.coins += coinsPurchased;
       await user.save();
 
@@ -94,11 +106,13 @@ router.post("/verify", async (req, res) => {
       return res.status(400).json({ msg: "Payment not found via API" });
     }
 
-    payload = verifyRes.data.data;
+    const payload = verifyRes.data.data;
     if (payload.status !== "successful") return res.status(400).json({ msg: `Payment not successful. Status: ${payload.status}` });
 
-    const rate = { NGN: 100, USD: 0.25, EUR: 0.23 }[payload.currency] || 100;
-    const coinsPurchased = Math.round((payload.amount / rate) * 10);
+    const rate = currencyRates[payload.currency] || 100;
+    coinsPurchased = Math.round((payload.amount / rate) * 10);
+    coinsPurchased += getBonus(coinsPurchased); // Add boss bonus
+
     user.coins += coinsPurchased;
     await user.save();
 
