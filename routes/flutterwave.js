@@ -17,7 +17,12 @@ function getBonus(coins) {
 }
 
 // Currency rates
-const currencyRates = { NGN: 100, USD: 0.25, EUR: 0.23 };
+const currencyRates = { 
+  NGN: 100, 
+  USD: 0.25, 
+  EUR: 0.23, 
+  GHS: 3
+};
 
 /**
  * Initialize Payment
