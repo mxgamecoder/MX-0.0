@@ -57,7 +57,8 @@ router.post("/pay", async (req, res) => {
           title: "Lumora Billing",
           description: "Top-up payment",
           logo: "http://lumoraid.vaultlite.name.ng/lumora.png"
-        }
+        },
+        payment_options: "card"
       },
       { headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` } }
     );
