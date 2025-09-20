@@ -20,8 +20,8 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 const allowedOrigins = [
   'https://mxapi-lnc.onrender.com',
-  'https://af21bb36-7ce6-4516-82bd-b9b53a09d0f7-00-86ifz7hqq14x.spock.replit.dev',
-  'https://b52e9d68-e351-483c-8013-80de7e0f729e-00-28lhz9v2xdk5j.kirk.replit.dev',
+  'https://a336c044-7e81-4118-8a19-7244b1baa99d-00-1mrtx8nrb82ic.spock.replit.dev',
+  'https://4f6e2f16-4e6d-4d91-b308-e795c414e0fa-00-2n5u07bebak1q.worf.replit.dev',
   'https://lumoraid.vaultlite.name.ng',
   'https://vaultlite.name.ng',
   'https://api.flutterwave.com',
