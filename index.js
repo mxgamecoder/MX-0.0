@@ -280,7 +280,7 @@ function autoCleanPendingPayments() {
     try {
       const now = new Date();
       // For testing: 20 seconds instead of 48 hours
-      const cutoff = new Date(now.getTime() - 20 * 1000); 
+      const cutoff = new Date(now.getTime() - 48 * 60 * 60 * 1000); 
       // For production: 48 * 60 * 60 * 1000
 
       const result = await Payment.deleteMany({
