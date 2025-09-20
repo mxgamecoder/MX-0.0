@@ -5,6 +5,7 @@ const sendEmail = require("../utils/sendEmail");
 const User = require("../models/User");
 const Payment = require("../models/Payment");
 const { paymentSuccessEmail } = require("../utils/templates");
+const authenticate = require("../middleware/auth")
 
 const FLW_BASE_URL = "https://api.flutterwave.com/v3";
 
@@ -199,12 +200,22 @@ router.post("/verify", async (req, res) => {
   }
 });
 
-// 🔹 Get successful transactions
-router.get("/history", async (req, res) => {
+// ✅ Get user’s own transaction history
+router.get("/history", authenticate, async (req, res) => {
   try {
-    const payments = await Payment.find({ status: "successful" }).sort({ createdAt: -1 });
+    const publicUserId = req.user?.publicUserId || req.query.publicUserId;
+    if (!publicUserId) {
+      return res.status(400).json({ msg: "Missing user id" });
+    }
+
+    const payments = await Payment.find({
+      status: "successful",
+      publicUserId,
+    }).sort({ createdAt: -1 });
+
     res.json(payments);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: "Failed to fetch transactions" });
   }
 });
