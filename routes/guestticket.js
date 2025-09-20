@@ -2,10 +2,24 @@ const express = require("express");
 const router = express.Router();
 const VaultX = require("vaultx-sdk");
 const sendTicketEmail = require("../utils/endTicketEmail");
-const GuestTicket = require("../models/GuestTicket"); // create a separate model for guest tickets
+const GuestTicket = require("../models/GuestTicket");
 const { guestTicketTemplate } = require("../utils/ticketEmailTemplate");
 const multer = require("multer");
-const upload = multer();
+
+// Set up multer storage (in-memory)
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    // Allow only png, jpg, pdf
+    const allowedTypes = ["image/png", "image/jpeg", "application/pdf"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Only PNG, JPG, and PDF files are allowed"));
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 } // optional: limit each file to 5MB
+});
 
 const vaultx = new VaultX({
   publicUserId: process.env.VAULTX_PUBLIC_USERID || "mxapi_xsot4s1w",
@@ -16,17 +30,25 @@ const vaultx = new VaultX({
 router.post("/guest", upload.array("attachments", 5), async (req, res) => {
   try {
     const { fullname, email, message } = req.body;
+
+    // Validate fields
     if (!fullname || !email || !message) {
       return res.status(400).json({ msg: "Name, email, and message are required" });
+    }
+
+    // Validate fullname (letters only)
+    if (!/^[A-Za-z\s]+$/.test(fullname)) {
+      return res.status(400).json({ msg: "Name must contain only letters" });
+    }
+
+    // Validate email (Yahoo, Gmail, Outlook only)
+    if (!/^[\w.-]+@(gmail\.com|yahoo\.com|outlook\.com)$/.test(email)) {
+      return res.status(400).json({ msg: "Email must be Gmail, Yahoo, or Outlook" });
     }
 
     // Handle attachments
     let attachments = [];
     if (req.files && req.files.length > 0) {
-      if (req.files.length > 5) {
-        return res.status(400).json({ msg: "Max 5 files allowed" });
-      }
-
       for (const file of req.files) {
         const uploaded = await vaultx.upload(process.env.VAULTX_FOLiDER, file.buffer, {
           filename: file.originalname,
@@ -55,7 +77,7 @@ router.post("/guest", upload.array("attachments", 5), async (req, res) => {
     res.json({ success: true, msg: "Ticket created, check your inbox!" });
   } catch (err) {
     console.error("Guest support error:", err);
-    res.status(500).json({ success: false, msg: "Server error" });
+    res.status(500).json({ success: false, msg: err.message || "Server error" });
   }
 });
 
