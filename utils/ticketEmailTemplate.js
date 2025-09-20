@@ -170,8 +170,45 @@ const ticketResolvedTemplate = (username, subject, ticketId) => {
   `;
 };
 
+// ✅ Guest template for guest support tickets
+const guestTicketTemplate = (fullname, message, ticketId) => {
+  return `
+  <div style="font-family: Arial, sans-serif; color:#f1f1f1; background:#070607; line-height:1.6; padding:20px;">
+    <div style="border:3px solid #9F7AEA; border-radius:8px; padding:20px;">
+      <h2 style="color:#9F7AEA; margin-top:0;">📩 Support Request Received</h2>
+      <p>Hello <strong>${fullname}</strong>,</p>
+      <p>We have received your support request. Here are the details you submitted:</p>
+
+      <div style="background:#111; padding:15px; border-radius:6px; margin:15px 0; border:1px solid #9F7AEA;">
+        <p><strong>📝 Message:</strong></p>
+        <blockquote style="color:#ddd; margin:10px 0; padding:10px; background:#1a1a1a; border-left:4px solid #9F7AEA;">
+          ${message}
+        </blockquote>
+        <p><strong>🔑 Ticket ID:</strong> ${ticketId}</p>
+        <p><strong>Status:</strong> <span style="color:#9F7AEA;">Received ⏳</span></p>
+      </div>
+
+      <p>Our support team will reply to you as soon as possible 🙏💬</p>
+
+      <p style="margin-top:20px;">
+        You can track your request at:<br/>
+        <a href="https://lumoraid.vaultlite.name.ng/contact" style="color:#9F7AEA; text-decoration:none;">
+          https://lumoraid.vaultlite.name.ng/contact
+        </a>
+      </p>
+    </div>
+
+    <p style="font-size:0.9em; color:#bbb; margin-top:20px; text-align:center;">
+      Lumora Support Team <br/>
+      <span style="color:#9F7AEA;">Lumora × MΞKΛ Core</span>
+    </p>
+  </div>
+  `;
+};
+
 module.exports = {
   ticketEmailTemplate,
+  guestTicketTemplate,
   ticketDeletedTemplate,
   ticketReplyTemplate,
   ticketReplyTemplatee,
