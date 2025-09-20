@@ -13,6 +13,7 @@ const marketplaceRoutes = require('./routes/marketplace');
 const coinsRoutes = require('./routes/coins');
 const adminRoutes = require("./routes/admin");
 const flutterwaveRoutes = require("./routes/flutterwave");
+const Payment = require("./models/Payment");
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -273,4 +274,28 @@ function autoMonthlyReset() {
   }, 1000 * 60 * 60); // Run every hour
 }
 
+// AUTO-CLEAN PENDING PAYMENTS
+function autoCleanPendingPayments() {
+  setInterval(async () => {
+    try {
+      const now = new Date();
+      // For testing: 20 seconds instead of 48 hours
+      const cutoff = new Date(now.getTime() - 20 * 1000); 
+      // For production: 48 * 60 * 60 * 1000
+
+      const result = await Payment.deleteMany({
+        status: "pending",
+        createdAt: { $lt: cutoff }
+      });
+
+      if (result.deletedCount > 0) {
+        console.log(`🗑 Deleted ${result.deletedCount} pending transactions older than cutoff.`);
+      }
+    } catch (err) {
+      console.error("❌ Failed to auto-clean pending payments:", err.message);
+    }
+  }, 5000); // Check every 5 seconds for testing, adjust as needed
+}
+
+autoCleanPendingPayments();
 autoMonthlyReset(); // Call it when server starts
