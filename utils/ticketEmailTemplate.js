@@ -189,13 +189,6 @@ const guestTicketTemplate = (fullname, message, ticketId) => {
       </div>
 
       <p>Our support team will reply to you as soon as possible 🙏💬</p>
-
-      <p style="margin-top:20px;">
-        You can track your request at:<br/>
-        <a href="https://lumoraid.vaultlite.name.ng/contact" style="color:#9F7AEA; text-decoration:none;">
-          https://lumoraid.vaultlite.name.ng/contact
-        </a>
-      </p>
     </div>
 
     <p style="font-size:0.9em; color:#bbb; margin-top:20px; text-align:center;">
