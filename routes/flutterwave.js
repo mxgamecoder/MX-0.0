@@ -57,8 +57,7 @@ router.post("/pay", async (req, res) => {
           title: "Lumora Billing",
           description: "Top-up payment",
           logo: "http://lumoraid.vaultlite.name.ng/lumora.png"
-        },
-        payment_options: "card"
+        }
       },
       { headers: { Authorization: `Bearer ${process.env.FLW_SECRET_KEY}` } }
     );
@@ -197,6 +196,16 @@ router.post("/verify", async (req, res) => {
   } catch (err) {
     console.error("❌ Payment verification error:", err.response?.data || err.message);
     res.status(500).json({ msg: "Payment verification failed" });
+  }
+});
+
+// 🔹 Get successful transactions
+router.get("/history", async (req, res) => {
+  try {
+    const payments = await Payment.find({ status: "successful" }).sort({ createdAt: -1 });
+    res.json(payments);
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to fetch transactions" });
   }
 });
 
