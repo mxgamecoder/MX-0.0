@@ -239,7 +239,7 @@ router.get("/:id", (req, res) => {
   res.json(pkg);
 });
 
-router.get("/", (req, res) => {
+router.get("/packages", (req, res) => {
   res.json(packages);
 });
 
