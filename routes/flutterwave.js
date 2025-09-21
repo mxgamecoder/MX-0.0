@@ -239,4 +239,8 @@ router.get("/:id", (req, res) => {
   res.json(pkg);
 });
 
+router.get("/", (req, res) => {
+  res.json(packages);
+});
+
 module.exports = router;
