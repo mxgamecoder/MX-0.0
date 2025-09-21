@@ -13,160 +13,246 @@
       padding: 0;
       background: #000;
       color: #e5e5e5;
-      font-family: 'Poppins', sans-serif;
+      font-family: Arial, sans-serif;
       line-height: 1.8;
     }
-.catt{
-  text-decoration: none;
-}
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #0a0a0a;
-      padding: 12px 25px;
-      border-bottom: 1px solid #222;
+
+    /* SPLASH SCREEN */
+    .splash {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 9999;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .splash img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
     }
-    .logo img {
-      width: 55px;
-      border-radius: 50%;
-    }
-    .logo h1 {
-      font-size: 24px;
-      margin: 0;
+    .overlay-text {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #7c3aed;
+      font-size: clamp(1rem, 3vw, 1.5rem);
       font-weight: 700;
-      color: #7f5af0;
-    }
-    .lumora-btn {
-      padding: 8px 14px;
-      background: #7f5af0;
-      color: #fff;
-      font-weight: 600;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background 0.2s ease;
-      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-style: italic;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
       white-space: nowrap;
     }
-    .lumora-btn:hover {
-      background: #6a47d4;
+    .overlay-text .highlight {
+      color: #130f27;
+      font-weight: 900;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.9);
+    }
+    .fade-out {
+         animation: fadeOut 1s forwards;
+         }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
     }
 
-    section {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 20px 25px;
+    /* HIDE MAIN CONTENT INITIALLY */
+    .content { display: none; }
+
+    /* === YOUR MAIN SITE STYLES === */
+    .catt{
+         text-decoration: none;
+         }
+    header {
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       background: #0a0a0a;
+       border: none;
+       padding: 14px 40px;
+       border-bottom: 1px solid #1a1a1a;
+       position: sticky;  /* stays at top when scrolling */
+       top: 0;
+    z-index: 1000;
+}
+    .logo { 
+        display: flex;
+         align-items: center; 
+         gap: 250px; }
+    .logo img {
+       width: 50px;
+        height: 50px;
+       border-radius: 50%;
+       border: 2px solid #7f5af0;  /* subtle border around logo */
+       box-shadow: 0 0 10px rgba(127, 90, 240, 0.4); /* glow effect */
+}
+    .lumora-btn {
+      padding: 8px 14px; 
+      background: #7f5af0; 
+      color: #fff; 
+      font-weight: 600;
+      border-radius: 8px; 
+      text-decoration: none;
+       transition: background 0.2s ease;
+      font-size: 12px; white-space: nowrap;
     }
+    .lumora-btn:hover {
+         background: #6a47d4;
+         }
+    section { 
+        max-width: 1100px;
+         margin: 0 auto;
+          padding: 20px 25px;
+         }
     h2 {
-      color: #7f5af0;
-      margin-top: 30px;
-    }
+         color: #7f5af0; 
+         margin-top: 30px;
+         }
     p {
-      font-size: 16px;
-      margin-bottom: 16px;
-      color: #ccc;
-    }
-    .highlight { color: #9f7aea; font-weight: 600; }
-    .green { color: #22c55e; font-weight: 600; }
-    .red { color: red; }
+         font-size: 16px; 
+         margin-bottom: 16px;
+          color: #ccc;
+         }
+    .highlight { 
+        color: #9f7aea;
+         font-weight: 600;
+         }
+    .green { 
+        color: #22c55e;
+         font-weight: 600;
+         }
+    .red {
+         color: red;
+         }
     footer {
       text-align: center;
-      font-size: 13px;
+       font-size: 13px;
       padding: 25px;
-      border-top: 1px solid #222;
-      color: #777;
+       border-top: 1px solid #222;
+        color: #777;
     }
-
-    .mobile-only { display: none; }
-
+    h1{
+        text-align: center;
+        color: #6a47d4;
+    
+    }
+    .mobile-only {
+         display: none;
+         }
     @media (max-width: 768px) {
-      header { flex-direction: column; gap: 10px; text-align: center; }
-      header .lumora-btn { display: none; }
-      .mobile-only { display: inline-block; margin: 15px 0; }
-      .logo h1 { font-size: 20px; }
-      .lumora-btn { font-size: 11px; padding: 7px 12px; }
-      section { padding: 15px 18px; }
-      p { font-size: 14px; }
+         header { flex-direction: column;
+         gap: 10px; text-align: center; }
+    header .lumora-btn {
+         display: none; 
+        }
+         .mobile-only { 
+            display: inline-block; 
+            margin: 15px 0;
+         }
+      .logo h1 {
+         font-size: 20px;
+         }
+      .lumora-btn {
+         font-size: 11px;
+          padding: 7px 12px;
+        }
+      section {
+         padding: 15px 18px;
+         }
+      p { 
+        font-size: 14px; 
+    }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="logo">
-      <img src="mxapi.png" alt="MXAPI Logo">
-      <h1>👋 Welcome to MXAPI</h1>
-    </div>
-    <a href="https://lumoraid.vaultlite.name.ng?id=mxapi" target="_blank" class="lumora-btn">
-      🔑 Connect with Lumora ID
-    </a>
-  </header>
-
-  <section>
-    <h2>🌐 What is MXAPI?</h2>
-    <p>
-      MXAPI is your <span class="highlight">secure, developer-first API gateway</span>.  
-      Powered by Lumora × MΞKΛ Core v4, it helps developers launch, scale, and manage APIs  
-      without worrying about infrastructure or security.
-    </p>
-    <!-- Mobile-only button -->
-    <a href="https://lumoraid.vaultlite.name.ng?id=mxapi" target="_blank" class="lumora-btn mobile-only">
-      🔑 Connect with Lumora ID
-    </a>
-
-    <h2>👤 About the Founder</h2>
-    <p>
-      MXAPI is built by <span class="highlight">MX-GΔMΞCØDΞR</span>, the creator of VaultX and Lumora Ecosystem.  
-      A passionate Nigerian developer 🌍 building tools that put <span class="green">power in the hands of creators</span>.
-    </p>
-
-    <h2>🌌 Lumora ID</h2>
-    <p>
-      Your <span class="highlight">Lumora ID</span> is the passport to MXAPI, VaultX, and all future apps in the Lumora Ecosystem.  
-      With one account, you can connect to everything — simple, safe, and seamless.
-    </p>
-
-    <h2>🚀 Other Projects</h2>
-    <div>
-      <p><strong>VaultX 🔐</strong> – Secure cloud storage. <a href="https://vaultx.vaultlite.name.ng" class="red">Visit VaultX</a></p>
-      <p><strong>Lexa Maya AI 🤖</strong> – Friendly assistant AI. <span class="green">Coming Soon</span></p>
-      <p><strong>MEKA Database 🗄️</strong> – Developer-first database. <span class="green">Coming Soon</span></p>
-    </div>
-
-    <h2>📈 Roadmap</h2>
-    <ul>
-      <li>✅ API key generation</li>
-      <li>✅ Coin-based subscription plans</li>
-      <li>🔜 Public marketplace for APIs</li>
-      <li>🔜 Integration with VaultX storage</li>
-      <li>🔜 Developer analytics & insights</li>
-    </ul>
-  </section>
-  <div id="supportIcon" style="
-    position:fixed; bottom:20px; right:20px;
-    width:60px; height:60px; background:#9F7AEA;
-    border-radius:50%; display:flex; justify-content:center;
-    align-items:center; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.3);
-    z-index:999;
-  ">
-   <a href="support.html" class="catt">💬</a>
+  <!-- SPLASH -->
+  <div class="splash" id="splash">
+    <img src="logo.jpg" alt="Splash Image">
+    <div class="overlay-text">Welcome to <span class="highlight">MXAPI</span></div>
   </div>
-  <footer>
-    MXAPI © 2025 • Part of the <span class="highlight">Lumora Ecosystem</span> 🌌
-  </footer>
+
+  <!-- MAIN SITE -->
+  <div class="content" id="content">
+   
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <img src="logo.jpg" alt="MXAPI Logo">
+       <h1>MXAPI</h1>
+      </div>
+      <a href="https://lumoraid.vaultlite.name.ng?id=mxapi" target="_blank" class="lumora-btn">
+        🔑 Connect with Lumora ID
+      </a>
+    </header>
+
+    <section>
+      <h2> What is MXAPI?</h2>
+      <p>
+        MXAPI is a <span class="highlight">secure, developer-centric API gateway</span>.  
+        Powered by Lumora × MΞKΛ Core v4, it enables developers to efficiently launch, scale, and manage APIs  
+        without the burden of infrastructure or security concerns.
+      </p>
+      <a href="https://lumoraid.vaultlite.name.ng?id=mxapi" target="_blank" class="lumora-btn mobile-only">
+        🔑 Connect with Lumora ID
+      </a>
+
+      <h2>👤 About the Founder</h2>
+      <p>
+        MXAPI is developed by <span class="highlight">MX-GΔMΞCØDΞR</span>, the creator of VaultX and Lumora Ecosystem-  
+        A dedicated Nigerian developer 🌍  focus on building tools that empower <span class="green"> CREATORS</span>.
+      </p>
+
+      <h2>🌌 Lumora ID</h2>
+      <p>
+        Your <span class="highlight">Lumora ID</span> serves as a unified gateway to  MXAPI, VaultX, and all future application within the Lumora Ecosystem. With a single account,you gain secure,streamlined access to everything
+      </p>
+
+      <h2>Additional Platforms</h2>
+      <div>
+        <p><strong>VaultX 🔐</strong> – Secure cloud storage. <a href="https://vaultx.vaultlite.name.ng" class="red">Visit VaultX</a></p>
+        <p><strong>Lexa Maya AI 🤖</strong> – Intelligent visual assistant. <span class="green">Coming Soon</span></p>
+        <p><strong>MEKA Database 🗄️</strong> – Developer-focused database platform. <span class="green">Coming Soon</span></p>
+      </div>
+
+      <h2>📈 Roadmap</h2>
+      <ul>
+        <li>✅ API key generation</li>
+        <li>✅ Coin-based subscription plans</li>
+        <li>🔜 Public marketplace for APIs</li>
+        <li>🔜 Integration with VaultX storage</li>
+        <li>🔜 Developer analytics & insights</li>
+      </ul>
+    </section>
+
+    <div id="supportIcon" style="
+      position:fixed; bottom:20px; right:20px;
+      width:60px; height:60px; background:#9F7AEA;
+      border-radius:50%; display:flex; justify-content:center;
+      align-items:center; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.3);
+      z-index:999;
+    ">
+      <a href="support.html" class="catt">💬</a>
+    </div>
+
+    <footer>
+      MXAPI © 2025 • Part of the <span class="highlight">Lumora Ecosystem</span> 🌌
+    </footer>
+  </div>
 
   <script>
+    // Splash fade-out after 4s, hide at 5s
+    setTimeout(() => { document.getElementById("splash").classList.add("fade-out"); }, 1000);
+    setTimeout(() => {
+      document.getElementById("splash").style.display = "none";
+      document.getElementById("content").style.display = "block";
+    }, 2000);
+
+    // Redirect if logged in
     const token = localStorage.getItem('mxapi_token');
     const id = localStorage.getItem('mxapi_id');
-    if (token && id) {
-      window.location.href = "dashboard.html";
-    }
+    if (token && id) { window.location.href = "dashboard.html"; }
   </script>
 
 </body>
