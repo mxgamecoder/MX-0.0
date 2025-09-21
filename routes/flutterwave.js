@@ -228,6 +228,10 @@ router.get("/history", authenticate, async (req, res) => {
   }
 });
 
+router.get("/packages", (req, res) => {
+  res.json(packages);
+});
+
 router.get("/:id", (req, res) => {
   const { id } = req.params;
   const pkg = packages.find(p => p.id === id);
@@ -237,10 +241,6 @@ router.get("/:id", (req, res) => {
   }
 
   res.json(pkg);
-});
-
-router.get("/packages", (req, res) => {
-  res.json(packages);
 });
 
 module.exports = router;
