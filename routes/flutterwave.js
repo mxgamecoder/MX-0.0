@@ -6,6 +6,7 @@ const User = require("../models/User");
 const Payment = require("../models/Payment");
 const { paymentSuccessEmail } = require("../utils/templates");
 const authenticate = require("../middleware/auth")
+const packages = require("../utils/packages");
 
 const FLW_BASE_URL = "https://api.flutterwave.com/v3";
 
@@ -29,10 +30,17 @@ const currencyRates = {
  * Initialize Payment
  */
 router.post("/pay", async (req, res) => {
-  const { amount, currency, publicUserId, platform } = req.body;
-  if (!amount || !publicUserId || !platform) {
+  const { packageId, currency, publicUserId, platform } = req.body;
+  if (!packageId || !currency || !publicUserId || !platform) {
     return res.status(400).json({ msg: "Missing required fields" });
   }
+
+    // 🔐 Always lookup from backend packages list
+  const selected = packages.find(p => p.id === packageId);
+  if (!selected) return res.status(400).json({ msg: "Invalid package" });
+
+  const amount = selected[currency.toLowerCase()];
+  if (!amount) return res.status(400).json({ msg: "Unsupported currency" });
 
   if (!process.env.FLW_SECRET_KEY || !process.env.FLW_REDIRECT_URL) {
     return res.status(500).json({ msg: "Server not configured properly" });
