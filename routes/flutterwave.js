@@ -228,4 +228,15 @@ router.get("/history", authenticate, async (req, res) => {
   }
 });
 
+router.get("/:id", (req, res) => {
+  const { id } = req.params;
+  const pkg = packages.find(p => p.id === id);
+
+  if (!pkg) {
+    return res.status(404).json({ error: "Package not found" });
+  }
+
+  res.json(pkg);
+});
+
 module.exports = router;
