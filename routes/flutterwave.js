@@ -229,7 +229,11 @@ router.get("/history", authenticate, async (req, res) => {
 });
 
 router.get("/packages", (req, res) => {
-  res.json(packages);
+  const enriched = packages.map(p => ({
+    ...p,
+    bonus: getBonus(p.coins)
+  }));
+  res.json(enriched);
 });
 
 router.get("/:id", (req, res) => {
