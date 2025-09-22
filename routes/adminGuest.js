@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const GuestTicket = require("../models/GuestTicket");
 const sendAdminTicketEmail = require("../utils/adminTicketEmail");
-const { ticketReplyTemplatee, ticketResolvedTemplate } = require("../utils/ticketEmailTemplate");
+const { guestReplyTemplate } = require("../utils/ticketEmailTemplate");
 
 // =====================
 // Fetch ALL guest tickets
@@ -37,61 +37,28 @@ router.get("/guest-tickets/:id", async (req, res) => {
 });
 
 // =====================
-// Reply to guest ticket
+// Reply to guest ticket and delete instantly
 // =====================
 router.post("/guest-tickets/:id/reply", async (req, res) => {
   try {
     const { message, adminName } = req.body;
-    if (!message || !adminName) return res.status(400).json({ msg: "Message and admin name are required" });
+    if (!message || !adminName)
+      return res.status(400).json({ msg: "Message and admin name are required" });
 
     const ticket = await GuestTicket.findById(req.params.id);
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
 
-    // Save reply
-    ticket.replies.push({
-      username: adminName,
-      message,
-      createdAt: new Date(),
-      isAdmin: true,
-    });
-
-    ticket.status = "answered";
-    await ticket.save();
-
-    // Send reply email to guest
+    // Send reply email to guest using guest template
     await sendAdminTicketEmail({
       to: ticket.email,
       subject: `💬 ${adminName} replied to your support request`,
-      html: ticketReplyTemplatee(
-        ticket.fullname,
-        "Guest Support Request",
-        message,
-        ticket._id.toString(),
-        adminName
-      ),
+      html: guestReplyTemplate(ticket.fullname, message, adminName, ticket._id.toString()),
     });
 
-    // Auto resolve after 3 days
-    setTimeout(async () => {
-      const t = await GuestTicket.findById(ticket._id);
-      if (t && t.status === "answered") {
-        t.status = "resolved";
-        await t.save();
+    // Delete ticket instantly since it's a guest
+    await GuestTicket.findByIdAndDelete(ticket._id);
 
-        // Send resolved email
-        await sendAdminTicketEmail({
-          to: t.email,
-          subject: `✅ Your guest support request has been resolved`,
-          html: ticketResolvedTemplate(
-            t.fullname,
-            "Guest Support Request",
-            t._id.toString()
-          ),
-        });
-      }
-    }, 3 * 24 * 60 * 60 * 1000); // 3 days
-
-    res.json({ msg: "✅ Reply sent (auto-resolve scheduled)", ticket });
+    res.json({ msg: "✅ Reply sent and guest ticket deleted successfully" });
   } catch (err) {
     console.error("Admin reply guest ticket error:", err);
     res.status(500).json({ msg: "Server error" });
