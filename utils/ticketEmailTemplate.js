@@ -199,11 +199,41 @@ const guestTicketTemplate = (fullname, message, ticketId) => {
   `;
 };
 
+// Guest reply template for admin responses
+const guestReplyTemplate = (fullname, replyMessage, adminName, ticketId) => {
+  return `
+  <div style="font-family: Arial, sans-serif; color:#f1f1f1; background:#070607; line-height:1.6; padding:20px;">
+    <div style="border:3px solid #9F7AEA; border-radius:8px; padding:20px;">
+      <h2 style="color:#9F7AEA; margin-top:0;">💬 Support Response</h2>
+      <p>Hello <strong>${fullname}</strong>,</p>
+      <p>Our support agent <strong style="color:#9F7AEA;">${adminName}</strong> has replied to your request:</p>
+
+      <div style="background:#111; padding:15px; border-radius:6px; margin:15px 0; border:1px solid #9F7AEA;">
+        <p><strong>💬 Reply:</strong></p>
+        <blockquote style="color:#ddd; margin:10px 0; padding:10px; background:#1a1a1a; border-left:4px solid #9F7AEA;">
+          ${replyMessage}
+        </blockquote>
+        <p><strong>🔑 Ticket ID:</strong> ${ticketId}</p>
+        <p><strong>Status:</strong> <span style="color:#9F7AEA;">Answered ✅</span></p>
+      </div>
+
+      <p>If you have more questions, feel free to contact our support team again 🙏💬</p>
+    </div>
+
+    <p style="font-size:0.9em; color:#bbb; margin-top:20px; text-align:center;">
+      Lumora Support Team <br/>
+      <span style="color:#9F7AEA;">Lumora × MΞKΛ Core</span>
+    </p>
+  </div>
+  `;
+};
+
 module.exports = {
   ticketEmailTemplate,
   guestTicketTemplate,
   ticketDeletedTemplate,
   ticketReplyTemplate,
   ticketReplyTemplatee,
+  guestReplyTemplate,
   ticketResolvedTemplate, // 🟢 add this
 };
