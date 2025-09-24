@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Other Platforms 🌐</title>
+  <link rel="icon" type="image/png" href="mxapi.png">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #0f0f0f;
+      color: white;
+    }
+
+    /* Navbar */
+    nav {
+      display: flex;
+      align-items: center;
+      background: #1a1a1a;
+      padding: 12px 16px;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-right: 14px;
+      display: flex;
+      align-items: center;
+    }
+
+    nav button svg {
+      width: 30px;
+      height: 30px;
+      fill: #9c4dff;
+      transition: 0.2s;
+    }
+
+    nav button:hover svg {
+      fill: #b266ff;
+    }
+
+    nav input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: #2a2a2a;
+      color: white;
+      font-size: 14px;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 20px 0 8px;
+      color: #9c4dff;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    /* Platforms grid */
+    #platformList {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    #platformList a, #platformList div {
+      display: block;
+      padding: 16px;
+      border-radius: 10px;
+      background: #1a1a1a;
+      text-decoration: none;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #platformList a:hover,
+    #platformList div:hover {
+      background: #6a0dad;
+    }
+
+    #noResults {
+      text-align: center;
+      margin-top: 20px;
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+
+    /* Popup modal */
+    #popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1a1a1a;
+      padding: 20px 30px;
+      border-radius: 12px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      display: none;
+      z-index: 1000;
+    }
+    #popup button {
+      margin-top: 12px;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #6a0dad;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #popup button:hover {
+      background: #9c4dff;
+    }
+
+    /* Overlay */
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <button onclick="history.back()" title="Back">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+    <input 
+      type="text" 
+      id="searchBar" 
+      placeholder="Search platform..." 
+      onkeyup="filterPlatforms()"
+    />
+  </nav>
+
+  <h1>Other Platforms 🌐</h1>
+  <p class="subtitle">Explore our connected services powered by Lumora × MΞKΛ Core ⚡</p>
+
+  <!-- Platforms List -->
+  <div id="platformList">
+
+    <a href="https://mxapi-lnc.onrender.com" target="_blank">
+      🚀 MXAPI - APIs at your fingertips
+    </a>
+
+    <a href="https://mxgamecoder.lovestoblog.com" target="_blank">
+      🌌 Lumora - The ecosystem hub
+    </a>
+
+    <a href="http://lumoraid.vaultlite.name.ng" target="_blank">
+      🛡️ Lumora ID - Secure identity
+    </a>
+
+    <div onclick="showPopup()">
+      🤖 Lexa - AI assistant
+    </div>
+
+    <div onclick="showPopup()">
+      🎨 Maya - Creative tools
+    </div>
+
+    <div onclick="showPopup()">
+      🗄️ MekaDatabase - Cloud data storage
+    </div>
+
+  </div>
+
+  <!-- No Results Message -->
+  <p id="noResults" style="display:none;">❌ Platform not found</p>
+
+  <!-- Popup -->
+  <div id="overlay"></div>
+  <div id="popup">
+    ⚠️ This platform is not yet available.<br>Config coming soon.
+    <br>
+    <button onclick="closePopup()">OK</button>
+  </div>
+
+<script>
+  function filterPlatforms() {
+    const input = document.getElementById("searchBar").value.toLowerCase();
+    const list = document.getElementById("platformList").children;
+    let found = false;
+
+    for (let item of list) {
+      const text = item.textContent.toLowerCase();
+      if (text.includes(input)) {
+        item.style.display = "block";
+        found = true;
+      } else {
+        item.style.display = "none";
+      }
+    }
+
+    document.getElementById("noResults").style.display = found ? "none" : "block";
+  }
+
+  function showPopup() {
+    document.getElementById("popup").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+  }
+
+  function closePopup() {
+    document.getElementById("popup").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+  }
+</script>
+
+</body>
+</html>
