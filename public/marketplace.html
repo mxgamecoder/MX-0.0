@@ -1,444 +1,91 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-black text-white">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MXAPI Marketplace</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/png" href="mxapi.png">
+<link rel="stylesheet" href="css/marketplace.css">
 </head>
-<body class="p-4">
+<body>
+  <h1>🛒 MXAPI Marketplace</h1>
 
-  <h1 class="text-3xl font-bold mb-4">🛒 Marketplace</h1>
-
-  <!-- Search -->
-  <div class="mb-4">
-    <input id="search" type="text" oninput="searchApis()" placeholder="Search for an API..."
-      class="w-full p-2 rounded bg-gray-900 border border-gray-700 text-white placeholder-gray-400">
+  <div style="margin-bottom:16px;">
+    <input id="search" type="text" oninput="searchApis()" placeholder="🔍 Search for an API...">
   </div>
 
-  <!-- Filters -->
-  <div class="flex flex-wrap gap-2 mb-4">
-    <button onclick="filterGroup('ALL')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">All</button>
-    <button onclick="filterGroup('A-E')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">A-E</button>
-    <button onclick="filterGroup('F-I')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">F-I</button>
-    <button onclick="filterGroup('J-O')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">J-O</button>
-    <button onclick="filterGroup('P-T')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">P-T</button>
-    <button onclick="filterGroup('U-Z')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded">U-Z</button>
-    <select onchange="filterByCoins()" id="coin-filter" class="px-4 py-2 bg-gray-700 text-white rounded">
-      <option value="all">Filter by Coins</option>
-      <option value="10">≤ 10 Coins</option>
-      <option value="25">≤ 25 Coins</option>
-      <option value="50">≤ 50 Coins</option>
-      <option value="100">≤ 100 Coins</option>
-    </select>
+  <div class="filter-bar">
+    <div class="letter-buttons">
+      <button onclick="filterGroup('ALL')" class="btn-gray">All</button>
+      <button onclick="filterGroup('A-E')" class="btn-gray">A-E</button>
+      <button onclick="filterGroup('F-I')" class="btn-gray">F-I</button>
+      <button onclick="filterGroup('J-O')" class="btn-gray">J-O</button>
+      <button onclick="filterGroup('P-T')" class="btn-gray">P-T</button>
+      <button onclick="filterGroup('U-Z')" class="btn-gray">U-Z</button>
+    </div>
 
-    <button onclick="fetchMarketplaceApis()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded">🔄 Reset</button>
+    <div class="coin-tag-filters">
+      <select id="coin-filter" onchange="filterByCoins()">
+        <option value="all">All Coins</option>
+        <option value="10">≤ 10 Coins</option>
+        <option value="25">≤ 25 Coins</option>
+        <option value="50">≤ 50 Coins</option>
+        <option value="100">≤ 100 Coins</option>
+        <option value="250">≤ 250 Coins</option>
+        <option value="500">≤ 500 Coins</option>
+        <option value="1000">≤ 1000 Coins</option>
+      </select>
+      <select id="tag-filter" onchange="filterByTag()">
+        <option value="all">All Tags</option>
+        <option value="hot">🔥 Hot</option>
+        <option value="new">🆕 New</option>
+        <option value="popular">⭐ Popular</option>
+      </select>
+    </div>
   </div>
 
-  <div id="not-found" class="text-red-400 mb-4 hidden">Not available yet 😞. Contact admin if needed.</div>
-  <div id="api-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  <div id="not-found" style="color:#f87171; margin-bottom:12px; display:none; text-align:center;">
+    Not available yet 😞. Contact admin if needed.
+  </div>
+
+  <div id="api-container"></div>
 
   <!-- Popup -->
-  <div id="popup" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-[999]">
-    <div class="bg-gray-900 text-white p-6 rounded-xl w-[90%] max-w-md h-[30vh] flex flex-col justify-center text-center shadow-xl">
-      <p id="popup-message" class="mb-4 text-lg"></p>
-      <button onclick="closePopup()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded text-white">Okay</button>
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <p id="popup-message" style="margin-bottom:16px;"></p>
+      <button onclick="closePopup()" class="btn-purple">Okay</button>
     </div>
   </div>
 
-<div id="apiFullPopup" class="fixed inset-0 bg-[#0f0f1a] z-50 hidden flex flex-col">
-  <div class="flex-1 flex flex-col overflow-y-auto text-white">
-      <!-- Header -->
-      <div class="flex items-center justify-between bg-[#181827] px-6 py-4 border-b border-gray-700">
-        <div class="flex items-center gap-2">
-          <button id="updateBtn" onclick="handleUpdate()" class="text-xl text-green-400 hover:text-green-300 hidden">🔄 Update</button>
-          <span class="font-semibold text-white text-lg">API Details</span>
-        </div>
-        <button onclick="closeApiFullPopup()" class="text-2xl text-red-400 hover:text-red-300">✖</button>
+  <!-- Full API Modal -->
+  <div id="apiFullPopup">
+    <header>
+      <span style="font-weight:600;">API Details</span>
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <span id="api-tag" style="color:#facc15; font-weight:600; font-size:0.9rem;"></span>
+        <button onclick="closeApiFullPopup()" class="btn-red">✖</button>
       </div>
-
-      <!-- Scrollable Content -->
-    <div id="apiFullContent" class="flex-1 overflow-y-auto p-6"></div>
-    </div>
+    </header>
+    <div id="apiFullContent"></div>
   </div>
-
 
   <!-- Comment Modal -->
-<div id="commentModal" class="fixed inset-0 bg-[#0f0f1a] z-50 hidden flex flex-col p-6">
-  <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-    <h2 class="text-xl font-semibold text-white">💬 Comments</h2>
-    <button onclick="closeCommentModal()" class="text-2xl text-red-400 hover:text-red-300">✖</button>
+  <div id="commentModal">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <h2>💬 Comments</h2>
+      <button onclick="closeCommentModal()" class="btn-red">✖</button>
+    </div>
+    <div id="comment-container"></div>
+    <div id="commentList" style="flex:1; overflow-y:auto; margin-bottom:10px;"></div>
+    <div id="replyInfo" style="display:none; margin-bottom:6px; font-size:0.85rem; color:#facc15;">
+      Replying to <span id="replyToName"></span>
+      <button onclick="cancelReply()" class="btn-red" style="padding:2px 6px; font-size:0.75rem;">✖ Cancel</button>
+    </div>
+    <textarea id="commentBox" rows="3" placeholder="Type your comment..."></textarea>
+    <button onclick="submitComment()" class="btn-purple" style="margin-top:10px;">📨 Send Comment</button>
   </div>
 
-  <div class="flex-1 overflow-y-auto text-gray-300 space-y-3 mb-6">
-    <p>🛠️ Coming soon... Real-time comment threads will appear here.</p>
-  </div>
-
-  <div class="mt-auto border-t border-gray-700 pt-4">
-    <textarea id="commentBox" rows="3" placeholder="Type your comment..." class="w-full bg-gray-900 text-white p-3 rounded mb-2"></textarea>
-    <button onclick="submitComment()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded text-white">📨 Send Comment</button>
-  </div>
-</div>
-
-  <script>
-    const token = localStorage.getItem('mxapi_token');
-    const userId = localStorage.getItem('mxapi_id');
-    const apiKey = localStorage.getItem('mxapi_apikey');
-
-    if (!token || !userId || !apiKey) {
-      showPopup("You're missing login or API key. Please go to the dashboard and log out, then log in again.", () => {
-        window.location.href = "index.html";
-      });
-    }
-
-    let allApis = [];
-    let owned = [];
-
-    async function fetchMarketplaceApis() {
-      try {
-        const [dbRes, jsonRes, ownedRes] = await Promise.all([
-          fetch('/api/marketplace/all'),
-          fetch('/api/marketplace/json'),
-          fetch(`/api/marketplace/user/owned-apis/${userId}`)
-        ]);
-
-        const dbData = await dbRes.json();
-        const jsonData = await jsonRes.json();
-        const ownedData = await ownedRes.json();
-
-        owned = ownedData.owned || [];
-        allApis = [...(dbData.apis || []), ...(jsonData.apis || [])];
-        displayApis(allApis);
-      } catch (err) {
-        showPopup("Failed to load marketplace APIs.");
-      }
-    }
-
-    function displayApis(apiList) {
-      const container = document.getElementById("api-container");
-      const notFound = document.getElementById("not-found");
-      container.innerHTML = "";
-      notFound.classList.add("hidden");
-
-      if (!apiList.length) {
-        notFound.classList.remove("hidden");
-        return;
-      }
-
-      apiList.forEach(api => {
-        const image = api.image || "https://i.ibb.co/JjMphBCP/avatar.jpg";
-        container.innerHTML += `
-          <div onclick="showFullApi('${api._id}')" class="bg-[#1e1e2f] hover:bg-[#2a2a3f] transition-all cursor-pointer p-3 rounded-xl shadow mb-3">
-            <h2 class="text-white font-bold text-base mb-1">${api.name}</h2>
-            <p class="text-gray-300 text-sm mb-1 line-clamp-2">${api.description || 'No description available.'}</p>
-            <p class="text-yellow-300 text-sm mb-1">💰 ${api.price || 0} Coins</p>
-            <p class="text-blue-300 text-xs mb-1">🧑‍💻 ${api.createdBy || 'Unknown'}</p>
-<p class="text-xs text-gray-500 italic">🕒 ${api.lastUpdated ? new Date(api.lastUpdated).toLocaleDateString() : 'Last Updated: Unknown'}</p>
-            <div class="flex justify-between items-center text-sm text-gray-400 mb-1">
-              <div class="flex gap-4">
-<span>👍 ${api.likes?.length || 0}</span>
-<span>👎 ${api.dislikes?.length || 0}</span>
-<span>💬 ${api.comments?.length || 0}</span>
-              </div>
-              <div class="text-xs text-yellow-400 font-semibold">${getTag(api)}</div>
-            </div>
-            <p class="text-xs text-gray-400 italic">ℹ️ Tap to see full API details</p>
-          </div>
-        `;
-      });
-    }
-
-    function getTag(api) {
-      if (api.isHot) return "🔥 Hot";
-      if (api.isNew) return "🆕 New";
-      if (api.isPopular) return "⭐ Popular";
-      return "";
-    }
-
-    function showFullApi(apiId) {
-      const api = allApis.find(a => a._id === apiId);
-      if (!api) return alert("API not found.");
-
-      const image = api.image || "https://i.ibb.co/JjMphBCP/avatar.jpg";
-      const isOwned = owned.some(o =>
-        o._id === api._id ||
-        (o.name === api.name && o.category === api.category) ||
-        (o.filePath && o.filePath === api.filePath)
-      );
-// Show or hide update button based on ownership
-document.getElementById('updateBtn').style.display = isOwned ? 'inline-block' : 'none';
-
-      let actionBtn = "";
-      if (isOwned) {
-        actionBtn = `<button disabled class='w-full mt-6 py-2 bg-purple-700 rounded text-white cursor-not-allowed text-lg'>👑 Owner</button>`;
-      } else if ((api.available ?? 9999) <= 0) {
-        actionBtn = `<button disabled class='w-full mt-6 py-2 bg-gray-600 rounded text-white cursor-not-allowed text-lg'>⛔ Out of Stock</button>`;
-      } else {
-        actionBtn = `<button onclick="buyApi('${api._id}', this)" class='w-full mt-6 py-2 bg-green-600 hover:bg-green-500 rounded text-white text-lg'>🛍 Buy</button>`;
-      }
-
-      document.getElementById('apiFullContent').innerHTML = `
-        <h2 class="text-2xl font-bold mb-4">🧪 ${api.name}</h2>
-<img src="${image}" ... class="w-full max-w-xs sm:max-w-sm md:max-w-md rounded border mb-4 object-cover mx-auto">
-        <p class="text-gray-300 mb-3">${api.description || 'No description provided.'}</p>
-
-        <div class="grid sm:grid-cols-2 gap-4 text-sm mb-4">
-          <p>🧑‍💻 <span class="text-white font-semibold">${api.createdBy || 'Unknown'}</span></p>
-          <p>💰 Price: <span class="text-yellow-400">${api.price || 0} Coins</span></p>
-          <p>📁 Category: ${api.category || 'None'}</p>
-          <p>📦 Available: ${api.available ?? 9999}</p>
-          <p>⏳ Duration: ${api.duration ? api.duration + ' days' : 'Permanent'}</p>
-          <p class="text-sm text-gray-400 mb-2 italic">🕒 Last Updated: ${api.lastUpdated ? new Date(api.lastUpdated).toLocaleString() : 'Unknown'}</p>
-        </div>
-<div class="mt-6">
-  <div class="flex gap-6 mb-4 text-xl">
-    <button onclick="likeApi(event, '${api._id}')" class="hover:text-green-400">👍</button>
-    <button onclick="dislikeApi(event, '${api._id}')" class="hover:text-red-400">👎</button>
-    <button onclick="openCommentModal('${api._id}')" class="hover:text-blue-400">💬</button>
-  </div>
-</div>
-        ${api.usageMessage ? `<div class="mt-6 bg-yellow-900 text-yellow-100 p-4 rounded-md text-sm whitespace-pre-line">${api.usageMessage}</div>` : ''}
-${actionBtn}
-      `;
-      document.getElementById("apiFullPopup").classList.remove("hidden");
-    }
-
-    function closeApiFullPopup() {
-      document.getElementById("apiFullPopup").classList.add("hidden");
-    }
-
-    function showPopup(message, callback = null) {
-      const popup = document.getElementById("popup");
-      document.getElementById("popup-message").innerText = message;
-      popup.classList.remove("hidden");
-      popup.dataset.callback = callback ? "yes" : "";
-    }
-
-    function closePopup() {
-      const popup = document.getElementById("popup");
-      popup.classList.add("hidden");
-      if (popup.dataset.callback === "yes") {
-        window.location.href = "index.html";
-      }
-    }
-
-    async function buyApi(apiId, btn) {
-      if (!apiId) return showPopup("Invalid API ID.");
-      btn.disabled = true;
-      btn.innerText = "⏳ Purchasing...";
-
-      // Block back button
-      window.history.pushState(null, null, window.location.href);
-      window.onpopstate = function () {
-        window.history.go(1);
-      };
-
-      try {
-        const res = await fetch('/api/marketplace/buy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, apiId })
-        });
-
-        const data = await res.json();
-        showPopup(data.message);
-
-        // ✅ Refresh owned APIs only (not full list)
-        const ownedRes = await fetch(`/api/marketplace/user/owned-apis/${userId}`);
-        const ownedData = await ownedRes.json();
-        owned = ownedData.owned || [];
-
-        // ✅ Update modal with new state (👑 Owner)
-        showFullApi(apiId);
-
-      } catch (err) {
-        showPopup("Something went wrong. Please try again.");
-        btn.disabled = false;
-        btn.innerText = "🛍 Buy";
-      }
-    }
-
-    function searchApis() {
-      const term = document.getElementById("search").value.toLowerCase();
-      const filtered = allApis.filter(api => api.name.toLowerCase().includes(term));
-      displayApis(filtered);
-    }
-
-    function filterGroup(group) {
-      const map = {
-        "A-E": ["a", "b", "c", "d", "e"],
-        "F-I": ["f", "g", "h", "i"],
-        "J-O": ["j", "k", "l", "m", "n", "o"],
-        "P-T": ["p", "q", "r", "s", "t"],
-        "U-Z": ["u", "v", "w", "x", "y", "z"],
-        "ALL": null
-      };
-      if (group === "ALL") return displayApis(allApis);
-      const chars = map[group];
-      const filtered = allApis.filter(api => chars.includes(api.name[0].toLowerCase()));
-      displayApis(filtered);
-    }
-
-    function filterByCoins() {
-      const maxCoins = document.getElementById("coin-filter").value;
-      if (maxCoins === "all") return displayApis(allApis);
-      const filtered = allApis.filter(api => (api.price || 0) <= parseInt(maxCoins));
-      if (!filtered.length) {
-        showPopup(`😩 No APIs found under ${maxCoins} coins. Try a higher value or reset filter.`);
-        return;
-      }
-      displayApis(filtered);
-    }
-
-    async function likeApi(event, apiId) {
-  event.stopPropagation();
-  try {
-    const res = await fetch('/api/marketplace/react', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiId, type: 'like', userId })
-    });
-    const data = await res.json();
-    if (data.success) {
-      showFullApi(apiId); // Refresh modal
-    } else {
-      showPopup(data.message || "Failed to like.");
-    }
-  } catch (err) {
-    showPopup("Like failed. Try again later.");
-  }
-    }
-
-    async function dislikeApi(event, apiId) {
-  event.stopPropagation();
-  try {
-    const res = await fetch('/api/marketplace/react', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiId, type: 'dislike', userId })
-    });
-    const data = await res.json();
-    if (data.success) {
-      showFullApi(apiId); // Refresh modal
-    } else {
-      showPopup(data.message || "Failed to dislike.");
-    }
-  } catch (err) {
-    showPopup("Dislike failed. Try again later.");
-  }
-    }
-    
-    function handleUpdate() {
-  // Add your update logic or modal
-  alert("Opening update UI for this API...");
-}
-
-    async function openCommentModal(apiId) {
-      document.getElementById("commentModal").classList.remove("hidden");
-      document.getElementById("commentModal").dataset.api = apiId;
-      await loadComments(apiId);
-    }
-
-    function closeCommentModal() {
-      document.getElementById("commentModal").classList.add("hidden");
-      document.getElementById("commentBox").value = "";
-      document.getElementById("commentModal").dataset.editing = "";
-    }
-
-    async function submitComment() {
-      const commentText = document.getElementById("commentBox").value.trim();
-      const apiId = document.getElementById("commentModal").dataset.api;
-
-      if (!commentText) return alert("Please type a comment first.");
-
-      try {
-        const res = await fetch('/api/marketplace/react', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            apiId,
-            type: 'comment',
-            userId,
-            username: localStorage.getItem('mxapi_username'),
-            commentText
-          })
-        });
-
-        const data = await res.json();
-        if (data.success) {
-          closeCommentModal();
-          showFullApi(apiId); // Refresh modal to show comment count
-        } else {
-          showPopup(data.message || "Failed to comment.");
-        }
-      } catch (err) {
-        showPopup("Comment failed. Try again later.");
-      }
-    }
-
-    async function loadComments(apiId) {
-  const container = document.querySelector("#commentModal .overflow-y-auto");
-  container.innerHTML = `<p class="text-gray-400">Loading comments...</p>`;
-
-  try {
-    const res = await fetch(`/api/marketplace/comments/${apiId}`);
-    const data = await res.json();
-
-    if (!data.success || !data.comments.length) {
-      container.innerHTML = `<p class="text-gray-400">No comments yet. Be the first! 🥇</p>`;
-      return;
-    }
-
-    container.innerHTML = "";
-    data.comments.forEach(c => {
-      const editable = c.userId === userId;
-      const date = new Date(c.createdAt).toLocaleString();
-      const editTag = c.edited ? `<span class="text-yellow-500 text-xs">(edited)</span>` : "";
-
-      container.innerHTML += `
-        <div class="bg-gray-800 p-3 rounded relative group">
-          <p class="text-sm text-white mb-1">${c.username || 'Anonymous'} <span class="text-xs text-gray-400">• ${date}</span> ${editTag}</p>
-          <p class="text-gray-300 text-sm mb-1">${c.text}</p>
-          ${editable ? `
-            <div class="absolute top-2 right-2 hidden group-hover:flex gap-2">
-              <button onclick="editComment('${apiId}', '${c._id}', \`${c.text.replace(/`/g, '\\`')}\`)" class="text-blue-400 hover:text-blue-300 text-sm">✏️</button>
-              <button onclick="deleteComment('${apiId}', '${c._id}')" class="text-red-400 hover:text-red-300 text-sm">🗑️</button>
-            </div>` : ``}
-        </div>
-      `;
-    });
-  } catch (err) {
-    container.innerHTML = `<p class="text-red-500">⚠️ Failed to load comments.</p>`;
-  }
-    }
-
-
-    async function deleteComment(apiId, commentId) {
-  if (!confirm("Are you sure you want to delete this comment?")) return;
-
-  try {
-    const res = await fetch(`/api/marketplace/comment/${apiId}/${commentId}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId })
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      await loadComments(apiId);
-    } else {
-      showPopup(data.message || "Failed to delete comment.");
-    }
-  } catch (err) {
-    showPopup("Delete failed. Try again.");
-  }
-    }
-
-    function editComment(apiId, commentId, text) {
-  document.getElementById("commentBox").value = text;
-  document.getElementById("commentModal").dataset.editing = commentId;
-    }
-    fetchMarketplaceApis();
-  </script>
+  <script src="js/marketplace.js"></script>
 </body>
 </html>

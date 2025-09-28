@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create API</title>
+  <link rel="icon" type="image/png" href="mxapi.png" />
+  <link rel="stylesheet" href="css/create.css">
+  <script>  
+    const token = localStorage.getItem('mxapi_token');  
+    const id = localStorage.getItem('mxapi_id');  
+    if (!token || !id) {
+      window.location.href = "index.html";
+    }
+  </script> 
+</head>
+<body>
+  <div class="wrap">
+    <h2>🚀 Upload Your API</h2>
+
+    <form id="createForm">
+      <!-- API Name -->
+      <div class="field">
+        <label for="name">API Name</label>
+        <input type="text" id="name" placeholder="Enter API name" required>
+      </div>
+
+      <!-- Category -->
+      <div class="field">
+        <label for="category">Category</label>
+        <select id="categorySelect" required>
+          <option value="">-- Select Category --</option>
+          <option value="fun">Fun</option>
+          <option value="utility">Utility</option>
+          <option value="games">Games</option>
+          <option value="ai">AI & Machine Learning</option>
+          <option value="media">Media & Entertainment</option>
+          <option value="education">Education</option>
+          <option value="finance">Finance</option>
+          <option value="health">Health & Fitness</option>
+          <option value="tools">Developer Tools</option>
+          <option value="social">Social & Messaging</option>
+          <option value="productivity">Productivity</option>
+          <option value="other">Other (Custom)</option>
+        </select>
+        <input type="text" id="customCategory" placeholder="Enter custom category" style="display:none; margin-top:8px;">
+      </div>
+
+      <!-- preview (full) -->
+      <div id="previewBox" class="preview-box full">
+        /api/<span id="previewCategory">category</span>/<span id="previewName">apiname</span>
+      </div>
+
+      <!-- Description (full) -->
+      <div class="field full">
+        <label for="description">Description</label>
+        <textarea id="description" placeholder="Explain what your API does, key features, and why people should use it." required></textarea>
+      </div>
+
+      <!-- price -->
+      <div class="field">
+        <label for="price">Price (coins)</label>
+        <input type="number" id="price" placeholder="Enter price in coins (max 6000)" min="0" max="6000" required>
+        <div class="hint">Maximum allowed price is 6000 coins</div>
+      </div>
+
+      <!-- duration -->
+      <div class="field">
+        <label for="duration">Duration</label>
+        <select id="durationSelect">
+          <option value="custom">Custom (days)</option>
+          <option value="unlimited">Unlimited</option>
+        </select>
+        <input type="number" id="duration" placeholder="Enter number of days" style="margin-top:8px;" required>
+      </div>
+
+      <!-- available -->
+      <div class="field">
+        <label for="available">Available Quantity</label>
+        <select id="availableSelect">
+          <option value="custom">Custom (number)</option>
+          <option value="unlimited">Unlimited</option>
+        </select>
+        <input type="number" id="available" placeholder="Enter available quantity" style="margin-top:8px;" required>
+      </div>
+
+      <!-- image type selector -->
+      <div class="field">
+        <label for="imageType">Image Input</label>
+        <select id="imageType" required>
+          <option value="url">Image URL</option>
+          <option value="upload">Upload Image</option>
+        </select>
+      </div>
+
+      <!-- image url (full) -->
+      <div id="urlBox" class="field full">
+        <label for="imageUrl">Image URL</label>
+        <input type="text" id="imageUrl" placeholder="https://example.com/image.png" required>
+        <div id="imagePreviewWrap" style="margin-top:10px;display:flex;align-items:center;gap:8px;"></div>
+      </div>
+
+      <!-- image upload (full) -->
+      <div id="uploadBox" class="field full" style="display:none;">
+        <label>Upload Image</label>
+        <label class="file-input">
+          📁 Select Image
+          <input type="file" id="imageFile" accept="image/*">
+        </label>
+        <div id="imageFileName" class="file-meta"></div>
+      </div>
+
+      <!-- code upload (full) -->
+      <div class="field full">
+        <label>Upload Your Code (ZIP only)</label>
+        <label class="file-input">
+          📦 Select ZIP File
+          <input type="file" id="codeFile" accept=".zip" required>
+        </label>
+        <div id="codeFileName" class="file-meta"></div>
+      </div>
+
+      <!-- submit -->
+      <div class="full actions">
+        <div style="flex:1"></div>
+        <button type="submit">Submit API</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <div id="loadingOverlay" style="
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:#000;display:none;align-items:center;justify-content:center;
+    flex-direction:column;z-index:9999;">
+    <div class="spinner" style="
+      width:50px;height:50px;border:5px solid #ddd;border-top-color:#6b46c1;
+      border-radius:50%;animation:spin 1s linear infinite;"></div>
+    <p style="margin-top:15px;font-weight:600;color:#444;">Checking backend validation…</p>
+  </div>
+
+  <style>
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  </style>
+
+  <script>
+    // keep original logic + small enhancements (file name display, image preview)
+    const categorySelect = document.getElementById("categorySelect");
+    const customCategory = document.getElementById("customCategory");
+    const previewCategory = document.getElementById("previewCategory");
+    const previewName = document.getElementById("previewName");
+    const nameInput = document.getElementById("name");
+
+    categorySelect.addEventListener("change", () => {
+      if (categorySelect.value === "other") {
+        customCategory.style.display = "block";
+        customCategory.required = true;
+      } else {
+        customCategory.style.display = "none";
+        customCategory.required = false;
+        previewCategory.textContent = categorySelect.value || "category";
+      }
+    });
+
+    // Custom Category: only letters (A–Z, case-insensitive)
+    customCategory.addEventListener("input", () => {
+      // remove anything that’s not a letter or space
+      customCategory.value = customCategory.value.replace(/[^a-zA-Z\s]/g, "");
+      previewCategory.textContent = customCategory.value || "category";
+    });
+    nameInput.addEventListener("input", () => { previewName.textContent = nameInput.value || "apiname"; });
+
+    // PRICE validation
+    document.getElementById("price").addEventListener("input", (e) => {
+      if (e.target.value > 6000) e.target.value = 6000;
+    });
+
+    // DURATION toggle
+    const durationSelect = document.getElementById("durationSelect");
+    const durationInput = document.getElementById("duration");
+    durationSelect.addEventListener("change", () => {
+      if (durationSelect.value === "unlimited") {
+        durationInput.style.display = "none";
+        durationInput.required = false;
+      } else {
+        durationInput.style.display = "block";
+        durationInput.required = true;
+      }
+    });
+
+    // AVAILABLE toggle
+    const availableSelect = document.getElementById("availableSelect");
+    const availableInput = document.getElementById("available");
+    availableSelect.addEventListener("change", () => {
+      if (availableSelect.value === "unlimited") {
+        availableInput.style.display = "none";
+        availableInput.required = false;
+      } else {
+        availableInput.style.display = "block";
+        availableInput.required = true;
+      }
+    });
+
+    // image toggle
+    const imageType = document.getElementById("imageType");
+    const urlBox = document.getElementById("urlBox");
+    const uploadBox = document.getElementById("uploadBox");
+    const imageUrl = document.getElementById("imageUrl");
+    const imageFile = document.getElementById("imageFile");
+    const imageFileName = document.getElementById("imageFileName");
+    const imagePreviewWrap = document.getElementById("imagePreviewWrap");
+
+    imageType.addEventListener("change", () => {
+      if (imageType.value === "url") {
+        urlBox.style.display = "block";
+        imageUrl.required = true;
+        uploadBox.style.display = "none";
+        imageFile.required = false;
+      } else {
+        urlBox.style.display = "none";
+        imageUrl.required = false;
+        uploadBox.style.display = "block";
+        imageFile.required = true;
+      }
+    });
+
+    // show file name when user picks files
+    imageFile.addEventListener("change", () => {
+      if (imageFile.files && imageFile.files.length > 0) {
+        imageFileName.textContent = imageFile.files[0].name;
+        // small preview
+        const img = document.createElement('img');
+        img.style.maxWidth = '80px'; img.style.maxHeight = '60px'; img.style.borderRadius='6px';
+        img.src = URL.createObjectURL(imageFile.files[0]);
+        imagePreviewWrap.innerHTML = '';
+        imagePreviewWrap.appendChild(img);
+      } else { imageFileName.textContent = ''; imagePreviewWrap.innerHTML = ''; }
+    });
+
+    // code file name
+    const codeFile = document.getElementById('codeFile');
+    const codeFileName = document.getElementById('codeFileName');
+
+    codeFile.addEventListener('change', () => {
+      if (codeFile.files.length > 0) {
+        codeFileName.textContent = codeFile.files[0].name;
+      } else {
+        codeFileName.textContent = '';
+      }
+    });
+
+    // preview image from URL
+    imageUrl.addEventListener('input', ()=>{
+      const url = imageUrl.value.trim();
+      imagePreviewWrap.innerHTML = '';
+      if (!url) return;
+      const img = document.createElement('img');
+      img.style.maxWidth='80px'; img.style.maxHeight='60px'; img.style.borderRadius='6px';
+      img.onerror = ()=>{ imagePreviewWrap.innerHTML = ''; };
+      img.src = url;
+      imagePreviewWrap.appendChild(img);
+    });
+
+    // toast function
+    function showToast(message, success=true) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.style.background = success ? "rgba(139,92,246,0.95)" : "rgba(239,68,68,0.95)";
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 3000);
+    }
+
+    // submit (kept same behaviour)
+    const form = document.getElementById("createForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Show overlay & hide form
+      // Show overlay & hide form
+      document.querySelector(".wrap").style.display = "none";
+      const overlay = document.getElementById("loadingOverlay");
+      overlay.style.display = "flex";
+
+      // reset to default message so old error doesn’t stick
+      overlay.querySelector("p").textContent = "Checking backend validation…";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("user");
+      if (!userId) { 
+        document.getElementById("loadingOverlay").style.display = "none";
+        document.querySelector(".wrap").style.display = "block";
+        return showToast("❌ User ID missing in URL.", false); 
+      }
+
+      const category = categorySelect.value === "other" ? customCategory.value : categorySelect.value;
+
+      const formData = new FormData();
+      formData.append("name", nameInput.value.trim());
+      formData.append("category", category);
+      formData.append("description", document.getElementById("description").value.trim());
+      formData.append("createdBy", userId);
+      formData.append("price", parseInt(document.getElementById("price").value));
+      formData.append("duration", durationSelect.value === "unlimited" ? "unlimited" : parseInt(durationInput.value));
+      formData.append("available", availableSelect.value === "unlimited" ? "unlimited" : parseInt(availableInput.value));
+
+      if (imageType.value === "url") {
+        formData.append("imageUrl", imageUrl.value.trim());
+      } else if (imageFile.files.length > 0) {
+        formData.append("image", imageFile.files[0]);
+      }
+      if (codeFile.files.length > 0) {
+        formData.append("codeZip", codeFile.files[0]);
+      }
+
+      try {
+        const res = await fetch("/api/marketplace/upload", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` },
+          body: formData
+        });
+        const data = await res.json();
+
+        // Replace overlay message with backend message
+        const overlay = document.getElementById("loadingOverlay");
+        overlay.querySelector("p").textContent = data.success
+          ? "✅ Your API has been submitted. It is under review."
+          : "❌ " + data.message;
+
+        if (data.success) {
+          setTimeout(() => window.location.href = "apistudio.html", 3000);
+        } else {
+          setTimeout(() => {
+            overlay.style.display = "none";
+            document.querySelector(".wrap").style.display = "block";
+          }, 3000);
+        }
+      } catch (err) {
+        console.error(err);
+        const overlay = document.getElementById("loadingOverlay");
+        overlay.querySelector("p").textContent = "❌ Server error while uploading.";
+        setTimeout(() => {
+          overlay.style.display = "none";
+          document.querySelector(".wrap").style.display = "block";
+        }, 3000);
+      }
+    });
+  </script>
+</body>
+</html>

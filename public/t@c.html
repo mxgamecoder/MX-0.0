@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MXAPI Terms & Conditions</title>
+  <link rel="icon" type="image/png" href="mxapi.png">
+  <script>  
+    const token = localStorage.getItem('mxapi_token');  
+    const id = localStorage.getItem('mxapi_id');  
+    if (!token || !id) {
+      window.location.href = "index.html";
+    }
+  </script>  
+  <style>
+    :root {
+      --lumora-bg: #050510;
+      --lumora-panel: rgba(20, 20, 35, 0.85);
+      --lumora-purple: #8b5cf6;
+      --lumora-gray: #d4d4d8;
+      --lumora-red: #ef4444;
+      --lumora-blue: #3b82f6;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Inter", Arial, sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #0a0a15, #1a1a2e);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 850px;
+      width: 100%;
+      background: var(--lumora-panel);
+      padding: 30px;
+      border-radius: 18px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.35);
+      text-align: left;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    h1 {
+      text-align: center;
+      background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 24px;
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+    p, li {
+      font-size: 0.95rem;
+      color: var(--lumora-gray);
+      line-height: 1.55;
+    }
+    ul {
+      margin: 16px 0;
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 12px 22px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border-radius: 10px;
+      border: 2px solid var(--lumora-purple);
+      background: transparent;
+      color: var(--lumora-purple);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1 1 auto;
+      text-align: center;
+      min-width: 120px;
+    }
+    .btn:hover {
+      background: var(--lumora-purple);
+      color: white;
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+    }
+    .btn.secondary {
+      border-color: var(--lumora-red);
+      color: var(--lumora-red);
+    }
+    .btn.secondary:hover {
+      background: var(--lumora-red);
+      color: white;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 📱 Mobile adjustments */
+    @media (max-width: 640px) {
+      body {
+        padding: 10px;
+      }
+      .container {
+        padding: 20px;
+        border-radius: 14px;
+      }
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 18px;
+      }
+      p, li {
+        font-size: 0.85rem;
+      }
+      .btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+        flex: 1 1 100%;
+      }
+      .btn-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📜 MXAPI Terms & Conditions</h1>
+    <p>✨ Welcome to <span style="color:var(--lumora-purple); font-weight:bold;">API Studio</span>. Before you continue, please read carefully:</p>
+    <ul>
+      <li>🗑️ Deleted APIs remain stored for <b>6 months</b> before removal.</li>
+      <li>🛡️ Harmful APIs (virus/spam) can cause account bans.</li>
+      <li>📢 APIs are monitored for safety + performance.</li>
+      <li>⚖️ Follow Lumora × MXAPI community rules.</li>
+      <li>💰 APIs may require coins/fees — you’re responsible for fair pricing.</li>
+      <li>🚀 Abuse of free plan = rate limiting or ban.</li>
+      <li>📊 Logs collected for analytics + abuse prevention.</li>
+      <li>👤 Keep your API keys private — you’re responsible for use.</li>
+      <li>🛑 Illegal content strictly forbidden.</li>
+      <li>🔄 MXAPI may suspend/modify services for compliance.</li>
+      <li>🌍 Uploaded APIs are licensed for platform use.</li>
+      <li>🤝 Don’t plagiarize or re-upload without permission.</li>
+      <li>📧 Updates/notices may be sent to your registered email.</li>
+      <li>🕒 Inactive APIs may be auto-archived after <b>12 months</b>.</li>
+      <li>📱 Private info in API details will be public — share carefully.</li>
+    </ul>
+    <p>✅ If you agree to these terms, click below to continue.</p>
+    <div class="btn-group">
+      <button class="btn" onclick="agreeTerms()">I Agree & Continue 🚀</button>
+      <button class="btn secondary" onclick="disagree()">Disagree & Exit ❌</button>
+    </div>
+  </div>
+
+  <script>
+    function agreeTerms() {
+      localStorage.setItem("mxapi_tc_agreed", "true");
+      window.location.href = "apistudio.html"; // ✅ Updated flow
+    }
+    function disagree() {
+      window.location.href = "dashboard.html";
+    }
+  </script>
+</body>
+</html>

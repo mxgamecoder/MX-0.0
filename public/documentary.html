@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>📘 Lumora API Documentation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="mxapi.png">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -14,11 +15,11 @@
       padding: 30px;
     }
     a {
-      color: #09f;
+      color: #9b4dff; /* Lumora purple */
       text-decoration: none;
       transition: color 0.3s ease;
     }
-    a:hover { color: #00ffff; }
+    a:hover { color: #c27dff; } /* lighter purple on hover */
     h1, h2, h3 {
       margin-top: 30px;
       color: #ffffff;
@@ -29,14 +30,14 @@
     }
     .highlight {
       background: #1f1f1f;
-      border-left: 4px solid #00ffcc;
+      border-left: 4px solid #9b4dff; /* purple accent */
       padding: 20px;
       margin: 25px 0;
       border-radius: 6px;
     }
     pre {
       background: #181818;
-      color: #00ff88;
+      color: #c27dff; /* code text in light purple */
       padding: 15px;
       border-radius: 6px;
       margin: 15px 0;
@@ -45,7 +46,7 @@
     }
     code {
       font-family: monospace;
-      color: #00eaff;
+      color: #b07bff; /* inline code purple */
     }
     ul { padding-left: 25px; }
     .footer {
@@ -60,11 +61,11 @@
       border-radius: 4px;
       font-size: 0.85rem;
       margin-left: 5px;
-      color: #999;
+      color: #9b4dff; /* purple badge text */
     }
     .glow {
-      color: #00ffff;
-      text-shadow: 0 0 5px #00ffffaa;
+      color: #9b4dff;
+      text-shadow: 0 0 8px #9b4dffaa; /* glowing purple */
     }
   </style>
 </head>
@@ -86,15 +87,15 @@
 
     <h3>1. JS Fetch (Browser)</h3>
     <pre><code>fetch("https://mxapi-lnc.onrender.com/fun/joke?meka=your_api_key_here")
-  .then(res => res.json())
-  .then(data => alert(data.content));</code></pre>
+  .then(res =&gt; res.json())
+  .then(data =&gt; alert(data.content));</code></pre>
 
     <h3>2. Node.js</h3>
     <pre><code>const https = require("https");
-https.get("https://mxapi-lnc.onrender.com/fun/fact?meka=your_api_key_here", res => {
+https.get("https://mxapi-lnc.onrender.com/fun/fact?meka=your_api_key_here", res =&gt; {
   let d = "";
-  res.on("data", chunk => d += chunk);
-  res.on("end", () => console.log(JSON.parse(d).content));
+  res.on("data", chunk =&gt; d += chunk);
+  res.on("end", () =&gt; console.log(JSON.parse(d).content));
 });</code></pre>
 
     <h3>3. Curl</h3>
@@ -106,20 +107,20 @@ res = requests.get("https://mxapi-lnc.onrender.com/fun/riddle?meka=your_api_key_
 print(res.json()["content"])</code></pre>
 
     <h3>5. HTML Button</h3>
-    <pre><code>&lt;button onclick="getJoke()">Get Joke&lt;/button>
-&lt;script>
+    <pre><code>&lt;button onclick="getJoke()"&gt;Get Joke&lt;/button&gt;
+&lt;script&gt;
 function getJoke() {
   fetch("https://mxapi-lnc.onrender.comfun/joke?meka=your_api_key_here")
-    .then(res => res.json())
-    .then(data => alert(data.content));
+    .then(res =&gt; res.json())
+    .then(data =&gt; alert(data.content));
 }
-&lt;/script></code></pre>
+&lt;/script&gt;</code></pre>
 
     <h3>6. React (useEffect)</h3>
-    <pre><code>useEffect(() => {
+    <pre><code>useEffect(() =&gt; {
   fetch("https://mxapi-lnc.onrender.com/fun/quote?meka=your_api_key_here")
-    .then(res => res.json())
-    .then(data => console.log(data.content));
+    .then(res =&gt; res.json())
+    .then(data =&gt; console.log(data.content));
 }, []);</code></pre>
 
     <h3>7. Discord Bot (Python)</h3>
@@ -133,7 +134,7 @@ async def truth(ctx):
 $res = file_get_contents("https://mxapi-lnc.onrender.com/fun/quote?meka=your_api_key_here");
 $data = json_decode($res);
 echo $data-&gt;content;
-?></code></pre>
+?&gt;</code></pre>
 
     <h3>9. jQuery</h3>
     <pre><code>$.getJSON("https://mxapi-lnc.onrender.com/fun/whatIf?meka=your_api_key_here", function(data) {
@@ -147,8 +148,8 @@ echo $data-&gt;content;
 
     <h2>👨‍💻 What I Learned</h2>
     <ul>
-      <li>✅ Express.js middleware & routing</li>
-      <li>✅ JSON formatting & status control</li>
+      <li>✅ Express.js middleware &amp; routing</li>
+      <li>✅ JSON formatting &amp; status control</li>
       <li>✅ Prioritizing gifs in image APIs</li>
       <li>✅ Designing for real-world use</li>
       <li>✅ Testing with tools — raw, curl, Python, Postman</li>
@@ -167,7 +168,7 @@ echo $data-&gt;content;
   </div>
 
   <div class="footer">
-    &copy; 2025 Lumora × MX-GΔMΞCØDΞR — All Rights Reserved | Powered by passion, built with 💙
+    &copy; 2025 Lumora × MX-GΔMΞCØDΞR — All Rights Reserved | Powered by passion, built with 💜
   </div>
 </body>
 </html>

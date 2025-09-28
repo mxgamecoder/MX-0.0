@@ -1,0 +1,330 @@
+/* ==== GLOBAL ==== */
+:root {
+  --lumora-purple: #8b5cf6;
+  --bg-dark: #000000;
+  --card-bg: #141420;
+  --input-bg: #151522;
+  --input-border: #2a2a3f;
+  --hover-bg: #1f1f2e;
+  --text-light: #e5e5e5;
+  --text-medium: #ccc;
+  --text-muted: #888;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-light);
+  padding: 1.25rem;
+  overflow-x: hidden;
+}
+
+.comment-text, .reply-text {
+  font-size: 0.8rem;          /* smaller text */
+  color: #ddd;
+  white-space: pre-wrap;      /* keep line breaks */
+  word-wrap: break-word;      /* break long words */
+  overflow-wrap: anywhere;    /* force break if too long */
+  line-height: 1.4;
+  max-height: 4.2em;          /* ~3 lines before read more */
+  overflow: hidden;
+  position: relative;
+}
+
+.comment-text.expanded, .reply-text.expanded {
+  max-height: none;           /* show full text */
+}
+.read-more {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #60a5fa;
+  cursor: pointer;
+}
+.read-more:hover {
+  text-decoration: underline;
+}
+h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  color: var(--lumora-purple);
+  text-align: center;
+  letter-spacing: 0.05rem;
+}
+
+/* ==== INPUT & BUTTONS ==== */
+input, select, textarea {
+  box-sizing: border-box;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: #fff;
+  padding: 0.75rem;
+  border-radius: 0.625rem;
+  width: 100%;
+  outline: none;
+  font-size: 0.95rem;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--lumora-purple);
+  background: #1d1d2d;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #777;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 0.625rem;
+  padding: 0.625rem 1.125rem;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+/* Button Colors */
+.btn-gray { background: #2a2a3f; color: #fff; }
+.btn-gray:hover { background: #3a3a55; }
+.btn-purple { background: var(--lumora-purple); color: #fff; }
+.btn-purple:hover { background: #7c3aed; transform: translateY(-0.125rem); }
+.btn-green { background: #16a34a; color: #fff; }
+.btn-green:hover { background: #22c55e; }
+.btn-red { background: #dc2626; color: #fff; }
+.btn-red:hover { background: #ef4444; }
+
+/* ==== FILTER BAR ==== */
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+/* Letter buttons */
+.letter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 37.5rem;
+}
+
+.letter-buttons button {
+  flex: 1 1 5rem;
+  min-width: 3.75rem;
+  text-align: center;
+}
+
+/* Coin & Tag filters on same row */
+.coin-tag-filters {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.coin-tag-filters select {
+  flex: 1 1 10rem;
+  min-width: 10rem;
+  border-radius: 0.625rem;
+  background: #1c1c2b;
+  border: 1px solid #2a2a3f;
+}
+
+/* ==== GRID ==== */
+#api-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16.875rem, 1fr));
+  gap: 1.25rem;
+}
+
+/* ==== CARD ==== */
+.api-card {
+  background: var(--card-bg);
+  border-radius: 0.875rem;
+  padding: 1.125rem;
+  box-shadow: 0 0.375rem 1.125rem rgba(0,0,0,0.5);
+  transition: transform 0.2s ease, background 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.api-card:hover {
+  transform: translateY(-0.375rem);
+  background: var(--hover-bg);
+}
+
+.api-card h2 {
+  margin: 0 0 0.625rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.api-card p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-medium);
+}
+
+.api-card small {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ==== ACTION BUTTONS ==== */
+.action-btn {
+  width: 100%;
+  margin-top: 0.875rem;
+  border-radius: 0.5rem;
+  padding: 0.875rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-0.125rem);
+}
+
+/* ==== POPUP ==== */
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.popup-content {
+  background: #1a1a28;
+  padding: 1.375rem;
+  border-radius: 0.75rem;
+  max-width: 26.25rem;
+  text-align: center;
+  box-shadow: 0 0.375rem 1.25rem rgba(0,0,0,0.6);
+  animation: fadeIn 0.25s ease;
+}
+
+/* ==== FULL API VIEW ==== */
+#apiFullPopup {
+  position: fixed;
+  inset: 0;
+  background: #0b0b15;
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+#apiFullPopup header {
+  background: #181827;
+  padding: 1rem;
+  border-bottom: 1px solid #2a2a3f;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#apiFullContent {
+  flex: 1;
+  padding: 1.375rem;
+  overflow-y: auto;
+}
+
+/* ==== COMMENTS ==== */
+#commentModal {
+  position: fixed;
+  inset: 0;
+  background: #0b0b15;
+  display: none;
+  flex-direction: column;
+  padding: 1.25rem;
+  z-index: 1000;
+}
+
+#commentModal .comment {
+  background: #232338;
+  padding: 0.75rem;
+  border-radius: 0.625rem;
+  margin-bottom: 0.625rem;
+}
+
+/* ==== MOBILE FIX (Improved) ==== */
+@media(max-width: 37.5rem) {
+  h1 {
+    font-size: 1.7rem;
+  }
+
+  #api-container {
+    grid-template-columns: 1fr;
+  }
+
+  .letter-buttons {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .letter-buttons button {
+    flex: 1 1 28%;
+    min-width: auto;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* FIXED COIN + TAG ON SAME ROW, SMALLER */
+  .coin-tag-filters {
+    flex-direction: row;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .coin-tag-filters select {
+    flex: 1 1 48%;
+    min-width: 48%;
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  input, textarea {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  button {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.comment-text pre {
+  background: #1f1f2f;
+  padding: 8px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: #f5f5f5;
+}

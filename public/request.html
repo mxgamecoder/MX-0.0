@@ -2,17 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>MXAPI | Request Usage</title>
+  <title>MXAPI | Request Usage (2025)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<style>
-  body * {
-    color: white !important;
-  }
-</style>
+  <link rel="icon" type="image/png" href="mxapi.png">
+
   <script>
     const token = localStorage.getItem('mxapi_token');
-    const userId = localStorage.getItem('mxapi_id');
+    const userId = localStorage.getItem('mxapi_id'); // publicId
     const apiKey = localStorage.getItem('mxapi_apikey');
 
     if (!token || !userId) {
@@ -26,86 +22,117 @@
   </script>
 
   <style>
-    .progress-bar {
-      transition: width 1s ease-in-out;
+    :root {
+      --lumora-purple: #7A00FF;
+      --bg-dark: #0a0a0f;
+      --bg-card: rgba(20, 20, 30, 0.9);
+      --bg-sidebar: #111;
+      --text-light: #ccc;
+      --text-white: #fff;
+      --success: #2ecc71;
+      --info: #3498db;
+      --warning: #f1c40f;
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: var(--bg-dark); color: var(--text-white); min-height: 100vh; display: flex; }
+
+    main { flex: 1; padding: 40px; display: flex; justify-content: center; align-items: flex-start; }
+    .card { background: var(--bg-card); border-radius: 20px; width: 100%; max-width: 720px; overflow: hidden; box-shadow: 0 0 25px rgba(122,0,255,0.3); border: 1px solid rgba(122,0,255,0.2); backdrop-filter: blur(12px); }
+
+    .banner { position: relative; height: 140px; background: linear-gradient(135deg, var(--lumora-purple), #00c6ff, #ff00c8); background-size: 300% 300%; animation: bannerGlow 8s infinite alternate; }
+    @keyframes bannerGlow { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+    .banner img { position: absolute; bottom: -40px; left: 32px; width: 80px; height: 80px; border-radius: 50%; border: 4px solid var(--bg-card); box-shadow: 0 0 12px rgba(0,0,0,0.6); }
+
+    .content { padding: 60px 32px 32px; }
+    .content h1 { font-size: 26px; font-weight: bold; margin-bottom: 24px; color: var(--lumora-purple); text-shadow: 0 0 6px rgba(122,0,255,0.7); }
+    .usage-box { margin-bottom: 32px; }
+    .usage-box p { margin-bottom: 6px; font-size: 16px; }
+    .progress-bg { background: #222; border-radius: 10px; height: 14px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0%; border-radius: 10px; transition: width 1s ease-in-out; }
+    .green { background: var(--success); } .blue { background: var(--info); }
+
+    .tips { background: rgba(122,0,255,0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(122,0,255,0.3); font-size: 14px; }
+    .tips strong { color: var(--lumora-purple); }
   </style>
 </head>
-<body class="bg-black text-neutral-200 min-h-screen flex">
-
-  <!-- Sidebar -->
-  <aside class="w-64 bg-gray-950 p-5 hidden md:block shadow-xl">
-    <h2 class="text-2xl font-extrabold text-green-400 mb-8">☁️ MXAPI</h2>
-    <nav class="space-y-3 text-sm">
-      <a href="dashboard.html" class="block hover:bg-gray-800 px-4 py-2 rounded">🏠 Dashboard</a>
-      <a href="profile.html" class="block hover:bg-gray-800 px-4 py-2 rounded">👤 Profile</a>
-      <a href="apikey.html" class="block hover:bg-gray-800 px-4 py-2 rounded">🔑 API Key</a>
-      <a href="request.html" class="block bg-gray-800 text-green-400 px-4 py-2 rounded">📊 Request</a>
-      <a href="logout.html" class="block hover:bg-red-600 px-4 py-2 rounded">🚪 Logout</a>
-    </nav>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="flex-1 p-6 md:p-12">
-    <div class="max-w-3xl mx-auto bg-gray-900 rounded-3xl overflow-hidden shadow-2xl border border-gray-800">
-
-      <!-- Banner Section -->
-      <div class="relative h-36 bg-gradient-to-br from-green-500 via-blue-500 to-purple-600">
-        <img src="https://i.ibb.co/JjMphBCP/avatar.jpg" class="w-20 h-20 rounded-full border-4 border-gray-900 absolute -bottom-10 left-6 shadow-lg" alt="Avatar">
+<body>
+  <main>
+    <div class="card">
+      <div class="banner">
+        <img id="avatar" src="https://i.ibb.co/JjMphBCP/avatar.jpg" alt="Avatar">
       </div>
-
-      <!-- Usage Section -->
-      <div class="p-8 pt-16">
-        <h1 class="text-3xl font-bold text-green-400 mb-6">📊 Your Request Usage</h1>
-        <div id="usageContainer" class="space-y-8 text-base">
-          <p class="text-neutral-400">⏳ Hang tight... loading your MXAPI stats.</p>
+      <div class="content">
+        <h1 id="profileName">📊 Your Request Usage</h1>
+        <div id="usageContainer">
+          <p style="color: var(--text-light);">⏳ Hang tight... loading your MXAPI stats.</p>
         </div>
       </div>
-
     </div>
   </main>
 
   <script>
-    async function loadUsage() {
-      const res = await fetch(`/api/user/usage?meka=${apiKey}`);
-      const data = await res.json();
-
-      if (!data.success) {
-        return document.getElementById('usageContainer').innerHTML = "⚠️ Failed to load usage.";
+    async function loadProfile() {
+      try {
+        const res = await fetch(`/api/auth/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.user) {
+          document.getElementById('avatar').src = data.user.avatarUrl || "https://i.ibb.co/JjMphBCP/avatar.jpg";
+          document.getElementById('profileName').innerText = `📊 ${data.user.username}'s Request Usage`;
+        }
+      } catch (err) {
+        console.error("Profile load error:", err);
       }
-
-      const percentUsed = Math.min((data.used / data.limit) * 100, 100).toFixed(1);
-      const percentStorage = Math.min((data.storageUsed / data.storageLimit) * 100, 100).toFixed(1);
-
-      document.getElementById('usageContainer').innerHTML = `
-        <div>
-          <p class="text-lg font-semibold">🧾 <span class="text-green-400">Plan:</span> ${data.plan}</p>
-          <p>🚀 <strong>Requests:</strong> ${data.used} / ${data.limit}</p>
-          <div class="w-full bg-gray-800 h-4 rounded-full mt-2">
-            <div class="bg-green-500 h-4 rounded-full progress-bar" style="width: ${percentUsed}%"></div>
-          </div>
-          <p class="text-sm text-right mt-1 text-gray-400">${percentUsed}% used</p>
-        </div>
-
-        <div>
-          <p>🗂️ <strong>Storage:</strong> ${data.storageUsed}MB / ${data.storageLimit}MB</p>
-          <div class="w-full bg-gray-800 h-4 rounded-full mt-2">
-            <div class="bg-blue-500 h-4 rounded-full progress-bar" style="width: ${percentStorage}%"></div>
-          </div>
-          <p class="text-sm text-right mt-1 text-gray-400">${percentStorage}% used</p>
-        </div>
-
-        <div class="mt-6">
-          <p class="text-yellow-400">💡 Tips:</p>
-          <ul class="list-disc list-inside text-sm text-gray-300">
-            <li>Your limits reset monthly on the <strong>2nd</strong>.</li>
-            <li>Upgrade plan to increase your quota.</li>
-            <li>Storage includes uploaded files, logs, and metadata.</li>
-          </ul>
-        </div>
-      `;
     }
 
+    async function loadUsage() {
+      try {
+        const res = await fetch(`/api/user/usage?meka=${apiKey}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          return document.getElementById('usageContainer').innerHTML =
+            "<p style='color:red'>⚠️ Failed to load usage.</p>";
+        }
+
+        const percentUsed = Math.min((data.used / data.limit) * 100, 100).toFixed(1);
+        const percentStorage = Math.min((data.storageUsed / data.storageLimit) * 100, 100).toFixed(1);
+
+        document.getElementById('usageContainer').innerHTML = `
+          <div class="usage-box">
+            <p>🧾 <strong style="color:var(--lumora-purple)">Plan:</strong> ${data.plan}</p>
+            <p>🚀 Requests: ${data.used} / ${data.limit}</p>
+            <div class="progress-bg">
+              <div class="progress-fill green" style="width: ${percentUsed}%"></div>
+            </div>
+            <p style="font-size:13px; text-align:right; color:var(--text-light);">${percentUsed}% used</p>
+          </div>
+
+          <div class="usage-box">
+            <p>🗂️ Storage: ${data.storageUsed}MB / ${data.storageLimit}MB</p>
+            <div class="progress-bg">
+              <div class="progress-fill blue" style="width: ${percentStorage}%"></div>
+            </div>
+            <p style="font-size:13px; text-align:right; color:var(--text-light);">${percentStorage}% used</p>
+          </div>
+
+          <div class="tips">
+            <p>💡 <strong>Tips:</strong></p>
+            <ul style="margin-left:16px; margin-top:8px;">
+              <li>Your limits reset monthly on the <strong>2nd</strong>.</li>
+              <li>Upgrade plan to increase your quota.</li>
+              <li>Storage includes uploaded files, logs, and metadata.</li>
+            </ul>
+          </div>
+        `;
+      } catch (err) {
+        console.error("Usage load error:", err);
+      }
+    }
+
+    loadProfile();
     loadUsage();
   </script>
 </body>

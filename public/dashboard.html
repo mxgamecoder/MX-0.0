@@ -4,182 +4,212 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MXAPI Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-900 text-white min-h-screen flex overflow-hidden relative">
+  <link rel="icon" type="image/png" href="mxapi.png">
 
-  <!-- Overlay -->
-  <div id="bodyOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+  <style>
+    :root {
+      --lumora-bg: #0a0a0f;
+      --lumora-panel: #0d0d15;
+      --lumora-purple: #8b5cf6;
+      --lumora-gray: #a1a1aa;
+      --lumora-red: #ef4444;
+      --lumora-blue: #3b82f6;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family: "Inter", Arial, sans-serif; }
+    body {
+      background: var(--lumora-bg);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+    a { text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px; }
+    button { cursor:pointer; border:none; background:none; }
+
+    /* ===== SIDEBAR ===== */
+    #sidebar {
+      width: 240px;
+      background: var(--lumora-panel);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      overflow-y: auto;   /* sidebar independent scroll */
+      overflow-x: hidden;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--lumora-purple) #1a1a25;
+    }
+    #sidebar::-webkit-scrollbar { width: 8px; }
+    #sidebar::-webkit-scrollbar-track { background: #1a1a25; }
+    #sidebar::-webkit-scrollbar-thumb { background: var(--lumora-purple); border-radius: 4px; }
+
+    /* Navigation */
+    #sidebar nav a {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--lumora-gray);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    #sidebar nav a:hover {
+      background: rgba(139,92,246,0.15);
+      color: var(--lumora-purple);
+    }
+    #sidebar nav a.active {
+      background: rgba(139,92,246,0.25); /* active highlight */
+      color: var(--lumora-purple);
+      font-weight: 600;
+    }
+
+    #sidebar hr {
+      border: none;
+      border-top: 1px solid #2e2e3e;
+      margin: 14px 0;
+    }
+
+    #sidebar.open { transform: translateX(0); }
+
+    /* Logo / Title */
+    #sidebar .brand {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--lumora-purple);
+      margin-bottom: 30px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    #sidebar nav a.logout {
+      color: var(--lumora-red);
+      font-weight: 600;
+      margin-top: auto;
+    }
+
+    /* Overlay */
+    #bodyOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 30;
+      display: none;
+    }
+    #bodyOverlay.show { display: block; }
+
+    /* ===== MAIN ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-left: 0;
+      z-index: 10;
+    }
+    @media (min-width: 1024px) {
+      .main { margin-left: 240px; }
+      #sidebar { transform: translateX(0); }
+      #bodyOverlay { display:none !important; }
+      #sidebarToggle, #closeSidebarBtn { display:none; }
+    }
+
+    /* Header */
+    header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:16px 20px;
+      border-bottom:1px solid #2e2e3e;
+      background: var(--lumora-bg);
+      position: sticky;
+      top:0;
+      z-index:20;
+    }
+    header h1 { font-size:1rem; font-weight:bold; }
+    header button svg { width:28px; height:28px; stroke:white; }
+
+    /* Content */
+    main { padding:28px; line-height:1.7; }
+    main p { margin-bottom:14px; }
+    .highlight { color: var(--lumora-purple); font-weight:bold; }
+
+    /* Footer */
+    footer {
+      text-align:center;
+      font-size:0.8rem;
+      color: var(--lumora-gray);
+      padding:16px;
+      border-top:1px solid #2e2e3e;
+      margin-top:auto;
+    }
+    footer span { color: var(--lumora-blue); font-weight:bold; }
+  </style>
+</head>
+<body>
+  <div id="bodyOverlay"></div>
 
   <!-- Sidebar -->
-  <aside id="sidebar" class="fixed z-40 inset-y-0 left-0 w-64 transform -translate-x-full lg:translate-x-0 bg-gray-800 transition-transform duration-300 overflow-y-auto">
-    <div class="h-full flex flex-col p-4 space-y-4 relative">
-      <!-- Close button -->
-      <button id="closeSidebarBtn" class="absolute top-3 right-3 text-white lg:hidden">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+  <aside id="sidebar">
+    <div class="brand">🚀 MXAPI</div>
+    <nav>
 
-      <h2 class="text-xl font-bold mb-4">🚀 MXAPI Panel</h2>
+      <!-- Core -->
+      <a href="dashboard.html" class="active">🏠 Home</a>
+      <a href="documentary.html">📚 Documentary</a>
+      <a href="api-list.html">📃 API List</a>
+      <a href="status.html">📡 API Status</a>
+      <hr>
 
-      <!-- Nav Links -->
-      <nav class="flex-1 space-y-3 overflow-y-auto">
-        <a href="dashboard.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🏠 Home</a>
-        <a href="documentary.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📚 Documentary</a>
-        <a href="api-list.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📃 API List</a>
-        <a href="status.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📡 API Status</a>
-        <a href="other.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🌐 Other Platforms</a>
-        <a href="contact.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🆘 Contact Support</a>
-        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">💰 Balance & Withdraw</a>
-        <hr class="border-gray-700 my-2" />
-        <a href="apikey.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🔑 API Key</a>
-        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">💳 Billing</a>
-        <a href="https://lumoraid.vaultlite.name.ng/profile" class="block px-3 py-2 rounded-md hover:bg-gray-700">👤 Profile</a>
-        <a href="api-test.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🧪 API Test</a>
-        <a href="owner.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">🛠️ Own API</a>
-        <a href="coming-soon.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📤 Upload</a>
-        <a href="marketplace.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">⚡ Marketplace</a>
-        <a href="request.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📊 Usage</a>
-        <!--<a href="request.html" class="block px-3 py-2 rounded-md hover:bg-gray-700">📩 Requests</a>-->
-        <hr class="border-gray-700 my-2" />
-        <a href="#" onclick="logout()" class="block px-3 py-2 rounded-md hover:bg-red-700 text-red-400">🔓 Logout</a>
-      </nav>
+      <!-- Explore -->
+      <a href="marketplace.html">⚡ Marketplace</a>
+      <a href="other.html">🌐 Other Platforms</a>
+      <a href="contact.html">🆘 Contact</a>
+      <hr>
 
-      <div class="text-xs text-gray-400 mt-auto pt-4 border-t border-gray-700">
-        Powered by <span class="font-semibold text-blue-400">Lumora</span> × <span class="text-white">MΞKΛ core v4</span>
-      </div>
-    </div>
+      <!-- Management -->
+      <a href="api-test.html">🧪 API Test</a>
+      <a href="owner.html">🛠️ Own API</a>
+      <a href="#" onclick="openStudio()">🛠️ API Studio</a>
+      <a href="request.html">📊 Usage</a>
+      <hr>
+
+      <!-- Account -->
+      <a href="https://lumoraid.vaultlite.name.ng/profile">👤 Profile</a>
+      <a href="apikey.html">🔑 API Key</a>
+      <a href="coming-soon.html">💰 Balance</a>
+      <a href="coming-soon.html">💳 Billing</a>
+      <a href="#" onclick="logout()" class="logout">🔓 Logout</a>
+
+    </nav>
   </aside>
 
-  <!-- Main Content -->
-  <div class="flex-1 flex flex-col lg:ml-64 z-10">
-
-    <!-- Header -->
-    <header class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900 lg:sticky top-0 z-30">
-      <button id="sidebarToggle" class="text-white lg:hidden">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
+  <!-- Main -->
+  <div class="main">
+    <header>
+      <button id="sidebarToggle">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
       </button>
-      <h1 class="text-lg font-bold" id="greeting">Welcome 👋</h1>
+      <h1 id="greeting">Welcome 👋</h1>
     </header>
 
-    <!-- Page Content -->
-    <main class="p-6 space-y-4">
-      <p class="text-lg">✨ This is your personalized API control center.</p>
-      <p>You're managing powerful APIs built into the Lumora platform and proudly maintained by <span class="font-semibold text-blue-300">MX-GΔMΞCØDΞR</span>.</p>
-      <p>💡 Even Lumora services use this very same API. You're in good hands!</p>
+    <main>
+      <p>✨ This is your personalized API control center.</p>
+      <p>You're managing powerful APIs built into the Lumora platform and proudly maintained by <span class="highlight">MX-GΔMΞCØDΞR</span>.</p>
+      <p>💡 Even Lumora services use this same API.</p>
     </main>
 
-    <!-- Footer -->
-    <footer class="text-center text-xs text-gray-400 mt-auto py-4 border-t border-gray-700">
-      Powered by <span class="font-semibold text-blue-400">Lumora</span> × <span class="text-white">MΞKΛ core v4</span>
+    <footer>
+      Powered by <span>Lumora</span> × MΞKΛ core v4
     </footer>
   </div>
 
-  <!-- Script -->
-  <script>
-    const sidebar = document.getElementById('sidebar');
-    const toggleButton = document.getElementById('sidebarToggle');
-    const closeButton = document.getElementById('closeSidebarBtn');
-    const bodyOverlay = document.getElementById('bodyOverlay');
-
-    const closeSidebar = () => {
-      sidebar.classList.add('-translate-x-full');
-      bodyOverlay.classList.add('hidden');
-    };
-
-    toggleButton.addEventListener('click', () => {
-      sidebar.classList.remove('-translate-x-full');
-      bodyOverlay.classList.remove('hidden');
-    });
-
-    closeButton.addEventListener('click', closeSidebar);
-    bodyOverlay.addEventListener('click', closeSidebar);
-
-    // ✅ Universal session handling
-    function initSession() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenFromUrl = urlParams.get("token");
-      const idFromUrl = urlParams.get("id");
-      const apiKeyFromUrl = urlParams.get("apikey");
-
-      if (tokenFromUrl && idFromUrl) {
-        localStorage.setItem("mxapi_token", tokenFromUrl);
-        localStorage.setItem("mxapi_id", idFromUrl);
-
-        // ✅ remove query params from URL (no reload)
-        const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-      }
-
-      if (apiKeyFromUrl) {
-        localStorage.setItem("mxapi_apikey", apiKeyFromUrl);
-
-        // ✅ also clean URL if only apikey was passed
-        const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-      }
-
-      const token = localStorage.getItem("mxapi_token");
-      const publicId = localStorage.getItem("mxapi_id");
-
-      if (!token || !publicId) {
-        window.location.href = "index.html";
-        return null;
-      }
-
-      return { token, publicId };
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      const session = initSession();
-      if (!session) return; // ✅ Now valid inside this function
-      let { token, publicId } = session;
-
-      // Dynamic greeting
-      const greetingEl = document.getElementById('greeting');
-      const hour = new Date().getHours();
-      let greeting = "Welcome";
-      if (hour < 12) greeting = "🌅 Good morning";
-      else if (hour < 17) greeting = "🌞 Good afternoon";
-      else greeting = "🌙 Good evening";
-
-      async function fetchUser() {
-        try {
-          const res = await fetch(`/api/auth/user/${publicId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-
-          const data = await res.json();
-          if (res.ok && data.user) {
-            greetingEl.textContent = `${greeting} @${data.user.username}!`;
-            localStorage.setItem('mxapi_username', data.user.username);
-          } else {
-            greetingEl.textContent = `${greeting} 👤 User`;
-          }
-        } catch (err) {
-          console.error("Error fetching user:", err);
-          greetingEl.textContent = `${greeting} 👤 Error`;
-        }
-      }
-
-      fetchUser();
-    });
-
-    function logout() {
-      localStorage.removeItem('mxapi_token');
-      localStorage.removeItem('mxapi_id');
-      localStorage.removeItem('mxapi_apikey');
-      localStorage.removeItem('mxapi_username');
-      localStorage.removeItem('seenWelcome');
-      window.location.href = 'index.html';
-    }
-  </script>
-
+  <script src="/js/dash.js"></script>
 </body>
 </html>

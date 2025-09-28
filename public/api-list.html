@@ -3,7 +3,8 @@
 <head>  
   <meta charset="UTF-8" />  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
-  <title>🧠 MSWORLD API Explorer 2025</title>  
+  <title>⚡ MXAPI Explorer</title>
+  <link rel="icon" type="image/png" href="mxapi.png">
   <script>  
     const token = localStorage.getItem('mxapi_token');  
     const id = localStorage.getItem('mxapi_id');  
@@ -11,67 +12,183 @@
       window.location.href = "index.html";
     }
   </script>  
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
       --bg-color: #121212;
       --card-bg: #1e1e1e;
       --text-color: #f0f0f0;
-      --accent: #00bcd4;
-      --accent-hover: #0097a7;
+      --accent: #9b4dff;        /* Lumora purple */
+      --accent-hover: #7b2fff;  /* darker purple */
+      --muted: #888;
     }
+
     body {
       background: var(--bg-color);
       color: var(--text-color);
       font-family: "Segoe UI", sans-serif;
       padding: 1rem;
+      margin: 0;
+    }
+
+    /* Heading */
+    h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      text-shadow: 0 0 6px var(--accent);
+    }
+    h1 span {
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: normal;
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    /* Search bar */
+    .search-bar {
+      width: 100%;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      justify-content: center;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 9px;
+      border: none;
+      background: #2a2a2a;
+      color: white;
+      font-size: 0.95rem;
+    }
+    .search-bar input::placeholder {
+      color: #aaa;
+    }
+    .search-bar input:focus {
+      outline: 2px solid var(--accent);
+    }
+
+    /* Filter buttons */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .lumora-btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .lumora-btn:hover {
+      background: var(--accent-hover);
+    }
+    .reset-btn {
+      background: #555;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      border: none;
+      cursor: pointer;
+    }
+    .reset-btn:hover {
+      background: #666;
+    }
+
+    /* Sections */
+    .section {
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .section h2 {
+      color: var(--accent);
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .category-list button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #2a2a2a;
+      color: white;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .category-list button:hover {
+      background: #383838;
+    }
+    .empty-msg {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 0.5rem;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h1 class="text-3xl font-bold text-center mb-6">⚡ MSWORLD API Explorer</h1>
+  <h1>
+    ⚡ MXAPI Explorer
+    <span>powered by Lumora × MΞKΛ</span>
+  </h1>
 
-  <!-- ✨ SEARCH BAR -->
-  <div class="w-full flex justify-center mb-6">
+  <!-- Search bar -->
+  <div class="search-bar">
     <input
       type="text"
       id="searchInput"
       placeholder="🔍 Search APIs..."
-      class="bg-[#2a2a2a] text-white placeholder-gray-400 px-5 py-2 rounded-full w-[90%] max-w-md focus:outline-none focus:ring-2 focus:ring-cyan-400 transition duration-200"
       oninput="searchCategories()"
     />
   </div>
 
-  <!-- ✨ A–Z FILTER BAR -->
-  <div class="flex flex-wrap justify-center gap-2 mb-8">
-    <button onclick="filterRange('A','E')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">A–E</button>
-    <button onclick="filterRange('F','K')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">F–K</button>
-    <button onclick="filterRange('L','P')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">L–P</button>
-    <button onclick="filterRange('Q','T')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">Q–T</button>
-    <button onclick="filterRange('U','Z')" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">U–Z</button>
-    <button onclick="resetFilters()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-1 rounded-full text-sm transition duration-200">🔁 Reset</button>
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <button onclick="filterRange('A','E')" class="lumora-btn">A–E</button>
+    <button onclick="filterRange('F','K')" class="lumora-btn">F–K</button>
+    <button onclick="filterRange('L','P')" class="lumora-btn">L–P</button>
+    <button onclick="filterRange('Q','T')" class="lumora-btn">Q–T</button>
+    <button onclick="filterRange('U','Z')" class="lumora-btn">U–Z</button>
+    <button onclick="resetFilters()" class="reset-btn">🔁 Reset</button>
   </div>
 
-  <!-- ✨ SECTIONS -->
-  <div class="bg-[#1e1e1e] p-4 rounded-lg mb-6 shadow-md">
-    <h2 class="text-cyan-400 text-xl font-semibold mb-2">🔞 NSFW</h2>
+  <!-- Sections -->
+  <div class="section">
+    <h2>🔞 NSFW</h2>
     <div id="nsfwList" class="category-list"></div>
-    <div id="nsfwEmpty" class="text-center text-sm text-gray-400 mt-2 hidden">API not yet available 😔</div>
+    <div id="nsfwEmpty" class="empty-msg">API not yet available 😔</div>
   </div>
-  <div class="bg-[#1e1e1e] p-4 rounded-lg mb-6 shadow-md">
-    <h2 class="text-cyan-400 text-xl font-semibold mb-2">🎭 Jest</h2>
+  <div class="section">
+    <h2>🎭 Jest</h2>
     <div id="jestList" class="category-list"></div>
-    <div id="jestEmpty" class="text-center text-sm text-gray-400 mt-2 hidden">API not yet available 😔</div>
+    <div id="jestEmpty" class="empty-msg">API not yet available 😔</div>
   </div>
-  <div class="bg-[#1e1e1e] p-4 rounded-lg mb-6 shadow-md">
-    <h2 class="text-cyan-400 text-xl font-semibold mb-2">🎈 Fun</h2>
+  <div class="section">
+    <h2>🎈 Fun</h2>
     <div id="funList" class="category-list"></div>
-    <div id="funEmpty" class="text-center text-sm text-gray-400 mt-2 hidden">API not yet available 😔</div>
+    <div id="funEmpty" class="empty-msg">API not yet available 😔</div>
   </div>
-  <div class="bg-[#1e1e1e] p-4 rounded-lg mb-6 shadow-md">
-    <h2 class="text-cyan-400 text-xl font-semibold mb-2">👾 Theend</h2>
+  <div class="section">
+    <h2>👾 Theend</h2>
     <div id="theendList" class="category-list"></div>
-    <div id="theendEmpty" class="text-center text-sm text-gray-400 mt-2 hidden">API not yet available 😔</div>
+    <div id="theendEmpty" class="empty-msg">API not yet available 😔</div>
   </div>
 
   <script>
@@ -83,7 +200,7 @@
       throw new Error("API key missing");
     }
 
-    async function fetchCategories(route, listId, type) {
+    async function fetchCategories(route, listId) {
       const res = await fetch(`/${route}?meka=${apiKey}`);
       const data = await res.json();
       allCategories[route] = data.categories;
@@ -94,12 +211,8 @@
       data.categories.forEach(cat => {
         const btn = document.createElement("button");
         btn.textContent = cat;
-        btn.className = "block w-full text-left bg-[#2a2a2a] hover:bg-[#383838] text-white px-4 py-2 mb-2 rounded-md font-semibold searchable transition duration-200";
         btn.setAttribute("data-name", cat.toLowerCase());
-        btn.onclick = () => {
-          if (btn.style.display === "none") return;
-          console.log(`Clicked: ${route}/${cat}`);
-        };
+        btn.onclick = () => console.log(`Clicked: ${route}/${cat}`);
         container.appendChild(btn);
       });
     }
@@ -116,12 +229,8 @@
           if (first >= startChar && first <= endChar) {
             const btn = document.createElement("button");
             btn.textContent = cat;
-            btn.className = "block w-full text-left bg-[#2a2a2a] hover:bg-[#383838] text-white px-4 py-2 mb-2 rounded-md font-semibold searchable transition duration-200";
             btn.setAttribute("data-name", cat.toLowerCase());
-            btn.onclick = () => {
-              if (btn.style.display === "none") return;
-              console.log(`Filtered: ${type}/${cat}`);
-            };
+            btn.onclick = () => console.log(`Filtered: ${type}/${cat}`);
             list.appendChild(btn);
             anyVisible = true;
           }
@@ -154,10 +263,10 @@
     }
 
     async function fetchAll() {
-      await fetchCategories("nsfw", "nsfwList", "image");
-      await fetchCategories("jest", "jestList", "image");
-      await fetchCategories("fun", "funList", "text");
-      await fetchCategories("theend", "theendList", "text");
+      await fetchCategories("nsfw", "nsfwList");
+      await fetchCategories("jest", "jestList");
+      await fetchCategories("fun", "funList");
+      await fetchCategories("theend", "theendList");
     }
 
     fetchAll();

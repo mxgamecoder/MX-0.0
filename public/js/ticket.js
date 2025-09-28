@@ -10,7 +10,7 @@ const token = localStorage.getItem("mxapi_token");
 const publicId = localStorage.getItem("mxapi_id");
 if (!token || !publicId) { window.location.href = "index.html"; }
 
-const API = "https://mxapi-lnc.onrender.com/api/tickets";
+const API = "/api/tickets";
 let ticketsData = [];
 
 // Fetch tickets
@@ -365,7 +365,7 @@ document.getElementById("ticketForm").addEventListener("submit", async e => {
 
 fetchTickets();
 
-const API_BASE = "https://mxapi-lnc.onrender.com";
+const API_BASE = "";
 async function fetchUser() {
   try {
     const res = await fetch(`${API_BASE}/api/auth/user/${publicId}`, {

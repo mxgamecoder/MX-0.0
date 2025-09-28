@@ -2,35 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>⚙️ MX API Test</title>
+  <title>⚙️ MX API Test | 2025 Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="mxapi.png">
 <script>
   const token = localStorage.getItem('mxapi_token');
   const id = localStorage.getItem('mxapi_id');
-
-  // If token or ID is missing, block access
-  if (!token || !id) {
-    window.location.href = "index.html"; // redirect to login
-  }
+  if (!token || !id) window.location.href = "index.html"; 
 </script>
   <style>
     :root {
-      --bg: #121212;
-      --card: #1f1f1f;
+      --bg: #0b0b0f;
+      --card: #151521;
       --text: #f2f2f2;
-      --primary: #00f7ff;
-      --blue: #007bff;
-      --hover: #0056b3;
+      --primary: #9b4dff;
       --error: #ff4d4d;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
+    body {
       height: 100%;
       background: var(--bg);
       font-family: 'Segoe UI', sans-serif;
@@ -38,25 +29,57 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
+      overflow-x: hidden;
     }
 
+    /* Particle background */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle, rgba(155,77,255,0.1) 0%, transparent 70%) repeat;
+      animation: bgmove 12s linear infinite;
+      z-index: -1;
+    }
+    @keyframes bgmove { from { background-position: 0 0; } to { background-position: 400px 400px; } }
+
     .section {
-      margin-top: 22vh;
+      margin-top: 18vh;
       background: var(--card);
       padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 0 16px rgba(0, 255, 255, 0.1);
+      border-radius: 18px;
       width: 95%;
-      max-width: 640px;
+      max-width: 680px;
       text-align: center;
+      position: relative;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      box-shadow: 0 0 25px rgba(155,77,255,0.2);
     }
+
+    .section::before {
+      content: "";
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #9b4dff, #00eaff, #ff00c8);
+      background-size: 400% 400%;
+      animation: borderGlow 6s ease infinite;
+      z-index: -1;
+    }
+    @keyframes borderGlow { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
 
     h1 {
       font-size: 2rem;
       margin-bottom: 1.5rem;
-      color: var(--primary);
-      text-shadow: 0 0 8px var(--primary);
+      background: linear-gradient(90deg,#9b4dff,#00eaff,#ff00c8,#9b4dff);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 8s infinite;
     }
+    @keyframes shimmer { 0%{background-position:0% 50%}100%{background-position:100% 50%} }
 
     label {
       display: block;
@@ -66,51 +89,55 @@
 
     select, button {
       width: 100%;
-      padding: 0.8rem;
+      padding: 0.9rem;
       margin-bottom: 1rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 1rem;
     }
 
-    select {
-      background: #2a2a2a;
-      color: var(--text);
-    }
-
+    select { background: #2a2a2a; color: var(--text); }
     button {
-      background-color: var(--blue);
+      background: var(--primary);
       color: #fff;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: 0.3s;
     }
-
-    button:hover {
-      background-color: var(--hover);
-    }
+    button:hover { background: #7a33ff; }
 
     .response-box {
-      background: #222;
+      background: #1c1c28;
       padding: 1rem;
-      border-radius: 8px;
+      border-radius: 10px;
       font-family: monospace;
       white-space: pre-wrap;
       text-align: left;
       margin-bottom: 1rem;
       overflow-x: auto;
       color: #d3d3d3;
+      min-height: 80px;
     }
 
     .curl-box {
-      background: #1b1b1b;
+      background: #12121a;
       padding: 0.7rem;
-      border-radius: 6px;
+      border-radius: 8px;
       font-family: monospace;
       text-align: left;
-      white-space: pre-wrap;
       color: #00ffae;
     }
+
+    .loading {
+      display: inline-block;
+      width: 1.2em;
+      height: 1.2em;
+      border: 3px solid #9b4dff;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 
     img {
       max-width: 100%;
@@ -122,22 +149,25 @@
     .error {
       color: var(--error);
       font-weight: bold;
+      animation: glitch 1s infinite;
+    }
+    @keyframes glitch {
+      0% { text-shadow: 2px 2px #ff00c8; }
+      50% { text-shadow: -2px -2px #00eaff; }
+      100% { text-shadow: 2px 2px #ff00c8; }
     }
 
-    @media (max-width: 600px) {
-      .section {
-        padding: 1.5rem;
-      }
-
-      h1 {
-        font-size: 1.6rem;
-      }
+    footer {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #777;
     }
+    footer span { color: var(--primary); font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="section">
-    <h1>⚙️ MX API Test Tool</h1>
+    <h1>⚙️ MX API Test Tool (2025 Edition)</h1>
 
     <label for="categorySelect">🔎 Choose an API Endpoint</label>
     <select id="categorySelect">
@@ -149,6 +179,8 @@
     <div id="output" class="response-box"></div>
     <div id="imagePreview"></div>
     <div id="curlCommand" class="curl-box"></div>
+
+    <footer>🚀 Powered by <span>Lumora × MΞKΛ core v4</span></footer>
   </div>
 
 <script>
@@ -164,10 +196,7 @@
     "/theend": "👾 Theend"
   };
 
-  // 🔐 Get API Key from localStorage
   const apiKey = localStorage.getItem("mxapi_apikey");
-
-  // ❌ Stop everything if missing
   if (!apiKey) {
     alert(`⚠️ Your API Key is missing.
 
@@ -200,7 +229,7 @@ This action is normal.`);
   async function testApi() {
     const endpoint = categorySelect.value;
     const fullUrl = `${endpoint}?meka=${apiKey}`;
-    outputDiv.innerHTML = '⏳ Testing...';
+    outputDiv.innerHTML = '<div class="loading"></div> Testing...';
     imagePreview.innerHTML = '';
     curlDiv.innerHTML = '';
 
@@ -219,7 +248,7 @@ This action is normal.`);
       const curl = `curl "${window.location.origin}${fullUrl}"`;
       curlDiv.textContent = `💡 CURL:\n${curl}`;
     } catch (err) {
-      outputDiv.innerHTML = `<div class="error">❌ Failed to fetch or parse JSON. Maybe this endpoint doesn’t return valid JSON?</div>`;
+      outputDiv.innerHTML = `<div class="error">❌ Glitch! Failed to fetch or parse JSON.</div>`;
       curlDiv.textContent = `curl "${window.location.origin}${fullUrl}"`;
     }
   }

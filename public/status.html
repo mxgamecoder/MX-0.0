@@ -3,29 +3,141 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="mxapi.png">
   <title>🧠 MX API Status</title>
   <script>
     const token = localStorage.getItem('mxapi_token');
     const id = localStorage.getItem('mxapi_id');
     if (!token || !id) window.location.href = "index.html";
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --card: #1a1a1a;
+      --text: #f0f0f0;
+      --muted: #777;
+      --cyan: #9b4dff;
+      --cyan-dark: #9b4dff;
+      --green: #9b4dff;
+      --yellow: #facc15;
+      --red: #ef4444;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 1.5rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 1.5rem;
+    }
+    .search-box {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #111;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .group {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .group-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--cyan);
+      border-bottom: 1px solid var(--cyan-dark);
+      padding-bottom: 0.3rem;
+      margin-bottom: 1rem;
+    }
+    .endpoint {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #333;
+    }
+    .endpoint:last-child {
+      border-bottom: none;
+    }
+    .endpoint span {
+      font-weight: 500;
+    }
+    .status {
+      min-width: 90px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      padding: 0.2rem 0.4rem;
+      border-radius: 6px;
+    }
+    .loading {
+      background: #333;
+      color: #aaa;
+    }
+    .loading::after {
+      content: "⏳";
+      display: inline-block;
+      margin-left: 5px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .ok {
+      background: var(--green);
+      color: #000;
+    }
+    .warn {
+      background: var(--yellow);
+      color: #000;
+    }
+    .fail {
+      background: var(--red);
+      color: #fff;
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0.5rem 0;
+    }
+    .error-msg {
+      color: var(--red);
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
-<body class="bg-zinc-950 text-white font-sans px-4 py-6">
+<body>
 
-  <h1 class="text-3xl font-bold text-center text-cyan-400 mb-6">📊 MX API Status Dashboard</h1>
+  <h1>📊 MX API Status Dashboard</h1>
 
-  <div class="flex justify-center mb-6">
+  <div class="search-box">
     <input
       id="searchInput"
       type="text"
       placeholder="🔍 Search endpoint..."
-      class="w-full max-w-md px-4 py-2 rounded-lg bg-zinc-800 text-white border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
       oninput="filterEndpoints()"
     />
   </div>
 
-  <div id="statusContainer" class="space-y-6">Loading...</div>
+  <div id="statusContainer">Loading...</div>
 
   <script>
     const apiKey = localStorage.getItem("mxapi_apikey");
@@ -43,7 +155,7 @@
       "👾 Theend": "/theend"
     };
 
-    let allGroups = {}; // For search filtering
+    let allGroups = {};
 
     async function fetchAllStatuses() {
       statusContainer.innerHTML = '';
@@ -66,36 +178,34 @@
 
     function buildGroup(groupName, type, endpoints) {
       const group = document.createElement('div');
-      group.className = 'bg-zinc-900 rounded-xl p-4 shadow-lg';
+      group.className = 'group';
       group.dataset.groupType = type;
 
       const title = document.createElement('div');
-      title.className = 'text-xl font-semibold text-cyan-400 border-b border-cyan-700 pb-1 mb-4';
+      title.className = 'group-title';
       title.textContent = groupName;
       group.appendChild(title);
 
       const container = document.createElement('div');
-      container.className = 'space-y-2';
       container.id = `group-${type}`;
       group.appendChild(container);
 
       if (!endpoints || endpoints.length === 0) {
         const empty = document.createElement('p');
-        empty.className = 'text-gray-400 text-center';
+        empty.className = 'empty';
         empty.textContent = 'API not available yet 😔';
         container.appendChild(empty);
       } else {
         endpoints.forEach(name => {
           const row = document.createElement('div');
-          row.className = 'flex justify-between items-center border-b border-zinc-700 pb-2';
+          row.className = 'endpoint';
 
           const label = document.createElement('span');
-          label.className = 'font-medium';
           label.textContent = `/${type}/${name}`;
 
           const status = document.createElement('span');
-          status.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-zinc-700 text-gray-300';
-          status.innerHTML = `<div class="w-4 h-4 border-2 border-zinc-500 border-t-cyan-400 rounded-full animate-spin mx-auto"></div>`;
+          status.className = 'status loading';
+          status.textContent = "Loading";
 
           row.appendChild(label);
           row.appendChild(status);
@@ -115,24 +225,24 @@
         .then(data => {
           const duration = performance.now() - start;
           if (data.success || data.imageUrl || data.content) {
-            statusElement.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-green-400 text-black';
+            statusElement.className = 'status ok';
             statusElement.textContent = `✅ ${Math.round(duration)}ms`;
           } else {
-            statusElement.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-yellow-400 text-black';
+            statusElement.className = 'status warn';
             statusElement.textContent = `⚠️ Error`;
           }
         })
         .catch(() => {
-          statusElement.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-red-500 text-white';
+          statusElement.className = 'status fail';
           statusElement.textContent = `❌ Offline`;
         });
     }
 
     function showError(groupName, message) {
       const group = document.createElement('div');
-      group.className = 'bg-zinc-900 rounded-xl p-4 shadow-lg';
-      group.innerHTML = `<div class="text-xl font-semibold text-cyan-400 border-b border-cyan-700 pb-1 mb-2">${groupName}</div>
-                         <div class="text-red-400">${message}</div>`;
+      group.className = 'group';
+      group.innerHTML = `<div class="group-title">${groupName}</div>
+                         <div class="error-msg">${message}</div>`;
       statusContainer.appendChild(group);
     }
 
@@ -146,21 +256,20 @@
 
         if (matches.length === 0) {
           const msg = document.createElement('p');
-          msg.className = 'text-gray-400 text-center';
+          msg.className = 'empty';
           msg.textContent = 'API not available yet 😔';
           container.appendChild(msg);
         } else {
           matches.forEach(name => {
             const row = document.createElement('div');
-            row.className = 'flex justify-between items-center border-b border-zinc-700 pb-2';
+            row.className = 'endpoint';
 
             const label = document.createElement('span');
-            label.className = 'font-medium';
             label.textContent = `/${type}/${name}`;
 
             const status = document.createElement('span');
-            status.className = 'min-w-[90px] text-center text-sm font-bold px-2 py-1 rounded bg-zinc-700 text-gray-300';
-            status.innerHTML = `<div class="w-4 h-4 border-2 border-zinc-500 border-t-cyan-400 rounded-full animate-spin mx-auto"></div>`;
+            status.className = 'status loading';
+            status.textContent = "Loading";
 
             row.appendChild(label);
             row.appendChild(status);

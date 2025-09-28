@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MXAPI Studio</title>
+  <link rel="icon" type="image/png" href="mxapi.png">
+  <script>  
+    const token = localStorage.getItem('mxapi_token');  
+    const id = localStorage.getItem('mxapi_id');  
+    if (!token || !id) {
+      window.location.href = "index.html";
+    }
+  </script>  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body, html {
+      width:100%; height:100%;
+      overflow: hidden;
+      font-family:"Inter", Arial, sans-serif;
+      color: white;
+    }
+
+    /* video background */
+    #bgVideo {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      transition: opacity 0.5s ease;
+    }
+
+    .overlay {
+      position: fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background: rgba(0,0,0,0.25);
+      z-index: -1;
+      transition: opacity 0.5s ease;
+    }
+
+    /* ====== Welcome screen ====== */
+    .welcome {
+      position: absolute;
+      top:0; left:0;
+      width:100%; height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      z-index: 10;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .welcome.hidden {
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+    .welcome h1 {
+      font-size: 2.5rem;
+      color: #8b5cf6;
+      margin-bottom: 20px;
+      text-shadow: 0 0 15px rgba(0,0,0,0.8);
+    }
+    .welcome p {
+      font-size: 1.2rem;
+      color: #e4e4e7;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px rgba(0,0,0,0.6);
+    }
+    .btn {
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      border: 2px solid #8b5cf6;
+      background: transparent;
+      border-radius: 12px;
+      color: #8b5cf6;
+      cursor: pointer;
+      font-weight:bold;
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    }
+    .btn:hover {
+      background: #8b5cf6;
+      color: white;
+      box-shadow: 0 0 20px rgba(139,92,246,0.6);
+    }
+
+    /* ====== Dashboard layout ====== */
+    .dashboard {
+      display: none;
+      position: absolute;
+      top:0; left:0;
+      width:100%; height:100%;
+      display:flex;
+      z-index: 20;
+    }
+    .dashboard.active { display:flex; }
+
+    /* Main dashboard content */
+    .main {
+      flex: 1;
+      padding: 40px 20px 80px; /* bottom padding for nav */
+      color: white;
+    }
+
+    /* Bottom navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0;
+      backdrop-filter: blur(10px);
+      border-top: 1px solid #8b5cf6;
+      z-index: 30;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: #8b5cf6;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.3s, transform 0.2s;
+    }
+    .nav-btn i {
+      font-size: 1.3rem;
+    }
+    .nav-btn:hover {
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .main h3 {
+      font-size:1.8rem;
+      margin-bottom:10px;
+    }
+    .main p {
+      font-size:1.2rem;
+      color:#d1d5db;
+    }
+    .me{
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background video -->
+  <video id="bgVideo" autoplay muted loop playsinline></video>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Welcome screen -->
+  <div class="welcome" id="welcomeScreen">
+    <h1>🎉 Welcome to MXAPI Studio</h1>
+    <p>Hello <span id="username">User</span>, click below to continue 💜</p>
+    <button class="btn" onclick="goInside()">Continue 😍</button>
+  </div>
+  
+  <!-- Dashboard (hidden initially) -->
+  <div class="me">
+    <div class="dashboard" id="dashboard">
+      <div class="main">
+        <h3>Your APIs</h3>
+        <p>No API created by you yet. Start by creating a new API from below!</p>
+      </div>
+
+      <!-- Bottom navigation -->
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goCreate()">
+          <i class="fa-solid fa-plus"></i><span>Create</span>
+        </button>
+        <button class="nav-btn"><i class="fa-solid fa-gear"></i><span>Manage</span></button>
+        <button class="nav-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i><span>Back</span></button>
+        <button class="nav-btn"><i class="fa-solid fa-sliders"></i><span>Settings</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const videos = ["/media/media1.mp4", "/media/media.mp4"];
+    const bgVideo = document.getElementById("bgVideo");
+    const randomVideo = videos[Math.floor(Math.random() * videos.length)];
+    bgVideo.src = randomVideo;
+
+    const overlay = document.getElementById("overlay");
+    const welcome = document.getElementById("welcomeScreen");
+    const dashboard = document.getElementById("dashboard");
+
+    // If session already marked, skip welcome
+    if (sessionStorage.getItem("mxapi_welcome_done") === "true") {
+      welcome.style.display = "none";
+      overlay.style.display = "none";
+      bgVideo.style.display = "none";
+      document.body.style.background = "black";   // keep background black
+      document.querySelector('.me').style.display = 'block';
+      dashboard.classList.add("active");
+    }
+
+    function goInside() {
+      welcome.classList.add("hidden");
+      overlay.style.opacity = 0;
+      bgVideo.style.opacity = 0;
+
+      setTimeout(() => {
+        welcome.style.display = "none";
+        overlay.style.display = "none";
+        bgVideo.style.display = "none";
+        document.body.style.background = "black"; // set black background
+        document.querySelector('.me').style.display = 'block';
+        dashboard.classList.add("active");
+
+        // Save session flag
+        sessionStorage.setItem("mxapi_welcome_done", "true");
+      }, 500);
+    }
+
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
+    function goCreate() {
+      const userId = localStorage.getItem("mxapi_id");
+      if (!userId) {
+        alert("Missing user ID. Please log in again.");
+        return;
+      }
+      window.location.href = `create.html?user=${encodeURIComponent(userId)}`;
+    }
+
+    // Load username
+    const uname = localStorage.getItem("mxapi_username");
+    if (uname) document.getElementById('username').textContent = uname;
+  </script>
+  
+</body>
+</html>
