@@ -23,8 +23,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 const allowedOrigins = [
   'https://mxapi-lnc.onrender.com',
-  'https://a336c044-7e81-4118-8a19-7244b1baa99d-00-1mrtx8nrb82ic.spock.replit.dev',
-  'https://4f6e2f16-4e6d-4d91-b308-e795c414e0fa-00-2n5u07bebak1q.worf.replit.dev',
+  'https://e6bca477-0d86-4d5a-9dcb-a3a6229fe1c3-00-3eyvqi9cjg7hb.janeway.replit.dev',
   'https://lumoraid.vaultlite.name.ng',
   'https://vaultlite.name.ng',
   'https://api.flutterwave.com',
@@ -251,10 +250,10 @@ function autoMonthlyReset() {
   setInterval(async () => {
     const now = new Date();
     const day = now.getDate();
-    const hour = now.getHours();
 
-    if (day === 2 && !alreadyResetToday) {
+    if (day === 1 && !alreadyResetToday) { // reset on 1st of every month
       try {
+        // ✅ Reset usage
         const usages = await Usage.find({});
         for (const usage of usages) {
           usage.count = 0;
@@ -263,19 +262,26 @@ function autoMonthlyReset() {
           await usage.save();
         }
 
-        console.log(`🔁 Monthly usage reset done on ${now.toDateString()}`);
-        alreadyResetToday = true; // Prevent multiple resets
+        // ✅ Reset API key regenerations
+        const users = await User.find({});
+        for (const user of users) {
+          user.apiKeyRegens = 0; // reset regen count
+          await user.save();
+        }
+
+        console.log(`🔁 Monthly reset done on ${now.toDateString()}`);
+        alreadyResetToday = true; // prevent multiple resets same day
       } catch (err) {
         console.error('❌ Monthly reset failed:', err.message);
       }
     }
 
-    // Reset the reset flag after the 2nd
-    if (day !== 2 && alreadyResetToday) {
+    // Reset the reset flag after the 1st
+    if (day !== 1 && alreadyResetToday) {
       alreadyResetToday = false;
     }
 
-  }, 1000 * 60 * 60); // Run every hour
+  }, 1000 * 60 * 60); // runs every hour
 }
 
 // AUTO-CLEAN PENDING PAYMENTS
@@ -303,3 +309,4 @@ function autoCleanPendingPayments() {
 
 autoCleanPendingPayments();
 autoMonthlyReset(); // Call it when server starts
+require("./cron"); // load cron jobs
